@@ -1,0 +1,36 @@
+//For first version, assuming zones are a box and negating any Y affect. Only worried about detection in X
+//Defining values for zoning, assuming left to right = 0 to 1
+Define XY plane
+redX = ? to ?
+orangeX = ? to ?
+Get Desired Position
+
+WHILE Not at Desired Position
+	Get Current Position
+	//Will catch if object is outside of yellow, orange, and red zones (Basically in green zone)
+	Call LiDAR function to gather values of X and Y
+	IF (X<min(orangeX) OR X>max(orangeX) //If no object in front already
+		Get current heading
+		Call Suphakans function to get desired heading
+		Get current heading
+		IF Desired != Current Heading //with wiggle room
+			//Rotates to approach desired heading or orange zone
+			WHILE Current heading < desired heading //How to make this more general so it doesnt rotate 350 degrees right instead of 10?
+				Rotate ? degrees //Can find exact degrees knowing the two headings
+				//Will catch if object enters orange zone
+				IF (X>min(orangeX) OR X<max(orangeX))
+					Exit while loop
+				ENDIF
+			ENDWHILE
+		ENDIF
+	ENDIF //Now in orange zone or pointing at POI depending on previous
+	Call moving function with move forward ? meters
+	//Will catch if object is within redzone
+	Call LiDAR function to gather X
+	IF (X>min(redX) OR X<max(redX))
+		//Will continue until out of orange zone
+		WHILE ((X>min(orangeX) OR X<max(orangeX))
+			Call rotation function with rotate ? degrees
+		ENDWHILE //Finished rotation, object is now in green zone
+	ENDIF
+ENDWHILE	
