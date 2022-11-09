@@ -85,11 +85,15 @@ def getCoor():
     #parse GPS messege and output as coordinate [lat,lon], ie. [23.1241,-45.0921] (object of floats)
     return [23.1241,-45.0921]
 
+def getHeading():
+    #get heading from magnetometer, deg from north
+    return 20;
+
 
 #simulate main structure
 tarCoor = [23.1242,-45.0929] #input from user
 currCoor = getCoor() #read from GPS
-currHeading = 10 #read from magnetometer, in deg
+currHeading = getHeading() #read from magnetometer, in deg
 
 
 print("Angle to target:",angleToTarget(currHeading,currCoor,tarCoor)," degrees")

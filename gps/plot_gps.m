@@ -2,41 +2,90 @@ clc
 clear
 
 %% user set up
-trueCoor = [400065308,-1052715937]/1e7; %will define this coordinate as origin (0,0)
-coor = table2array(readtable("data.txt"))/1e7;
-limit = 100; %x and y limit in plot, meter
+trueCoor1 = [40+0/60+27.95951/3600,-(105+15/60+32.3043/3600)]; %will define this coordinate as origin (0,0)
+trueCoor2 = [40+0/60+14.30551/3600,-(105+15/60+38.39176/3600)];
+altitude1 = 1619.927; %m
+altitude2 = 1624.112; %m
 
-%% don't change anything below this
+%% call plot functions
+plotgps("GPSsurveyData.txt",trueCoor1,altitude1)
+plotgps("GPSsurveyData2.txt",trueCoor2,altitude2)
 
-len = size(coor,1);
-x = zeros(1,len);
-y = x;
+%% call error analysis function
+error_analysis("GPSsurveyData.txt",trueCoor1,altitude1)
 
-for i=1:len
-    dist = distanceFromTrue(coor(i,:),trueCoor); %meter
-    rad = angleFromTrue(coor(i,:),trueCoor); %from north
-    x(i) = dist*sin(rad);
-    y(i) = dist*cos(rad);
+
+%% function definitions, don't change anything below this
+function error_analysis(file,trueCoor,altitude)
+    coor = table2array(readtable(file))/1e7;
+    coor = coor(:,1:2);
+    
+    len = size(coor,1);
+    x = zeros(1,len);
+    y = x;
+    maxdist = 0;
+
+    for i=1:len
+        dist = distanceFromTrue(coor(i,:),trueCoor,altitude); %meter
+        rad = angleFromTrue(coor(i,:),trueCoor); %from north
+        x(i) = dist*sin(rad);
+        y(i) = dist*cos(rad);
+        if maxdist<dist
+            maxdist = dist;
+        end
+    end
+    
+    avg = mean(dist);
+    sigma = std(dist);
+    z = 1.96; %for 95% CI
+    low_bound = avg-z*sigma/sqrt(len);
+    up_bound = avg+z*sigma/sqrt(len);
+    fprintf("For testing data at ["+trueCoor(1)+","+trueCoor(2)+"]");
+    fprintf("Max distance error: "+max(dist)+" m");
+    fprintf("Distance RMS error: "+rms(dist)+" m");
+    fprintf("95% confidence interval: ["+low_bound+","+up_bound+"]")
 end
 
-scatter(x,y,'.b')
-hold on
-scatter(0,0,'xr')
-grid on
-xlabel("meter")
-ylabel("meter")
-xlim([-limit,limit])
-ylim([-limit,limit])
-title("GPS test at ["+trueCoor(1)+","+trueCoor(2)+"]")
-hold off
+function plotgps(file,trueCoor,altitude)
+    coor = table2array(readtable(file))/1e7;
+    coor = coor(:,1:2);
+    
+    len = size(coor,1);
+    x = zeros(1,len);
+    y = x;
+    maxdist = 0;
 
-function meter = distanceFromTrue(currCoor,trueCoor)
+    for i=1:len
+        dist = distanceFromTrue(coor(i,:),trueCoor,altitude); %meter
+        rad = angleFromTrue(coor(i,:),trueCoor); %from north
+        x(i) = dist*sin(rad);
+        y(i) = dist*cos(rad);
+        if maxdist<dist
+            maxdist = dist;
+        end
+    end
+
+    figure
+    scatter(x,y,'.b')
+    hold on
+    scatter(0,0,'xr')
+    grid on
+    xlabel("meter")
+    ylabel("meter")
+    xlim([-maxdist,maxdist])
+    ylim([-maxdist,maxdist])
+    legend('Locations read from GPS','True Location')
+    title("GPS test for "+len+" points at 1 sec difference at ["+trueCoor(1)+","+trueCoor(2)+"]")
+    hold off
+end
+
+function meter = distanceFromTrue(currCoor,trueCoor,alti)
     deg2rad = pi/180;
     lat = currCoor(1)*deg2rad;
     lon = currCoor(2)*deg2rad;
     truelat = trueCoor(1)*deg2rad;
     truelon = trueCoor(2)*deg2rad;
-    radius = 6371000; %m
+    radius = 6371000+alti; %m
    
     %haversine
     a = (sin((truelat-lat)/2))^2 + cos(lat)*cos(truelat)*(sin((truelon-lon)/2))^2;

@@ -1,4 +1,3 @@
-
 // ---------------------------------------------------------------- //
 // Arduino Ultrasoninc Sensor HC-SR04
 // Re-writed by Arbi Abdul Jabbaar
@@ -78,6 +77,9 @@ void readData(){
     long altitude = myGNSS.getAltitude();
     Serial.print(F(" "));
     Serial.print(altitude);
+
+    Serial.print(F(" "));
+    Serial.print(fixType);
 
     Serial.println();
 }
