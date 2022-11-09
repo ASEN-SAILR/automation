@@ -2,7 +2,7 @@ import math
 
 
 def bearingToTarget(currCoor,tarCoor): 
-    #input: currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231N,-34.204] (object of floats)
+    #input: currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
     #output: bearing in deg from north, ie. 89 (float)
     
     lat1, lon1 = currCoor
@@ -43,7 +43,7 @@ def distanceToTarget(currCoor,tarCoor):
 
 def angleToTarget(currHeading,currCoor,tarCoor):
     #input: currHeading = current heading to target from magnetometer in deg (float)
-    #       currCoor, tarCoor = current and target coordinate [lat,lon], ie. ["23.0231N","34.204W"] (object of strings)
+    #       currCoor, tarCoor = current and target coordinate [lat,lon], ie. [23.0231,-34.204] (object of strings)
     #output: angle to target with respect to current heading in deg, positive mean to the right (float)
     return bearingToTarget(currCoor,tarCoor)-currHeading
 
