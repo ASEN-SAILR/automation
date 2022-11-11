@@ -39,14 +39,17 @@ def getObjectGrid(x, y, threshold:int=5, x_lim:tuple[float]=(0,3), y_lim:tuple[f
     for i,val in enumerate(vals):
         if counts[i]>threshold:
             print('val',val)
-            grid[int(val[0])][int(val[1])] = 1 # may need to flip axes of grid
+            grid[int(val[0])-(int(x_lim[0]/resolution))][int(val[1])-(int(y_lim[0]/resolution))] = 1 # may need to flip axes of grid
 
-    # displayImg(grid) #this also does not work because above is not working 
+    displayImg(grid) #this also does not work because above is not working 
 
     return np.multiply(objects[:,0],resolution),np.multiply(objects[:,1],resolution)
     # return np.multiply(x_dig,resolution),np.multiply(y_dig,resolution)
 
 def displayImg(img):
+    img = np.flip(np.array(img),1)
+    img = img.T
+    # img = np.flip(np.array(img),1)
     plt.imshow(img)
 
 
@@ -66,7 +69,7 @@ dist = np.array([val/1000 for val in dist])
 
 x,y = radialToCart(ang,dist,type='deg')
 
-xn,yn = getObjectGrid(x,y,threshold=500,resolution=0.05)
+xn,yn = getObjectGrid(x,y,threshold=100,resolution=0.05)
 
 
 #plot
@@ -75,13 +78,15 @@ plt.scatter(x,y);
 ax.set_title('Coordinates as measured by LiDar before processing', fontsize=18)
 ax.set_xlabel('x', fontsize=14)
 ax.set_ylabel('y', fontsize=14)
+ax.axes.set_aspect('equal')
 ax.grid()
 
 #plot
 fig, ax = plt.subplots(figsize=(8,8))
 plt.scatter(xn,yn);
-ax.set_title('Coordinates as measured by LiDar after processing', fontsize=18)
+ax.set_title('Coordinates as measured by LiDar after processing, th=10000', fontsize=18)
 ax.set_xlabel('xn', fontsize=14)
 ax.set_ylabel('yn', fontsize=14)
+ax.axes.set_aspect('equal')
 ax.grid()
 plt.show()
