@@ -14,10 +14,10 @@ def getObjectGrid(x, y, threshold:int=5, x_lim:tuple[float]=(0,3), y_lim:tuple[f
     x_mag = x_lim[1]-x_lim[0]
     y_mag = y_lim[1]-y_lim[0]
  
-    #the following array is a 1D array of bools. True means associated point is within x_lim and y_lim.
+    # the following array is a 1D array of bools. True means associated point is within x_lim and y_lim.
     truth_vals = np.all(np.vstack((x>x_lim[0], x<x_lim[1], y>y_lim[0], y<y_lim[1])),0)
     
-    #points that are false in `truth_vals` are removed
+    # points that are false in `truth_vals` are removed
     x_rem = x[truth_vals]
     y_rem = y[truth_vals]
     
@@ -29,14 +29,11 @@ def getObjectGrid(x, y, threshold:int=5, x_lim:tuple[float]=(0,3), y_lim:tuple[f
     # this returns unique points and their counts
     vals,counts = np.unique(list(zip(x_binned,y_binned)),return_counts=True,axis=0)
 
-    #objects are points where there are more hits than the threshold 
-    objects = vals[counts>threshold]
+    # objects are points where there are more hits than the threshold 
+    objects = np.array(vals[counts>threshold], dtype=np.int_)
  
-
-    #fills grid squares with 1 or 0 depending on if there is an object of not
-    for i,val in enumerate(vals):
-        if counts[i]>threshold:
-            grid[int(val[0])-(int(x_lim[0]/resolution))][int(val[1])-(int(y_lim[0]/resolution))] = 1 # may need to flip axes of grid
+    # fills the grid with ones where there is an "object"
+    grid[objects[:,0]-(int(x_lim[0]/resolution)),objects[:,1]-(int(y_lim[0]/resolution))] = 1
 
     oned_arr = np.any(grid,axis=0)
 
@@ -63,6 +60,8 @@ def getObjectGrid(x, y, threshold:int=5, x_lim:tuple[float]=(0,3), y_lim:tuple[f
         ax.set_title('Coordinates as measured by LiDar after processing, th=100', fontsize=18)
         ax.set_xlabel('xn [m]', fontsize=14)
         ax.set_ylabel('yn [m]', fontsize=14)
+        plt.xlim(x_lim)
+        plt.ylim(y_lim)
         ax.axes.set_aspect('equal')
         ax.grid()
 
@@ -88,6 +87,8 @@ all_scans = np.load("new_data.npy")
 MAX_DIST = 2 #m
 X_LIMITS = (0,3)
 Y_LIMITS = (-3,3)
+THRESHOLD = 100
+RESOLUTION = 0.05
 
 qual,ang,dist = zip(*all_scans)
 
@@ -97,7 +98,7 @@ dist = np.array([val/1000 for val in dist])
 
 x,y = radialToCart(ang,dist,type='deg')
 
-xn,yn = getObjectGrid(x, y, x_lim=X_LIMITS, y_lim=Y_LIMITS, threshold=100, resolution=0.05)
+xn,yn = getObjectGrid(x, y, x_lim=X_LIMITS, y_lim=Y_LIMITS, threshold=THRESHOLD, resolution=RESOLUTION)
 
 
 plt.show()
