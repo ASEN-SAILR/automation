@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import cv2
 
-def radialToCart(ang,dist,type = "rad"):
+def radialToCart(ang:np.ndarray, dist:np.ndarray, type = "rad"):
     if type == "deg":
         ang = [val*3.1415/180 for val in ang]
     x = np.multiply(np.cos(ang),dist)
@@ -21,8 +21,10 @@ def getObjectGrid(x, y, threshold:int=5, x_lim:tuple[float]=(0,3), y_lim:tuple[f
     x_rem = x[truth_vals]
     y_rem = y[truth_vals]
     
+    # create 2d array for objects 
     grid = np.zeros([int(x_mag//resolution),int(y_mag//resolution)])
 
+    # bins the x and y values into integer bins
     x_binned = [val//resolution for val in x_rem]
     y_binned = [val//resolution for val in y_rem]
 
@@ -32,10 +34,12 @@ def getObjectGrid(x, y, threshold:int=5, x_lim:tuple[float]=(0,3), y_lim:tuple[f
     # objects are points where there are more hits than the threshold 
     objects = np.array(vals[counts>threshold], dtype=np.int_)
  
-    # fills the grid with ones where there is an "object"
+    # fills the grid with ones where there is an "object". 
+    # Looks complicated because `objects` contains negative numbers which cannot be indices
     grid[objects[:,0]-(int(x_lim[0]/resolution)),objects[:,1]-(int(y_lim[0]/resolution))] = 1
 
-    oned_arr = np.any(grid,axis=0)
+    # collapses grid into a 1d array
+    one_d_arr = np.any(grid,axis=0)
 
     if plot:
         #plot
@@ -67,10 +71,10 @@ def getObjectGrid(x, y, threshold:int=5, x_lim:tuple[float]=(0,3), y_lim:tuple[f
 
         displayImg(grid) 
 
-        displayImg(np.expand_dims(np.flip(oned_arr ),axis=1))
+        displayImg(np.expand_dims(np.flip(one_d_arr ),axis=1))
      
 
-    return np.multiply(objects[:,0],resolution),np.multiply(objects[:,1],resolution)
+    return one_d_arr
 
 #flip image to match plots
 def displayImg(img):
@@ -93,12 +97,12 @@ RESOLUTION = 0.05
 qual,ang,dist = zip(*all_scans)
 
 #zip returns tuples, we need lists
-ang = np.array([val for val in ang])
+ang = ([val for val in ang])
 dist = np.array([val/1000 for val in dist])
 
 x,y = radialToCart(ang,dist,type='deg')
 
-xn,yn = getObjectGrid(x, y, x_lim=X_LIMITS, y_lim=Y_LIMITS, threshold=THRESHOLD, resolution=RESOLUTION)
+obj_arr = getObjectGrid(x, y, x_lim=X_LIMITS, y_lim=Y_LIMITS, threshold=THRESHOLD, resolution=RESOLUTION)
 
 
 plt.show()
