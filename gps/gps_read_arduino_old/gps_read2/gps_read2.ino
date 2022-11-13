@@ -18,7 +18,8 @@ void setup() {
   Serial.begin(115200);
   while (!Serial)
     ; //Wait for user to open terminal
-  Serial.println("SparkFun u-blox Example");
+  Serial.println("Read GPS data testing");
+  
 
   Wire.begin();
 
@@ -64,6 +65,7 @@ void readData(){
         Serial.print(" Waiting for 3D fix...");
         Serial.println();
         lasttime = millis();
+        fixType = myGNSS.getFixType();    
       }
     }
     
@@ -77,6 +79,10 @@ void readData(){
     long altitude = myGNSS.getAltitude();
     Serial.print(F(" "));
     Serial.print(altitude);
+
+    long numOfSat = myGNSS.getSIV();
+    Serial.print(F(" "));
+    Serial.print(numOfSat);
 
     Serial.print(F(" "));
     Serial.print(fixType);
