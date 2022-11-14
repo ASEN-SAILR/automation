@@ -11,8 +11,8 @@ altitude2 = 1624.112; %m
 %plotgps("data_loc1/test1.txt",trueCoor1,altitude1)
 %error_analysis("data_loc1/test1.txt",trueCoor1,altitude1)
 
-plotgps("data_loc1/test2.txt",trueCoor1,altitude2)
-error_analysis("data_loc1/test2.txt",trueCoor1,altitude1)
+%plotgps("data_loc1/test2.txt",trueCoor1,altitude2)
+%error_analysis("data_loc1/test2.txt",trueCoor1,altitude1)
 
 %plotgps("data_loc2/test1.txt",trueCoor2,altitude2)
 %error_analysis("data_loc2/test1.txt",trueCoor2,altitude2)
@@ -20,8 +20,8 @@ error_analysis("data_loc1/test2.txt",trueCoor1,altitude1)
 plotgps("data_loc2/test2.txt",trueCoor2,altitude2)
 error_analysis("data_loc2/test2.txt",trueCoor2,altitude2)
 
-plotgps("data_loc2/test3.txt",trueCoor2,altitude2)
-error_analysis("data_loc2/test3.txt",trueCoor2,altitude2)
+%plotgps("data_loc2/test3.txt",trueCoor2,altitude2)
+%error_analysis("data_loc2/test3.txt",trueCoor2,altitude2)
 
 
 
@@ -33,7 +33,8 @@ end
 function error_analysis(file,trueCoor,altitude)
     coor = table2array(readtable(file));
     SIV = coor(:,4);
-    coor = coor(SIV>=12,1:2)/1e7;
+    coor = coor(SIV>=4,1:2)/1e7;
+    %coor = coor(:,1:2)/1e7;
     
     len = size(coor,1);
     x = zeros(1,len);
@@ -56,7 +57,7 @@ function error_analysis(file,trueCoor,altitude)
     fprintf("For testing data at [%.6f,%.6f]",trueCoor(1),trueCoor(2));
     fprintf("\nMax distance error: "+max(dist)+" m\n");
     fprintf("Distance error mean: "+avg+" m\n");
-    fprintf("Standard deviation: %.2f\n", sigma);
+    fprintf("Standard deviation: %.2f m\n", sigma);
     fprintf("Precision: +/- %.2f m\n",precision);
     
 end
@@ -65,6 +66,7 @@ function plotgps(file,trueCoor,altitude)
     coor = table2array(readtable(file));
     SIV = coor(:,4);
     coor = coor(SIV>=10,1:2)/1e7;
+    %coor = coor(:,1:2)/1e7;
     
     len = size(coor,1);
     x = zeros(1,len);
@@ -82,9 +84,9 @@ function plotgps(file,trueCoor,altitude)
     end
 
     figure
-    scatter(x,y,'.b')
+    scatter(x,y,50,'.b')
     hold on
-    scatter(0,0,'xr')
+    scatter(0,0,150,'*r')
     grid on
     xlabel("East(meter)")
     ylabel("North(meter)")
