@@ -36,26 +36,27 @@ try:
 
 except KeyboardInterrupt:
     print("Didn't get data, maybe LiDar is disconnected")
-    np.save("new_data.npy",np.array(all_scans))
+    np.save("new2_data.npy",np.array(all_scans))
     pass
 
-print('scan',all_scans)
+# print('scan',all_scans)
 
 # convert to x,y
 degs = [i for i in range(360)]
 qual,ang,dist = zip(*all_scans)
-print('ang',ang)
-print('dist',dist)
+# print('ang',ang)
+# print('dist',dist)
 x,y = radialToCart(ang,dist,type='deg')
 
-print('x',x)
-print('y',y)
+# print('x',x)
+# print('y',y)
 #plot
 fig, ax = plt.subplots(figsize=(8,8))
 plt.scatter(x,y);
 ax.set_title('Coordinates as messured by LiDar', fontsize=18)
 ax.set_xlabel('x', fontsize=14)
 ax.set_ylabel('y', fontsize=14)
+ax.grid()
 plt.show()
 
 #stop (disconnects, but doesn't turn it off, idk why)
