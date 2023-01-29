@@ -39,6 +39,7 @@ class RoverVideo:
         self.recordingProcess.terminate()
         #tbc
 
+    # uneeded? Should we send at certain cadence?
     def sendVideo(self) -> bool:
         """
         write some amount of video to a path that will be sent back to ground station

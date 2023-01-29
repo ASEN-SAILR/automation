@@ -54,11 +54,16 @@ if __name__ == "__main__":
 			# tbc
 			
 		elif command["type"] == "manual":
+			# check for stop condition prior?
+
 			# multiprodcessing process for this???  
 			move.manual(command) #just send the whole dictionary?
 			#tbc
 
 		elif command["type"] == "photo":
+			# STOP recording 
+			# take pano photo
+			# begin recording 
 			#todo
 			pass
 
