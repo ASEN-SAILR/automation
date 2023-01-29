@@ -4,7 +4,7 @@ import RoverGPS
 import RoverLidar
 import RoverVideo
 import RoverUART
-from multiprocessing import Process
+from multiprocessing import Process,processmanager
 
 DISTANCE = 1 #distance to move in a straight line
 
@@ -41,6 +41,7 @@ if __name__ == "__main__":
 			command = comms.readCommand()
 			#once a command is recieved, we need a way to monitor motion
 
+		processmanager.stopprocesses()
 
 		if command["type"] == "autonomous":
 			# multiprodcessing process for this???  
