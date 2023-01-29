@@ -1,55 +1,67 @@
+import RoverMove
+import RoverComms
+import RoverGPS
+import RoverLidar
+import RoverVideo
+import RoverUART
+from multiprocessing import Process
+
 DISTANCE = 1 #distance to move in a straight line
 
-LOI = argv[0]
+if __name__ == "__main__":
+	# start video recording (class)
+	camPort = r"/dev/tty/0"
+	videoPath = r"~/videos/" #example path
+	video = RoverVideo(camPort,videoPath,vidLength=5)
+	video.startRecording()
 
-def send_translation(distance):
-	send_uart_cmd("translation",distance)
+	# start uart comms with Teensy
+	teensyPort = r"/dev/tty/1"
+	uart = RoverUART(teensyPort,baud=115200) 
 
-def send_rotation(angle):
-	send_uart_cmd("angle",angle)
+	# start lidar
+	lidarPort = r"/dev/tty/2"
+	lidar = RoverLidar(lidarPort) # more params?
 
+	# start gps 
+	gpsPort = r"/dev/tty/2"
+	gps = RoverGPS(gpsPort) # more params?
 
+	# start reading commands from commands log
+	commandsPath = r"~/commands.txt"
+	telemetryPath = r"~/telemetry.txt"
+	comms = RoverComms(commandsPath,telemetryPath)
 
+	# start RoverMove 
+	move = RoverMove(gps,lidar)
 
-### Autonomous Mode ###
-def autonomous():
-	while not atlocation:
-		#Finding change in heading desired to point to LOI
-		CurrCoordinate = get_gps()
-		MagHeading = get_heading()
-		DesHeading = bearing_to_target(CurrCoordinate,LOI)
-		DeltaHeading = get_delta_heading(MagHeading,DesHeading)
-		#Sending command to teensy
-		send_rotation(DeltaHeading)
-
-		#If fail, spit error
-		while not success:
-			success = check_motion_status() #ask teensy, teesny should know :)
-		
-		#Getting lidar map and finding what zone they are in
-		#Priming for loop
-		Map = get_lidar_map()
-		[Status,Obstacles] = check_obstacles(Map)
-		while Status is none:
-			if check_desired_heading():
-				send_translation(DISTANCE)
-				while not success:
-					success = check_motion_status()
-				send_video(seconds=30)
-
-				Map = get_lidar_map()
-				[Status,Obstacles] = check_obstacles(Map)
-			else
-				break
-		while Status is "yellow":
-			here
-		while Status is "red"
-			here
-
-def manual():
-	#insert code 
-	return
+	while True:
+		command = None
+		while command == None:
+			command = comms.readCommand()
+			#once a command is recieved, we need a way to monitor motion
 
 
+		if command["type"] == "autonomous":
+			# multiprodcessing process for this???  
+			# can we make autonomous only perform one action at a time? below is what a multiprocessing process would look like
+			auton_process = Process(target=move.autonomous,args=command["LOI"])
+			auton_process.start() 
+			
 
-	
+			# monitor process
+			# tbc
+			
+		elif command["type"] == "manual":
+			# multiprodcessing process for this???  
+			move.manual(command) #just send the whole dictionary?
+			#tbc
+
+		elif command["type"] == "photo":
+			#todo
+			pass
+
+		elif command["type"] == "stop":
+			uart.sendStopCmd
+			# skip over rest of loop and wait for command
+			continue
