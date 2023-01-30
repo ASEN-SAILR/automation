@@ -41,7 +41,7 @@ if __name__ == "__main__":
 			command = comms.readCommand()
 			#once a command is recieved, we need a way to monitor motion
 
-		processmanager.stopprocesses()
+		processmanager.stopprocesses() #we probably want a more elegent way of stopping, this may cause memory leaks
 
 		if command["type"] == "autonomous":
 			# multiprodcessing process for this???  
@@ -68,6 +68,16 @@ if __name__ == "__main__":
 			pass
 
 		elif command["type"] == "stop":
-			uart.sendStopCmd
+			# allow cild processes to stop on their own time (will finish motion)
+			uart.sendStop()
+			
+			# skip over rest of loop and wait for command
+			continue
+
+
+		elif command["type"] == "emergency_stop":
+			# termiate child processes immediately and stop motion ASAP
+			uart.sendEmergencyStop()
+		
 			# skip over rest of loop and wait for command
 			continue
