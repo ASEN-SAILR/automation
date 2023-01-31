@@ -4,7 +4,7 @@ import RoverGPS
 import RoverLidar
 import RoverCamera
 import RoverUART
-from multiprocessing import Process,processmanager
+from multiprocessing import Process,active_children
 
 DISTANCE = 1 #distance to move in a straight line
 
@@ -35,19 +35,45 @@ if __name__ == "__main__":
 	# start RoverMove 
 	move = RoverMove(gps,lidar)
 
+	# Variable that contains the active process: manual or autonomous
+	# need to initailize so that we don't have to check if its None on first pass
+	def junk(): pass
+	current_process = Process(target=junk)
+	current_process.start() 
+
+
+
 	while True:
 		command = None
-		while command == None:
+		while command == None: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
 			command = comms.readCommand()
 			#once a command is recieved, we need a way to monitor motion
 
-		processmanager.stopprocesses() #we probably want a more elegent way of stopping, this may cause memory leaks
+		# check for emergecy stop conidition first
+		if command["type"] == "emergency_stop":
+			# termiate child processes immediately and stop motion ASAP
+
+			current_process.terminate()
+			# current_process.close() #may need this???
+
+			#tell the teensy to stop motion
+			uart.sendEmergencyStop()
+		
+			# skip over rest of loop and wait for command
+			continue
+
+
+		# if we are here, there has been a new command specified and 
+		# we need to stop manual or autonomous motion
+		current_process.terminate() #we probably want a more elegent way of stopping, this may cause memory leaks
 
 		if command["type"] == "autonomous":
 			# multiprodcessing process for this???  
 			# can we make autonomous only perform one action at a time? below is what a multiprocessing process would look like
-			auton_process = Process(target=move.autonomous,args=command["LOI"])
+			auton_process = Process(target=move.autonomous,args=(command["LOI"]))
 			auton_process.start() 
+
+			current_process = auton_process
 			
 
 			# monitor process
@@ -75,9 +101,3 @@ if __name__ == "__main__":
 			continue
 
 
-		elif command["type"] == "emergency_stop":
-			# termiate child processes immediately and stop motion ASAP
-			uart.sendEmergencyStop()
-		
-			# skip over rest of loop and wait for command
-			continue
