@@ -2,7 +2,7 @@ import RoverMove
 import RoverComms
 import RoverGPS
 import RoverLidar
-import RoverVideo
+import RoverCamera
 import RoverUART
 from multiprocessing import Process,processmanager
 
@@ -12,7 +12,7 @@ if __name__ == "__main__":
 	# start video recording (class)
 	camPort = r"/dev/tty/0"
 	videoPath = r"~/videos/" #example path
-	video = RoverVideo(camPort,videoPath,vidLength=5)
+	video = RoverCamera(camPort,videoPath,vidLength=5)
 	video.startRecording()
 
 	# start uart comms with Teensy
