@@ -4,7 +4,7 @@ import RoverGPS
 import RoverLidar
 import RoverCamera
 import RoverUART
-from multiprocessing import Process,active_children
+from multiprocessing import Process
 
 DISTANCE = 1 #distance to move in a straight line
 
@@ -34,14 +34,12 @@ if __name__ == "__main__":
 
 	# start RoverMove 
 	move = RoverMove(gps,lidar)
-
+	
 	# Variable that contains the active process: manual or autonomous
-	# need to initailize so that we don't have to check if its None on first pass
-	def junk(): pass
-	current_process = Process(target=junk)
-	current_process.start() 
+	current_process = None
 
-
+	# tracks current command
+	active_command = "stop"
 
 	while True:
 		command = None
@@ -53,7 +51,7 @@ if __name__ == "__main__":
 		if command["type"] == "emergency_stop":
 			# termiate child processes immediately and stop motion ASAP
 
-			current_process.terminate()
+			if current_process is not None: current_process.terminate()
 			# current_process.close() #may need this???
 
 			#tell the teensy to stop motion
@@ -68,6 +66,8 @@ if __name__ == "__main__":
 		current_process.terminate() #we probably want a more elegent way of stopping, this may cause memory leaks
 
 		if command["type"] == "autonomous":
+			active_command = "autonomous"
+
 			# multiprodcessing process for this???  
 			# can we make autonomous only perform one action at a time? below is what a multiprocessing process would look like
 			auton_process = Process(target=move.autonomous,args=(command["LOI"]))
@@ -99,5 +99,14 @@ if __name__ == "__main__":
 			
 			# skip over rest of loop and wait for command
 			continue
+
+
+		while move.actionInProgress() and not comms.isNewCommand():
+			# will hold until a motion is complete or a new command 
+			# comes through from the ground station
+			pass
+
+		#return to top of loop
+			
 
 

@@ -17,10 +17,22 @@ class RoverComms:
         # member vars
         self.commandPath = commandPath
         self.telemPath = telemPath
+        self.currCmdNum = 0
 
         # initialize stuff as needed
 
         pass 
+
+    def isNewCommand(self):
+        """
+        checks for a new command in the command file
+
+        input:
+            none
+        returns:
+            True if new command
+            False if nothing new
+        """
 
     def readCommand(self) -> dict:
         """
