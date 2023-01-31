@@ -1,7 +1,7 @@
 #https://www.turing.com/kb/python-multiprocessing-vs-multithreading
 from multiprocessing import Process
 
-class RoverVideo:
+class RoverCamera:
     def __init__(self, port, storage_path, vid_length) -> None:
         """
         inputs:
@@ -14,6 +14,18 @@ class RoverVideo:
 
         # initialize stuff
 
+        pass
+
+    def setPhotoSetting(self,params):
+        """
+        setter for photo paramaters
+        """
+        pass
+
+    def setVideoSetting(self,params):
+        """
+        setter for video paramters
+        """
         pass
 
     def _record(self):
