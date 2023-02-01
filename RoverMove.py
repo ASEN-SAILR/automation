@@ -14,9 +14,11 @@ class RoverMove:
 		self.gps = gps
 		self.lidar = lidar
 
-	def motionInProgress(self):
+	def motionInProgress(self) :
 		"""
 		checks if the rover is executing a manual or autnonomous command
+
+		TODO: we need a variable that tracks if a motion is in progress, may not be possible with multiprocessing...
 		
 		inputs:
 			none
@@ -30,6 +32,8 @@ class RoverMove:
 	def autonomous(self,LOI):
 		"""
 		autonomously move the rover to a LOI
+
+		TODO: update function calls to match current classes
 		"""
 		#make the rover move autonomously to LOI
 		while not atlocation:
@@ -40,7 +44,7 @@ class RoverMove:
 			DeltaHeading = get_delta_heading(MagHeading,DesHeading)
 			
 			#Sending command to teensy
-			send_rotation(DeltaHeading)
+			self.sendRotation(DeltaHeading)
 
 			#If fail, spit error
 			while not success:
@@ -52,7 +56,7 @@ class RoverMove:
 			[Status,Obstacles] = check_obstacles(Map)
 			while Status is none:
 				if check_desired_heading():
-					send_translation(DISTANCE)
+					self.sendTranslation(DISTANCE)
 					while not success:
 						success = check_motion_status()
 					send_video(seconds=30)
