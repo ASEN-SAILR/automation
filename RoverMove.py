@@ -69,3 +69,25 @@ class RoverMove:
 	def manual(self,command):
 		# make the rover execute a single command
 		pass
+
+	def sendRotation(self,angle:float) -> bool:
+		"""
+		sends a rotation to the teesny/controls to be executed
+
+		input:
+			angle: angle (deg) to rotate in NED frame about vertical axis (CW is positive)
+		output:
+			True if sent to teensy
+			False if something went wrong
+		"""
+
+	def sendTranslation(self,distance:float) -> bool:
+		"""
+		sends a translation to the teesny/controls to be executed
+
+		input:
+			distance: distance [meters] to translate in body frame. Can only be along rover's foward and backward axis.
+		output:
+			True if sent to teensy
+			False if something went wrong
+		"""
