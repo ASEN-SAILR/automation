@@ -3,6 +3,7 @@
 from multiprocessing import Process
 import cv2
 import numpy as np
+import time
 
 class RoverCamera:
     #def __init__(self, port, storage_path, vid_length) -> None:
@@ -14,27 +15,30 @@ class RoverCamera:
     #    # member vars
     #    self.recordingProcess = []
         # initialize stuff
-
     #    pass
 
     def __init(self,port,storage_path,vid_length):
-        self.port = port
+        self.port = port #camera 1 2 3
         self.storage_path = storage_path
-        self.vid_length = vid_length
+        self.vid_length = vid_length #second
 
 
-    def setPhotoSetting(self,resolution):
+    def setPhotoSetting(self,photoPath,resolution):
         """
         setter for photo paramaters
         """
-        pass
+        self.photoPath = photoPath
+        self.photoCounter = 0
+        self.photoResolution = resolution
 
-    def setVideoSetting(self,fps,resolution):
+    def setVideoSetting(self,videoPath,fps,resolution):
         """
         setter for video paramters
         """
+        self.videoPath = videoPath
         self.fps = fps
-        self.resolution = resolution
+        self.videoResolution = resolution
+        self.videoCounter = 0
 
     def _record(self):
         """
@@ -43,26 +47,23 @@ class RoverCamera:
         """
         
         cap=cv2.VideoCapture(self.port[0]) #port one
+        #"desktop/:C/test" + "0" + ".avi"
+        out = cv2.VideoWriter(self.videoPath+num2str(self.videoCounter)+".avi",cv2.VideoWriter_fourcc('M','J','P','G'),self.fps, self.videoResolution)
+        videoCounter++
 
-        out = cv2.VideoWriter('outpy.avi',cv2.VideoWriter_fourcc('M','J','P','G'),self.fps, self.resolution)
-        #Can you specify how long the video is?
+        start = time.time()
 
-        while(True):
-
+        while(time.time()-start<self.vid_length):#break to stop recording after videoLength second
             ret,frame = cap.read()
-            
             out.write(frame)
-
             #cv2.imshow('frame',frame)
-            
             #if cv2.waitKey(1) & 0xFF == ord('q'):  
-            #    break 
 
+        out.release() #stop recording and write video file into path
+        cap.release() #turn off camera
 
-        out.release()
-        cap.release()
         # Destroy all the windows
-        cv2.destroyAllWindows()
+        #cv2.destroyAllWindows()
 
     def startRecording(self):
         """
@@ -81,23 +82,23 @@ class RoverCamera:
         #tbc
 
     # uneeded? Should we send at certain cadence?
-    def sendVideo(self): # -> bool:
+    #def sendVideo(self): # -> bool:
         """
         write some amount of video to a path that will be sent back to ground station
         """
         #todo
-        pass
+        #pass
 
-    def send360(self,port):
-        pano = self.take360(port)
+    #def send360(self,port):
+        #pano = self.take360(port)
 
         #send command
 
-    def take360(self,port):
+    def take360(self):
 
-        cam_port0=port[0]
-        cam_port1=port[1]
-        cam_port2=port[2]
+        cam_port0=self.port[0]
+        cam_port1=self.port[1]
+        cam_port2=self.port[2]
         result0, frame0 = cv2.VideoCapture(cam_port0)
         result1, frame1 = cv2.VideoCapture(cam_port1)
         result2, frame2 = cv2.VideoCapture(cam_port2)
@@ -116,9 +117,9 @@ class RoverCamera:
             # and due to this the resultant image won't fit the screen
             # scaling down the images
         # showing the original pictures
-        cv2.imshow('1',imgs[0])
-        cv2.imshow('2',imgs[1])
-        cv2.imshow('3',imgs[2])
+        #cv2.imshow('1',imgs[0])
+        #cv2.imshow('2',imgs[1])
+        #cv2.imshow('3',imgs[2])
         
         stitchy=cv2.Stitcher.create()
         (dummy,output)=stitchy.stitch(imgs)
@@ -132,34 +133,10 @@ class RoverCamera:
             print('Your Panorama is ready!')
         
         # final output
-        cv2.imwrite('Pano.jpg',output)
-
-        return output
+        cv2.imwrite(self.photoPath+num2str(self.photoCounter)+".avi",output)
+        photoCounter++
         # save output as .jpg
-        #cv2.imshow('final result',output)
 
+        #cv2.imshow('final result',output)
         #cv2.waitKey(0)
 
-    def takeVideo(self):
-
-        cap=cv2.VideoCapture(port[0]) #port one
-
-        out = cv2.VideoWriter('outpy.avi',cv2.VideoWriter_fourcc('M','J','P','G'),30, (640,480))
-
-        while(True):
-
-            ret,frame = cap.read()
-            
-            out.write(frame)
-
-            cv2.imshow('frame',frame)
-            
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):  
-                break 
-
-
-        out.release()
-        cap.release()
-        # Destroy all the windows
-        cv2.destroyAllWindows()
