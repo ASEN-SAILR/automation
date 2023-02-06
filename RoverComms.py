@@ -11,10 +11,10 @@ print(cmd_dict['id'])
 # 2
 
 """
-
+import os
 
 class RoverComms:
-    def __init__(self,commandPath,telemPath) -> None:
+    def __init__(self,commandPath,telemPath):# -> None:
         # member vars
         self.commandPath = commandPath
         self.telemPath = telemPath
@@ -35,7 +35,7 @@ class RoverComms:
             False if nothing new
         """
 
-    def readCommand(self) -> dict:
+    def readCommand(self): # -> dict:
         """
         read command from commands text file.
         
@@ -50,7 +50,7 @@ class RoverComms:
         """
         pass
 
-    def writeTelemetry(self,toWrite) -> bool:
+    def writeTelemetry(self,toWrite): # -> bool:
         """
         write telemetry to telemetry file
 
@@ -58,3 +58,14 @@ class RoverComms:
             toWrite: telemetry to write to file (FORMAT TBD)
         """
         pass
+
+    def syncOutbound(self,path):
+        system_password = 'asen4018'
+        sender_path = '/root/comms-gs/test.txt'
+        receiver_ip = '192.168.56.102'
+        receiver_path = receiver_ip+':/root/comms-gs/test.txt'
+
+        # os.system("sshpass -p '"+system_password+"' rsync -ave ssh /root/comms-gs/test.txt 192.168.56.102:/root/comms-gs/test.txt")
+        os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+
+
