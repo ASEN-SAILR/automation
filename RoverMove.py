@@ -1,7 +1,8 @@
+# Trevor 
 import RoverGPS
 import RoverLidar
 import numpy as np
-
+from multiprocessing import Process
 ### Class that will handle the motion of the rover
 class RoverMove:
 	def __init__(self,gps:RoverGPS,lidar:RoverLidar) -> None:
@@ -14,6 +15,7 @@ class RoverMove:
 
 		self.gps = gps
 		self.lidar = lidar
+		self.process = None
 
 	def motionInProgress(self) :
 		"""
@@ -26,6 +28,53 @@ class RoverMove:
 		returns:
 			True if executing motion
 			False if not executin motion
+		"""
+		return self.process.is_alive()
+
+	def startMove(self,command:dict):
+		"""
+		Begins multiprocessing process for manual or autonomous process for rover. 
+
+		input:
+			command dictionary
+		returns:
+			bool
+		"""
+		if self.process.is_alive():
+			#TODO Throw error
+			pass
+
+		# start self.process for these
+
+		if command["type"]=="autonomous":
+			self.process = Process(target=self.autonomous, args=(command['LOI']))
+			self.process.start()
+
+		elif command["type"]=="manual":
+			self.process = Process(target=self.manual, args=(command["type"],command["dist"],command["angle"]))
+			self.process.start()
+
+		else:
+			# throw error?
+			pass
+
+	def stopMove(self) -> bool:
+		"""
+		stop the rover after next action is complete
+		Maybe unneeded depending on how we want to stop the rover 
+		
+		input:
+			none
+		return:
+			bool
+		"""
+
+	def emergencyStopRover(self) -> bool:
+		"""
+		stop rover immediately. Terminate self.process ASAP. 
+
+		return:
+			bool
 		"""
 		pass
 
@@ -125,8 +174,21 @@ class RoverMove:
 		DistanceToMove = ValueY + BufferDistance
 		return DistanceToMove
 
-	def manual(self,command):
-		# make the rover execute a single command
+	def manual(self,type:str,dist:float,angle:float) -> bool:
+		"""
+		passes on  a single command to teensy to be executed
+
+		input:
+			type: "rotation" or "translation"
+			dist: distance to translate
+			angle: angle to rotate
+				*only one of dist and angle will be used with each call to manual()
+		returns:
+			True if executed
+			False if error
+
+		"""
+
 		pass
 
 	def sendRotation(self,angle:float) -> bool:
@@ -139,6 +201,7 @@ class RoverMove:
 			True if sent to teensy
 			False if something went wrong
 		"""
+		pass
 
 	def sendTranslation(self,distance:float) -> bool:
 		"""
@@ -150,3 +213,4 @@ class RoverMove:
 			True if sent to teensy
 			False if something went wrong
 		"""
+		pass
