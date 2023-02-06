@@ -1,5 +1,6 @@
 import RoverGPS
 import RoverLidar
+import numpy as np
 
 ### Class that will handle the motion of the rover
 class RoverMove:
@@ -69,6 +70,59 @@ class RoverMove:
 				here
 			while Status is "red":
 				here
+		
+	def check_desired_heading(MagHeading,DesHeading)
+		# checks if rover is pointing at LOI
+		if MagHeading > DesHeading - 5 AND MagHeading < DesHeading + 5:
+			pass
+		else
+			fail
+	
+	def get_delta_rotation(Obstacles):
+		# priming variables
+		Flag = 0
+		RightValueX = 0
+		RightValueY = 0
+		LeftValueX = 0
+		LeftValueY = 0
+		# determines angle to rotate to avoid obstacles
+		for Iteration in Obstacles:
+			if Iteration.X < 0
+			# takes most negative x value (left-most)
+				if Flag is 0:
+					LeftValueX = Iteration.X
+					LeftValueY = Iteration.Y
+					Flag = 1
+			else:
+			# takes most positive x value (right-most)
+				RightValueX = Iteration.X
+				RightValueY = Iteration.Y
+		if (-1*LeftValue)>RightValue:
+			# turns right
+			# trig to find angle to turn
+			AngleToTurn = np.arctan2(RightValueX,RightValueY)
+		else:
+			# turns left
+			AngleToTurn = np.arctan2(LeftValueX,LeftValueY)
+		# returns degrees
+		AngleToTurn = np.rad2deg(AngleToTurn)
+		# adds buffer to account for rover size
+		BufferAngle = 10
+		AngleToTurn = AngleToTurn + BufferAngle
+		return AngleToTurn
+
+	def get_delta_distance(Obstacles):
+		# determines distance to move rover to avoid obstacles
+		Flag = 0
+		Iteration_prev = 0
+		ValueY = 0
+		for Iteration in Obstacles:
+			if Iteration.Y > Iteration_prev
+				ValueY = Iteration.Y
+			Iteration_prev = Iteration.Y
+		BufferDistance = 1
+		DistanceToMove = ValueY + BufferDistance
+		return DistanceToMove
 
 	def manual(self,command):
 		# make the rover execute a single command
