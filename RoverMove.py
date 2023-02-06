@@ -73,7 +73,8 @@ class RoverMove:
 		
 	def check_desired_heading(MagHeading,DesHeading)
 		# checks if rover is pointing at LOI
-		if MagHeading > DesHeading - 5 AND MagHeading < DesHeading + 5:
+		BufferAngle = 5
+		if MagHeading > DesHeading - BufferAngle AND MagHeading < DesHeading + BufferAngle:
 			pass
 		else
 			fail
