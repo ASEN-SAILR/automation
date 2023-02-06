@@ -12,6 +12,7 @@ print(cmd_dict['id'])
 
 """
 
+
 class RoverComms:
     def __init__(self,commandPath,telemPath) -> None:
         # member vars

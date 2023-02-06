@@ -1,3 +1,6 @@
+# Trevor Reed, Luke Roberson, Suphakan Sukwong 
+
+
 import RoverMove
 import RoverComms
 import RoverGPS
@@ -16,21 +19,21 @@ if __name__ == "__main__":
 	video.startRecording()
 
 	# start uart comms with Teensy
-	teensyPort = r"/dev/tty/1"
+	teensy_port = r"/dev/tty/1"
 	uart = RoverUART(teensyPort,baud=115200) 
 
 	# start lidar
-	lidarPort = r"/dev/tty/2"
+	lidar_port = r"/dev/tty/2"
 	lidar = RoverLidar(lidarPort) # more params?
 
 	# start gps 
-	gpsPort = r"/dev/tty/2"
-	gps = RoverGPS(gpsPort) # more params?
+	gps_port = r"/dev/tty/2"
+	gps = RoverGPS(gps_port) # more params?
 
 	# start reading commands from commands log
-	commandsPath = r"~/commands.txt"
-	telemetryPath = r"~/telemetry.txt"
-	comms = RoverComms(commandsPath,telemetryPath)
+	commands_path = r"~/commands.txt"
+	telemetry_path = r"~/telemetry.txt"
+	comms = RoverComms(commands_path,telemetry_path9)
 
 	# start RoverMove 
 	move = RoverMove(gps,lidar)
@@ -41,15 +44,17 @@ if __name__ == "__main__":
 	# tracks current command
 	active_command = "stop"
 
+	command = None
 	while True:
-		command = None
 		while command == None: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
 			command = comms.readCommand()
 			#once a command is recieved, we need a way to monitor motion
 
 		# check for emergecy stop conidition first
-		if command["type"] == "emergency_stop":
+		if command["mode"] == "emergency_stop":
 			# termiate child processes immediately and stop motion ASAP
+
+			move.emergencyStop()
 
 			if current_process is not None: current_process.terminate()
 			# current_process.close() #may need this???
@@ -65,35 +70,17 @@ if __name__ == "__main__":
 		# we need to stop manual or autonomous motion
 		current_process.terminate() #we probably want a more elegent way of stopping, this may cause memory leaks
 
-		if command["type"] == "autonomous":
-			active_command = "autonomous"
+		if command["mode"] == "autonomous" or command["mode"] == "manual":
+			move.startMove(command)			
 
-			# multiprodcessing process for this???  
-			# can we make autonomous only perform one action at a time? below is what a multiprocessing process would look like
-			auton_process = Process(target=move.autonomous,args=(command["LOI"]))
-			auton_process.start() 
-
-			current_process = auton_process
-			
-
-			# monitor process
-			# tbc
-			
-		elif command["type"] == "manual":
-			# check for stop condition prior?
-
-			# multiprodcessing process for this???  
-			move.manual(command) #just send the whole dictionary?
-			#tbc
-
-		elif command["type"] == "photo":
+		elif command["mode"] == "photo":
 			# STOP recording 
 			# take pano photo
 			# begin recording 
 			#todo
 			pass
 
-		elif command["type"] == "stop":
+		elif command["mode"] == "stop":
 			# allow cild processes to stop on their own time (will finish motion)
 			uart.sendStop()
 			
