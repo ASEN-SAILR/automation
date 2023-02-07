@@ -14,33 +14,40 @@ print(cmd_dict['id'])
 import os
 
 class RoverComms:
-    def __init__(self,commandPath,telemPath):# -> None:
+    def __init__(self,commandPath,telemPath,cameraPath):# -> None:
         # member vars
         self.commandPath = commandPath
         self.telemPath = telemPath
+        self.cameraPath = cameraPath
         self.currCmdNum = 0
 
         # initialize stuff as needed
 
-        pass 
-
-    def isNewCommand(self):
+    #probably not needed now?
+    #def isNewCommand(self): 
         """
         checks for a new command in the command file
 
         input:
             none
         returns:
-            True if new command
+            command index if new command
             False if nothing new
         """
+    #    file = open(self.commandPath)
+    #    cmdNum = int(file.readline(1))
+    #    if cmdNum>self.currCmdNum:
+    #        return cmdNum
 
-    def readCommand(self): # -> dict:
+    #    return False
+
+    def readCommand(self): # -> dict or None:
+        
         """
         read command from commands text file.
         
-        Throw error if there are multiple new commands. 
-        Clear commands if this happens and send message to gruond station
+        **Throw error if there are multiple new commands. 
+        Clear commands if this happens and send message to ground station** maybe not, maybe just take the latest command?
 
         inputs:
             none
@@ -48,7 +55,21 @@ class RoverComms:
             dictionary of command (FORMAT TBD)
             None if there is no command
         """
-        pass
+        file = open(self.commandPath)
+        line = file.readline()
+        if int(line[0]) > self.currCmdNum+1:
+            #sendError("")
+            return
+
+        #if not error, increment currCmdNum and return a dictionary of command
+        self.currCmdNum += 1
+
+        lin = line.split()
+        
+        return {"mode" : lin[1],
+        "command" : lin[2],
+        "dist" : float(lin[3]),
+        "LOI" : lin[4].split(',')}
 
     def writeTelemetry(self,toWrite): # -> bool:
         """
@@ -57,7 +78,10 @@ class RoverComms:
         input:
             toWrite: telemetry to write to file (FORMAT TBD)
         """
-        pass
+
+        with open(self.telemPath, 'a') as f:
+            f.write('\n'+toWrite)
+        
 
     def syncOutbound(self,path):
         system_password = 'asen4018'
@@ -69,3 +93,7 @@ class RoverComms:
         os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
 
 
+comm = RoverComms("commandTest.txt","teleTest.txt",3)
+#print(comm.isNewCommand())
+comm.writeTelemetry('102,103')
+print(comm.readCommand())

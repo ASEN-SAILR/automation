@@ -1,0 +1,3 @@
+3 manual translation 1.09 -
+2 autonomous - - 102,105
+1 stop - -
