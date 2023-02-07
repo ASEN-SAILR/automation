@@ -12,7 +12,7 @@ class RoverGPS:
         self.tarCoor = tarCoor
         self.port = port
 
-    def bearingToTarget(currCoor): # -> float:
+    def bearingToTarget(self,currCoor): # -> float:
         """
         input: 
             currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
@@ -36,7 +36,7 @@ class RoverGPS:
         bearing = math.atan2(a,b) #in rad
         return bearing*180/math.pi #convert to deg
 
-    def distanceToTarget(currCoor,tarCoor): # -> float: 
+    def distanceToTarget(self,currCoor,tarCoor): # -> float: 
         """
         input: currCoor, tarCoor = [lat,lon], ie. [23.0231,-34.204] (object of floats)
         output: distance to target in meter (float)
@@ -59,7 +59,7 @@ class RoverGPS:
         meter = EarthRadiusMeter * c
         return meter;
 
-    def angleToTarget(currHeading): # -> float:
+    def angleToTarget(self,currHeading): # -> float:
         """
         input: 
             currHeading = current heading to target from magnetometer in deg (float)
@@ -67,7 +67,7 @@ class RoverGPS:
         output: 
             angle to target with respect to current heading in deg, positive mean to the right (float)
         """
-        return bearingToTarget(self.readGPS(),self.tarCoor)-currHeading
+        return self.bearingToTarget(self.readGPS(),self.tarCoor)-currHeading
 
     def readGPS(self):
 
