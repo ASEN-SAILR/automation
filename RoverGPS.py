@@ -5,13 +5,14 @@ import math
 from ublox_gps import UbloxGps
 
 class RoverGPS:
-    def __init__(self,port): # -> None:
+    def __init__(self,port,tarCoor): # -> None:
         #member vars
 
         #initialize stuff
+        self.tarCoor = tarCoor
         self.port = port
 
-    def bearingToTarget(currCoor,tarCoor): # -> float:
+    def bearingToTarget(currCoor): # -> float:
         """
         input: 
             currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
@@ -21,8 +22,8 @@ class RoverGPS:
         #input: currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
         #output: bearing in deg from north, ie. 89 (float)
         
-        lat1, lon1 = currCoor
-        lat2, lon2 = tarCoor
+        lat1, lon1 = self.readGPS()
+        lat2, lon2 = self.tarCoor
 
         deg2rad = math.pi/180
         lat1 = lat1*deg2rad
@@ -40,8 +41,8 @@ class RoverGPS:
         input: currCoor, tarCoor = [lat,lon], ie. [23.0231,-34.204] (object of floats)
         output: distance to target in meter (float)
         """
-        lat1, lon1 = currCoor
-        lat2, lon2 = tarCoor
+        lat1, lon1 = self.readGPS()
+        lat2, lon2 = self.tarCoor
 
         deg2rad = math.pi/180
         lat1 = lat1*deg2rad
@@ -58,7 +59,7 @@ class RoverGPS:
         meter = EarthRadiusMeter * c
         return meter;
 
-    def angleToTarget(currHeading,currCoor,tarCoor): # -> float:
+    def angleToTarget(currHeading): # -> float:
         """
         input: 
             currHeading = current heading to target from magnetometer in deg (float)
@@ -66,7 +67,7 @@ class RoverGPS:
         output: 
             angle to target with respect to current heading in deg, positive mean to the right (float)
         """
-        return bearingToTarget(currCoor,tarCoor)-currHeading
+        return bearingToTarget(self.readGPS(),self.tarCoor)-currHeading
 
     def readGPS(self):
 
@@ -74,13 +75,3 @@ class RoverGPS:
         gps = UbloxGps(port)
         geo = gps.geo_coords()
         return [geo.lon,geo.lat]
-
-
-#simulate main structure
-tarCoor = [23.1242,-45.0929] #input from user
-currCoor = getCoor() #read from GPS
-currHeading = getHeading() #read from magnetometer, in deg
-
-
-print("Angle to target:",angleToTarget(currHeading,currCoor,tarCoor)," degrees")
-print("Distance to target:",distanceToTarget(currCoor,tarCoor)," meters")
