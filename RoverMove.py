@@ -42,7 +42,7 @@ class RoverMove:
 		"""
 		if self.process.is_alive():
 			#TODO Throw error
-			pass
+			return
 
 		# start self.process for these
 
@@ -56,7 +56,7 @@ class RoverMove:
 
 		else:
 			# throw error?
-			pass
+			return
 
 	def stopMove(self) -> bool:
 		"""
@@ -76,7 +76,7 @@ class RoverMove:
 		return:
 			bool
 		"""
-		pass
+		return
 
 	### Autonomous Mode ###
 	def autonomous(self,LOI):
@@ -116,17 +116,19 @@ class RoverMove:
 				else:
 					break
 			while Status is "yellow":
-				here
+				#TODO
+				x = 0
 			while Status is "red":
-				here
+				#TODO
+				x = 0
 		
-	def check_desired_heading(MagHeading,DesHeading)
+	def check_desired_heading(MagHeading,DesHeading):
 		# checks if rover is pointing at LOI
 		BufferAngle = 5
-		if MagHeading > DesHeading - BufferAngle AND MagHeading < DesHeading + BufferAngle:
-			pass
-		else
-			fail
+		if (MagHeading > (DesHeading - BufferAngle)) and (MagHeading < (DesHeading + BufferAngle)):
+			return 1
+		else:
+			return 0
 	
 	def get_delta_rotation(Obstacles):
 		# priming variables
@@ -137,7 +139,7 @@ class RoverMove:
 		LeftValueY = 0
 		# determines angle to rotate to avoid obstacles
 		for Iteration in Obstacles:
-			if Iteration.X < 0
+			if Iteration.X < 0:
 			# takes most negative x value (left-most)
 				if Flag is 0:
 					LeftValueX = Iteration.X
@@ -167,7 +169,7 @@ class RoverMove:
 		Iteration_prev = 0
 		ValueY = 0
 		for Iteration in Obstacles:
-			if Iteration.Y > Iteration_prev
+			if Iteration.Y > Iteration_prev:
 				ValueY = Iteration.Y
 			Iteration_prev = Iteration.Y
 		BufferDistance = 1
@@ -189,7 +191,7 @@ class RoverMove:
 
 		"""
 
-		pass
+		return
 
 	def sendRotation(self,angle:float) -> bool:
 		"""
@@ -201,7 +203,7 @@ class RoverMove:
 			True if sent to teensy
 			False if something went wrong
 		"""
-		pass
+		return
 
 	def sendTranslation(self,distance:float) -> bool:
 		"""
@@ -213,4 +215,4 @@ class RoverMove:
 			True if sent to teensy
 			False if something went wrong
 		"""
-		pass
+		return
