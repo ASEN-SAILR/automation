@@ -71,7 +71,11 @@ class RoverGPS:
 
     def readGPS(self):
 
-        port = serial.Serial(self.port, baudrate=38400, timeout=1)
-        gps = UbloxGps(port)
+        gps = UbloxGps(self.port)
         geo = gps.geo_coords()
         return [geo.lon,geo.lat]
+
+port = serial.Serial('/dev/serial0', baudrate=38400, timeout=1)
+gps = RoverGPS(port,[12.02,34.42])
+while True:
+    gps.readGPS()
