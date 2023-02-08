@@ -11,16 +11,26 @@ print(cmd_dict['id'])
 # 2
 
 """
+
 import os
 
 class RoverComms:
-    def __init__(self,commandPath,telemPath,cameraPath):# -> None:
-        # member vars
-        self.commandPath = commandPath
-        self.telemPath = telemPath
-        self.cameraPath = cameraPath
+    def __init__(self,obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath):# -> None:
+
+        # onboard computer vars
+        # self.obcCommandPath = obcCommandPath not needed
+        self.obcTelemPath = obcTelemPath
+        self.obcVideoPath = obcVideoPath
+        self.obcImagePath = obcImagePath
         self.currCmdNum = 0
 
+        # ground station vars
+        # self.gs_ssh_password = gs_ssh_password #'asen4018'
+        # self.gs_ip = gs_ip #'192.168.56.102'
+
+        # self.gs_telem_path = gs_telem_path 
+        # self.gs_video_path = +':/root/comms-gs/test.txt'
+        # self.gs_image_path = +':/root/comms-gs/test.txt'
         # initialize stuff as needed
 
     #probably not needed now?
@@ -55,7 +65,10 @@ class RoverComms:
             dictionary of command (FORMAT TBD)
             None if there is no command
         """
-        file = open(self.commandPath)
+
+        with open(self.commandPath) as f:
+            file = f.read().splitlines()
+
         line = file.readline()
         if int(line[0]) > self.currCmdNum+1:
             #sendError("")
@@ -83,11 +96,7 @@ class RoverComms:
             f.write('\n'+toWrite)
         
 
-    def syncOutbound(self,path):
-        system_password = 'asen4018'
-        sender_path = '/root/comms-gs/test.txt'
-        receiver_ip = '192.168.56.102'
-        receiver_path = receiver_ip+':/root/comms-gs/test.txt'
+    def syncOutbound(self,):
 
         # os.system("sshpass -p '"+system_password+"' rsync -ave ssh /root/comms-gs/test.txt 192.168.56.102:/root/comms-gs/test.txt")
         os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
