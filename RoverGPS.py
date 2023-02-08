@@ -2,6 +2,7 @@
 
 import serial
 import math
+import time
 from ublox_gps import UbloxGps
 
 class RoverGPS:
@@ -75,7 +76,10 @@ class RoverGPS:
         geo = gps.geo_coords()
         return [geo.lon,geo.lat]
 
-port = serial.Serial('/dev/serial0', baudrate=38400, timeout=1)
+port = serial.Serial('/dev/ttyACM0', baudrate=38400, timeout=1)
 gps = RoverGPS(port,[12.02,34.42])
+
 while True:
-    gps.readGPS()
+    t = time.time()
+    print(gps.readGPS())
+    print(time.time()-t)
