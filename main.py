@@ -52,11 +52,14 @@ if __name__ == "__main__":
 	gs_video_path = gs_home_path+"videos"
 	gs_image_path = gs_home_path+"images"
 
+	#initialize all the classes
 	comms = RoverComms(obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path)
-
-	# start RoverMove 
+	gps = RoverGPS(comms)
+	lidar = RoverLidar() 
+	uart = RoverUART()
 	move = RoverMove(gps,lidar)
-	
+	cam = RoverCamera(comms)
+
 	# Variable that contains the active process: manual or autonomous
 	current_process = None
 
@@ -111,7 +114,7 @@ if __name__ == "__main__":
 			# will hold until a motion is complete or emergency stop command
 			# comes through from the ground station
 			command = comms.readCommand() #if user inputs command while moving, it will ignore
-										  #should exit this loop with command being None or emergency stop command
+										  #should exit this loop with command being None(and rover done action) or emergency stop command
 
 		#return to top of loop
 			

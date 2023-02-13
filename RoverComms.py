@@ -122,7 +122,7 @@ class RoverComms:
             return 0
 
 
-comm = RoverComms("commandTest.txt","teleTest.txt",'0','0','129.0.0.1',0,0,0)
+comm = RoverComms("commandTest.txt","teleTest.txt",'0','0','0','129.0.0.1','0','0','0')
 #print(comm.isNewCommand())
-comm.writeTelemetry('102,103')
+comm.writeTelemetry('102.123124,103.241214')
 print(comm.readCommand())
