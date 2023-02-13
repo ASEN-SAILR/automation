@@ -33,7 +33,7 @@ if __name__ == "__main__":
 	# start reading commands from commands log
 	commands_path = r"~/commands.txt"
 	telemetry_path = r"~/telemetry.txt"
-	comms = RoverComms(commands_path,telemetry_path9)
+	comms = RoverComms(commands_path,telemetry_path)
 
 	# start RoverMove 
 	move = RoverMove(gps,lidar)
