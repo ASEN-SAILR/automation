@@ -15,10 +15,14 @@ print(cmd_dict['id'])
 import os
 
 class RoverComms:
-    def __init__(self,obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath):# -> None:
+    def __init__(self,obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ip,system_password,sender_path,receiver_path):# -> None:
 
         # onboard computer vars
-        # self.obcCommandPath = obcCommandPath not needed
+        self.obcCommandPath = obcCommandPath  #not needed
+        self.gs_ip = gs_ip
+        self.system_password = system_password
+        self.sender_path = sender_path
+        self.receiver_path = receiver_path
         self.obcTelemPath = obcTelemPath
         self.obcVideoPath = obcVideoPath
         self.obcImagePath = obcImagePath
@@ -66,10 +70,11 @@ class RoverComms:
             None if there is no command
         """
 
-        with open(self.commandPath) as f:
+        with open(self.obcCommandPath) as f:
             file = f.read().splitlines()
-
-        line = file.readline()
+        print(file[0])
+        return
+        line = file[0]
 
         #probably not need to send error when multiple commands because we read the newest command instead of throwing error
 
@@ -86,7 +91,7 @@ class RoverComms:
         "dist" : float(lin[3]),
         "LOI" : lin[4].split(',')}
 
-    def writeTelemetry(self,toWrite): # -> bool:
+    def writeTelemetry(self,gpsCoor): # -> bool:
         """
         write telemetry to telemetry file
 
@@ -95,9 +100,9 @@ class RoverComms:
         """
 
         with open(self.obcTelemPath, 'a') as f:
-            f.write('\n'+toWrite)
+            f.write('\n'+str(self.checkConnection())+' '+gpsCoor)
 
-        syncOutbound(self.obcTelemPath)
+        #syncOutbound(self.obcTelemPath)
         
 
     def syncOutbound(self,): #return False if lose comm, True if successful
@@ -107,12 +112,14 @@ class RoverComms:
         os.system("sshpass -p '"+self.system_password+"' rsync -ave ssh "+self.sender_path+" "+self.receiver_path)
 
 
-
     def checkConnection(self,):
-        return (lambda a: True if 0 == a.system('ping '+ground_station_ip+' -n 3 -l 32 -w 3 > clear') else False)
-            
+        if 0 == os.system('ping '+self.gs_ip+' -c 3 -W 5'):
+            return 1
+        else:
+            return 0
 
-comm = RoverComms("commandTest.txt","teleTest.txt",3)
+
+comm = RoverComms("commandTest.txt","teleTest.txt",'0','0','129.0.0.1',0,0,0)
 #print(comm.isNewCommand())
 comm.writeTelemetry('102,103')
 print(comm.readCommand())
