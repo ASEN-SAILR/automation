@@ -71,12 +71,14 @@ class RoverComms:
             file = f.read().splitlines()
 
         line = file.readline()
-        if int(line[0]) > self.currCmdNum+1:
-            #sendError("")
-            return
 
-        #if not error, increment currCmdNum and return a dictionary of command
-        self.currCmdNum += 1
+        #probably not need to send error when multiple commands because we read the newest command instead of throwing error
+
+        if int(line[0]) == self.currCmdNum: #this means no new command
+            return None
+
+        #if new command found, update currCmdNum and return a dictionary of command
+        self.currCmdNum = int(line[0])
 
         lin = line.split()
         
@@ -93,8 +95,10 @@ class RoverComms:
             toWrite: telemetry to write to file (FORMAT TBD)
         """
 
-        with open(self.telemPath, 'a') as f:
+        with open(self.obcTelemPath, 'a') as f:
             f.write('\n'+toWrite)
+
+        syncOutbound(self.obcTelemPath)
         
 
     def syncTelem(self,):
@@ -108,6 +112,7 @@ class RoverComms:
     def syncImage(self,):
 
         os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
+
 
 
     def checkConnection(self,):
