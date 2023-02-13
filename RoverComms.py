@@ -103,9 +103,14 @@ class RoverComms:
     def syncOutbound(self,): #return False if lose comm, True if successful
 
         # os.system("sshpass -p '"+system_password+"' rsync -ave ssh /root/comms-gs/test.txt 192.168.56.102:/root/comms-gs/test.txt")
+
         os.system("sshpass -p '"+self.system_password+"' rsync -ave ssh "+self.sender_path+" "+self.receiver_path)
 
 
+
+    def checkConnection(self,):
+        return (lambda a: True if 0 == a.system('ping '+ground_station_ip+' -n 3 -l 32 -w 3 > clear') else False)
+            
 
 comm = RoverComms("commandTest.txt","teleTest.txt",3)
 #print(comm.isNewCommand())
