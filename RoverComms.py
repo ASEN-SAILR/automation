@@ -116,7 +116,7 @@ class RoverComms:
 
 
     def checkConnection(self,):
-        if 0 == os.system('ping '+self.gs_ip+' -n 3 -l 32 -w 3 > clear'):
+        if 0 == os.system('ping '+self.gs_ip+' -c 3 -W 5'):
             return True
         else: 
             return False

@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
 	# ground station comms vars
 	gs_ssh_password = "asen-sailr"
-	gs_ip = gs_ip #'192.168.56.102'
+	gs_ip = "192.168.56.102"
 	gs_home_path = "/home/ground-station/asen-sailr/"
 	gs_telem_path = gs_home_path+"telemetry.txt"
 	gs_video_path = gs_home_path+"videos"
