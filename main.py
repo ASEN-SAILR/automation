@@ -60,6 +60,10 @@ if __name__ == "__main__":
 	move = RoverMove(gps,lidar)
 	cam = RoverCamera(comms)
 
+	#start all processes that will be run on background - keep sending gps coors and keep recording and sending videos
+	gps.startTele()
+	cam.startRecording()
+
 	# Variable that contains the active process: manual or autonomous
 	current_process = None
 

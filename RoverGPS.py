@@ -3,15 +3,32 @@
 import serial
 import math
 import time
+import RoverComms
 from ublox_gps import UbloxGps
 
 class RoverGPS:
-    def __init__(self,port): # -> None:
+    def __init__(self,comms:RoverComms,port): # -> None:
         #member vars
 
         #initialize stuff
-        self.tarCoor = tarCoor
+        self.comms = comms
         self.port = port
+
+    def writeTele(self):
+        t = time.time()
+        while True:
+            if time.time()-t>5:
+                t = time.time()
+                comms.writeTelemetry(self.readGPS())
+
+    def startTele(self):
+        self.recordingProcess = Process(target=self.writeTele,args=None)
+        self.recordingProcess.start()
+
+    def stopTele(self):
+        self.recordingProcess = Process(target=self.writeTele,args=None)
+        self.recordingProcess.terminate()
+
 
     def bearingToTarget(self,tarCoor): # -> float:
         """
