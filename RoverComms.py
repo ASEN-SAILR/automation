@@ -15,10 +15,10 @@ print(cmd_dict['id'])
 import os
 
 class RoverComms:
-    def __init__(self,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path):# -> None:
+    def __init__(self,obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path):# -> None:
 
         # onboard computer vars
-        # self.obcCommandPath = obcCommandPath not needed
+        self.obcCommandPath = obcCommandPath
         self.obcTelemPath = obcTelemPath
         self.obcVideoPath = obcVideoPath
         self.obcImagePath = obcImagePath
@@ -98,7 +98,7 @@ class RoverComms:
         with open(self.obcTelemPath, 'a') as f:
             f.write('\n'+toWrite)
 
-        syncOutbound(self.obcTelemPath)
+        self.syncTelem()
         
 
     def syncTelem(self,):
@@ -116,7 +116,10 @@ class RoverComms:
 
 
     def checkConnection(self,):
-        return (lambda a: True if 0 == a.system('ping '+ground_station_ip+' -n 3 -l 32 -w 3 > clear') else False)
+        if 0 == os.system('ping '+self.gs_ip+' -n 3 -l 32 -w 3 > clear'):
+            return True
+        else: 
+            return False
             
 
 comm = RoverComms("commandTest.txt","teleTest.txt",3)
