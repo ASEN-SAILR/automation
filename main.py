@@ -31,9 +31,28 @@ if __name__ == "__main__":
 	gps = RoverGPS(gps_port) # more params?
 
 	# start reading commands from commands log
+	# leaving these in for testing on automation end but should be taken out
 	commands_path = r"~/commands.txt"
 	telemetry_path = r"~/telemetry.txt"
-	comms = RoverComms(commands_path,telemetry_path9)
+
+
+
+	# onboard computer comms vars
+	obcCommandPath = commands_path
+	obcTelemPath = telemetry_path
+	obcVideoPath = "~/video"
+	obcImagePath = "~/images"
+	currCmdNum = 0
+
+	# ground station comms vars
+	gs_ssh_password = "asen-sailr"
+	gs_ip = "192.168.56.102"
+	gs_home_path = "/home/ground-station/asen-sailr/"
+	gs_telem_path = gs_home_path+"telemetry.txt"
+	gs_video_path = gs_home_path+"videos"
+	gs_image_path = gs_home_path+"images"
+
+	comms = RoverComms(obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path)
 
 	# start RoverMove 
 	move = RoverMove(gps,lidar)

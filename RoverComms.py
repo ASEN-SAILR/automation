@@ -15,26 +15,23 @@ print(cmd_dict['id'])
 import os
 
 class RoverComms:
-    def __init__(self,obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ip,system_password,sender_path,receiver_path):# -> None:
-
+    def __init__(self,obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path):# -> None:
+    
         # onboard computer vars
-        self.obcCommandPath = obcCommandPath  #not needed
-        self.gs_ip = gs_ip
-        self.system_password = system_password
-        self.sender_path = sender_path
-        self.receiver_path = receiver_path
+        self.obcCommandPath = obcCommandPath
         self.obcTelemPath = obcTelemPath
         self.obcVideoPath = obcVideoPath
         self.obcImagePath = obcImagePath
         self.currCmdNum = 0
 
         # ground station vars
-        # self.gs_ssh_password = gs_ssh_password #'asen4018'
-        # self.gs_ip = gs_ip #'192.168.56.102'
+        self.gs_ssh_password = gs_ssh_password #'asen4018'
+        self.gs_ip = gs_ip #'192.168.56.102'
 
-        # self.gs_telem_path = gs_telem_path 
-        # self.gs_video_path = +':/root/comms-gs/test.txt'
-        # self.gs_image_path = +':/root/comms-gs/test.txt'
+        self.gs_telem_path = gs_telem_path 
+        self.gs_video_path = gs_video_path
+        self.gs_image_path = gs_image_path
+
         # initialize stuff as needed
 
     #probably not needed now?
@@ -102,14 +99,20 @@ class RoverComms:
         with open(self.obcTelemPath, 'a') as f:
             f.write('\n'+str(self.checkConnection())+' '+gpsCoor)
 
-        #syncOutbound(self.obcTelemPath)
+        self.syncTelem()
         
 
-    def syncOutbound(self,): #return False if lose comm, True if successful
+    def syncTelem(self,):
 
-        # os.system("sshpass -p '"+system_password+"' rsync -ave ssh /root/comms-gs/test.txt 192.168.56.102:/root/comms-gs/test.txt")
+        os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
 
-        os.system("sshpass -p '"+self.system_password+"' rsync -ave ssh "+self.sender_path+" "+self.receiver_path)
+    def syncVideo(self,):
+
+        os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
+
+    def syncImage(self,):
+
+        os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
 
 
     def checkConnection(self,):
