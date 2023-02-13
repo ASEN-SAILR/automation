@@ -134,7 +134,7 @@ class RoverCamera:
         
         # final output
         cv2.imwrite(self.photoPath+num2str(self.photoCounter)+".avi",output)
-        photoCounter++
+        self.photoCounter += 1
         # save output as .jpg
 
         #cv2.imshow('final result',output)

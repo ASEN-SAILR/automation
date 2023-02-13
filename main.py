@@ -81,17 +81,18 @@ if __name__ == "__main__":
 			pass
 
 		elif command["mode"] == "stop":
-			# allow cild processes to stop on their own time (will finish motion)
+			# allow child processes to stop on their own time (will finish motion)
 			uart.sendStop()
 			
 			# skip over rest of loop and wait for command
 			continue
 
-
-		while move.actionInProgress() and not comms.isNewCommand():
-			# will hold until a motion is complete or a new command 
+		command = comms.readCommand()
+		while move.actionInProgress() and command["mode"] != 'emergency_stop':
+			# will hold until a motion is complete or emergency stop command
 			# comes through from the ground station
-			pass
+			command = comms.readCommand() #if user inputs command while moving, it will ignore
+										  #should exit this loop with command being None or emergency stop command
 
 		#return to top of loop
 			
