@@ -1,16 +1,48 @@
 # Luke
-class RoverLidar:
-    def __init__(self) -> None:
-        # member vars
+# https://github.com/adafruit/Adafruit_CircuitPython_RPLIDAR
 
-        # initialize stuff
+from adafruit_rplidar import RPLidar 
+class RoverLidar:
+    def __init__(self, port:str, threshold:int, start_motor:bool=True, timeout:int=3,) -> None:
+        # member vars
+        self.port = port
+        self._lidar = RPLidar(None,port,timeout)
+
+        
+
+        if not start_motor: self.stopMotor() #RPLidar starts motor by default
+
+        # begin lidar rotation
 
         pass
+
+    def startMotor(self):
+        self._lidar.start_motor()
+
+    def stopMotor(self):
+        self._lidar.stop_motor()
+
+    def startSensing(self):
+        self._lidar.start()
+
+    def stopSensing(self):
+        self._lidar.stop()
+
+    def getSingleScan(self):
+        measurements = self._lidar.iter_scans()
+        return list(measurements)
 
     def getMap(self):
         """
         returns a 2d array of "objects"
         """
+        if self._lidar.motor_running == False:
+            self.startMotor()
+
+        self.startSensing()
+        scan = self.getSingleScan()
+        
+
         pass
 
     def getObstacles(self):
