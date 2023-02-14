@@ -81,6 +81,8 @@ class RoverLidar:
         # TODO: ensure the LiDAR stops
         self.stopSensing()
 
+        #TODO: turn scans into map
+
 
 
 
