@@ -16,7 +16,7 @@ if __name__ == "__main__":
 	#initialize logging
 	logging.basicConfig(
         filename='rover_log.log',
-        format='%(asctime)s %(levelname)-8s %(message)s',
+        format='%(asctime)s %(levelname)-8s %(filename)s:%(lineno)-3s -   %(message)s',
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -130,5 +130,4 @@ if __name__ == "__main__":
 
 		#return to top of loop
 			
-
 
