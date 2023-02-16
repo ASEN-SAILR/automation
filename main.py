@@ -7,11 +7,19 @@ import RoverGPS
 import RoverLidar
 import RoverCamera
 import RoverUART
+import logging
 from multiprocessing import Process
 
 DISTANCE = 1 #distance to move in a straight line
 
 if __name__ == "__main__":
+	#initialize logging
+	logging.basicConfig(
+        filename='rover_log.log',
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S')
+
 	# start video recording (class)
 	camPort = r"/dev/tty/0"
 	videoPath = r"~/videos/" #example path
@@ -20,11 +28,11 @@ if __name__ == "__main__":
 
 	# start uart comms with Teensy
 	teensy_port = r"/dev/tty/1"
-	uart = RoverUART(teensyPort,baud=115200) 
+	uart = RoverUART(teensy_port,baud=115200) 
 
 	# start lidar
 	lidar_port = r"/dev/tty/2"
-	lidar = RoverLidar(lidarPort) # more params?
+	lidar = RoverLidar(lidar_port) # more params?
 
 	# start gps 
 	gps_port = r"/dev/tty/2"
