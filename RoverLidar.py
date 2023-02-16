@@ -78,33 +78,44 @@ class RoverLidar:
     def scanToMap(self,scan):
         _,angles, distances = self.splitScan(scan)
 
-        x,y = radialToCart()
+        x_points,y_points = radialToCart(scan)
         x_mag = self.x_lim[1]-self.x_lim[0]
         y_mag = self.y_lim[1]-self.y_lim[0]
     
         # the following array is a 1D array of bools. True means associated point is within x_lim and y_lim.
-        truth_vals = np.all(np.vstack((x>x_lim[0], x<x_lim[1], y>y_lim[0], y<y_lim[1])),0)
+        truth_vals = np.all(np.vstack((x>self.x_lim[0], x<self.x_lim[1], y>self.y_lim[0], y<self.y_lim[1])),0)
         
-        # points that are false in `truth_vals` are removed
-        x_rem = x[truth_vals]
-        y_rem = y[truth_vals]
+        # removes points outside of x_lim and y_lim
+        x_chopped = x_points[truth_vals]
+        y_chopped = y_points[truth_vals]
         
-        # create 2d array for objects 
-        grid = np.zeros([int(x_mag//resolution),int(y_mag//resolution)])
 
-        # bins the x and y values into integer bins
-        x_binned = [val//resolution for val in x_rem]
-        y_binned = [val//resolution for val in y_rem]
+        # puts hit counts into integer coordnitates 
+        # ex: x,y = (0.1,0.2) would be binned into (1,2) if the resolution was 0.1
+        x_binned = [val//self.resolution for val in x_chopped]
+        y_binned = [val//self.resolution for val in y_chopped]
 
-        # this returns unique points and their counts
-        vals,counts = np.unique(list(zip(x_binned,y_binned)),return_counts=True,axis=0)
+        # this returns unique points (defined by coords in x_binned and y_binned) and their counts
+        coords,counts = np.unique(list(zip(x_binned,y_binned)),return_counts=True,axis=0)
 
         # objects are points where there are more hits than the threshold 
-        objects = np.array(vals[counts>threshold], dtype=np.int_)
+        objects = np.array(coords[counts>self.threshold], dtype=np.int_)
     
+        # create 2d array for objects 
+        x_bins = int(x_mag//self.resolution)
+        y_bins = int(y_mag//self.resolution)
+        grid = np.zeros([x_bins,y_bins])
+
         # fills the grid with ones where there is an "object". 
         # Looks complicated because `objects` contains negative numbers which cannot be indices
-        grid[objects[:,0]-(int(x_lim[0]/resolution)),objects[:,1]-(int(y_lim[0]/resolution))] = 1
+        grid[objects[:,0]-(int(self.x_lim[0]/self.resolution)),objects[:,1]-(int(self.y_lim[0]/self.resolution))] = 1
+
+        #get coordiantes of bins in final array
+        x = np.arange(start=self.x_lim[0], stop=self.x_lim[1])
+        y = np.arange(start=self.y_lim[0], stop=self.y_lim[1])
+        xx,yy = np.meshgrid(x,y)
+
+        return xx,yy,grid
 
 
     def getMap(self):
