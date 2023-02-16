@@ -1,6 +1,7 @@
 # Luke
 # https://github.com/adafruit/Adafruit_CircuitPython_RPLIDAR
 import numpy as np
+import logging
 from adafruit_rplidar import RPLidar 
 
 def radialToCart(ang:np.ndarray, dist:np.ndarray, type = "rad"):
@@ -12,7 +13,7 @@ def radialToCart(ang:np.ndarray, dist:np.ndarray, type = "rad"):
     return x, y
 
 class RoverLidar:
-    def __init__(self, port:str, start_motor:bool=True, timeout:int=3,) -> None:
+    def __init__(self, port:str, start_motor:bool=True, timeout:int=3) -> None:
         # member vars
         self.port = port
         self._lidar = RPLidar(None,port,timeout)
@@ -23,9 +24,12 @@ class RoverLidar:
         self.y_lim = None
         self.red_lim = None
         self.resolution = None
+        self._map_params_set = False 
 
         if not start_motor: 
             self.stopMotor() #RPLidar starts motor by default
+
+        logging.info("RoverLidar __init__: RoverLidar initialized")
 
 
     def setMapParams(self, x_lim:tuple[float], y_lim:tuple[float], threshold:int, 
@@ -48,6 +52,9 @@ class RoverLidar:
         self.threshold = threshold
         self.red_lim = red_lim
         self.resolution = resolution
+        self._map_params_set = True
+
+        logging.info("RoverLidar setMapParams: map paramaters set")
 
     def startMotor(self):
         self._lidar.start_motor()
@@ -126,7 +133,12 @@ class RoverLidar:
             m x n 2D bool array with side lengths defined by x_lim and y_lim. True where 
             obstacles are deteceted, false otherwise.
         """
+        if not self._map_params_set: 
+            logging.critical("RoverLidar getMap: Map paramaters not set. Use RoverLidar.setMapParams() to set map paramters.")
+            raise Exception("RoverLidar getMap: Map paramaters not set. Use RoverLidar.setMapParams() to set map paramters.")
+
         if self._lidar.motor_running == False:
+            
             self.startMotor()
 
         # start LiDAR laser and collection of data
@@ -140,6 +152,7 @@ class RoverLidar:
         self.stopSensing()
 
         #TODO: turn scans into map
+        xx,yy,grid = self.scanToMap(scan=scan)
 
 
 
