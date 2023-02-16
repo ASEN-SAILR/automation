@@ -1,7 +1,16 @@
 # Luke
 # https://github.com/adafruit/Adafruit_CircuitPython_RPLIDAR
-
+import numpy as np
 from adafruit_rplidar import RPLidar 
+
+def radialToCart(ang:np.ndarray, dist:np.ndarray, type = "rad"):
+    if type == "deg":
+        ang = [val*3.1415/180 for val in ang]
+
+    x = np.cos(ang)*dist
+    y = np.sin(ang)*dist
+    return x, y
+
 class RoverLidar:
     def __init__(self, port:str, start_motor:bool=True, timeout:int=3,) -> None:
         # member vars
@@ -58,7 +67,45 @@ class RoverLidar:
         TODO: how many rotations does this correspond to?
         """
         measurements = self._lidar.iter_scans()
-        return list(measurements)
+        return np.array(list(measurements))
+
+    def splitScan(self, scan):
+        qualitites = scan[:,0]
+        angles = scan[:,1]
+        distances = scan[:,2]
+        return qualitites,angles,distances
+
+    def scanToMap(self,scan):
+        _,angles, distances = self.splitScan(scan)
+
+        x,y = radialToCart()
+        x_mag = self.x_lim[1]-self.x_lim[0]
+        y_mag = self.y_lim[1]-self.y_lim[0]
+    
+        # the following array is a 1D array of bools. True means associated point is within x_lim and y_lim.
+        truth_vals = np.all(np.vstack((x>x_lim[0], x<x_lim[1], y>y_lim[0], y<y_lim[1])),0)
+        
+        # points that are false in `truth_vals` are removed
+        x_rem = x[truth_vals]
+        y_rem = y[truth_vals]
+        
+        # create 2d array for objects 
+        grid = np.zeros([int(x_mag//resolution),int(y_mag//resolution)])
+
+        # bins the x and y values into integer bins
+        x_binned = [val//resolution for val in x_rem]
+        y_binned = [val//resolution for val in y_rem]
+
+        # this returns unique points and their counts
+        vals,counts = np.unique(list(zip(x_binned,y_binned)),return_counts=True,axis=0)
+
+        # objects are points where there are more hits than the threshold 
+        objects = np.array(vals[counts>threshold], dtype=np.int_)
+    
+        # fills the grid with ones where there is an "object". 
+        # Looks complicated because `objects` contains negative numbers which cannot be indices
+        grid[objects[:,0]-(int(x_lim[0]/resolution)),objects[:,1]-(int(y_lim[0]/resolution))] = 1
+
 
     def getMap(self):
         """
