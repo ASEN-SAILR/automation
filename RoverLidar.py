@@ -54,38 +54,50 @@ class RoverLidar:
         self.resolution = resolution
         self._map_params_set = True
 
-        logging.info("RoverLidar setMapParams: map paramaters set")
+        if ((x_lim[1]-x_lim[0])/resolution != int((x_lim[1]-x_lim[0])/resolution)):
+            logging.warning(f"The limits defined by x_lim ({x_lim}) are not evenly dividable by the resoltion ({resolution}). Not the end of the world but bins will have a slightly different spacing.")
+
+        if ((y_lim[1]-y_lim[0])/resolution != int((y_lim[1]-y_lim[0])/resolution)):
+            logging.warning(f"The limits defined by y_lim ({y_lim}) are not evenly dividable by the resoltion ({resolution}). Not the end of the world but bins will have a slightly different spacing.")
+
+        logging.debug("RoverLidar setMapParams: map paramaters set")
 
     def startMotor(self):
-        self._lidar.start_motor()
+        val = self._lidar.start_motor()
+        logging.debug(f"motor started with return value of {val}")
 
     def stopMotor(self):
-        self._lidar.stop_motor()
+        val = self._lidar.stop_motor()
+        logging.debug(f"motor stopped with return value of {val}")
 
     def startSensing(self):
-        self._lidar.start()
+        val = self._lidar.start()
+        logging.debug(f"sensing started with raturn value of {val}")
 
     def stopSensing(self):
-        self._lidar.stop()
+        val = self._lidar.stop()
+        logging.debug(f"sensing stopped with return value of {val}")
 
     def getSingleScan(self) -> list[tuple]:
         """
         Gets measurements from a single call to _lidar.iter_scans()
         TODO: how many rotations does this correspond to?
         """
-        measurements = self._lidar.iter_scans()
-        return np.array(list(measurements))
+        measurements = np.array(list(self._lidar.iter_scans()))
+        logging.debug(f"`measurements` has dimensions of {measurements.shape}")
+        return measurements
 
     def splitScan(self, scan):
         qualitites = scan[:,0]
         angles = scan[:,1]
         distances = scan[:,2]
+        logging.debug(f"splitScan ran. `distances` has length {len(distances)}")
         return qualitites,angles,distances
 
     def scanToMap(self,scan):
-        _,angles, distances = self.splitScan(scan)
+        _, angles, distances = self.splitScan(scan)
 
-        x_points,y_points = radialToCart(scan)
+        x_points,y_points = radialToCart(ang=angles, dist=distances)
         x_mag = self.x_lim[1]-self.x_lim[0]
         y_mag = self.y_lim[1]-self.y_lim[0]
     
@@ -107,6 +119,7 @@ class RoverLidar:
 
         # objects are points where there are more hits than the threshold 
         objects = np.array(coords[counts>self.threshold], dtype=np.int_)
+        logging.info(f"there were {len(objects)} objects detected with a threshold of {self.threshold} and resoluton of {self.resolution}")
     
         # create 2d array for objects 
         x_bins = int(x_mag//self.resolution)
@@ -122,6 +135,7 @@ class RoverLidar:
         y = np.arange(start=self.y_lim[0], stop=self.y_lim[1])
         xx,yy = np.meshgrid(x,y)
 
+        logging
         return xx,yy,grid
 
 
