@@ -4,7 +4,7 @@ import numpy as np
 import logging
 from adafruit_rplidar import RPLidar 
 
-def radialToCart(ang:np.ndarray, dist:np.ndarray, type = "rad"):
+def radialToCart(angl, dist:np.ndarray, type = "rad"):
     if type == "deg":
         ang = [val*3.1415/180 for val in ang]
 
@@ -32,8 +32,8 @@ class RoverLidar:
         logging.info("RoverLidar __init__: RoverLidar initialized")
 
 
-    def setMapParams(self, x_lim:tuple[float], y_lim:tuple[float], threshold:int, 
-                    red_lim:tuple[float] , resolution:float):
+    def setMapParams(self, x_lim:tuple, y_lim:tuple, threshold:int, 
+            red_lim:tuple, resolution:float):
         """
         Sets paramaters for getting the object map.
         Assumed body X axis points forward, Y out the right side, Z down
@@ -78,7 +78,7 @@ class RoverLidar:
         val = self._lidar.stop()
         logging.debug(f"sensing stopped with return value of {val}")
 
-    def getSingleScan(self) -> list[tuple]:
+    def getSingleScan(self) -> list:
         """
         Gets measurements from a single call to _lidar.iter_scans()
         TODO: how many rotations does this correspond to?
