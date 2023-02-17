@@ -4,8 +4,14 @@ import sys
 sys.path.append('../.')
 
 import RoverLidar
+import logging
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        filename='lidar_log.log',
+        format='%(asctime)s %(levelname)-8s %(filename)s:%(lineno)-3s %(funcName)10s-   %(message)s',
+        level=logging.DEBUG,
+        datefmt='%Y-%m-%d %H:%M:%S')
     lidar_port = "/dev/tty/USB0"
     lidar = RoverLidar(port = lidar_port)
     lidar.setMapParams(
