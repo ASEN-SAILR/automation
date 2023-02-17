@@ -156,18 +156,18 @@ class RoverLidar:
             self.startMotor()
 
         # start LiDAR laser and collection of data
-        self.startSensing()
+        #self.startSensing()
 
         # collect data from lidar
         scan = self.getSingleScan()
 
         # stop the LiDAR sensing, keep motor running
         # TODO: ensure the LiDAR stops
-        self.stopSensing()
+        #self.stopSensing()
 
         #TODO: turn scans into map
         xx,yy,grid = self.scanToMap(scan=scan)
-
+        return xx,yy,grid
 
 
 
