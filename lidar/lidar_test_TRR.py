@@ -15,7 +15,10 @@ def radialToCart(ang,dist,type = "rad"):
 
 # Setup the RPLidar
 PORT_NAME = 'COM9'
+SCAN_TIME = 2
 lidar = RPLidar(None, PORT_NAME, timeout=3)
+
+
 
 # used to scale data to fit on the screen
 max_distance = 0
@@ -23,21 +26,30 @@ max_distance = 0
 def process_data(data):
     print(data)
 
+scan_time = 2
+
 scan_data = np.array([0]*360)
 all_scans = list([])
 try:
 #    print(lidar.get_info())
     count = 0
-    for scan in lidar.iter_scans():
-        for (_, angle, distance) in scan:
-            pass
-        all_scans.append(scan)
-        print(f"scan {count}")
+    while count<20:
         count+=1
+        start_time = time.time()
+        scan = []
+        for temp_scan in lidar.iter_scans():
+            if(start_time+scan_time<time.time()):
+                break
+            # print(temp_scan)
+        
+            for (_, angle, distance) in temp_scan:
+                pass
+            scan.extend(temp_scan)
+            
+        print(f"scan {count}")
         np.save(f"TRR_scan_{count}.npy",np.array(scan))
-        time.sleep(1)
-        if count>20:
-            break
+        all_scans.append(scan)
+
 
 except KeyboardInterrupt:
     print("Didn't get data, maybe LiDar is disconnected")
