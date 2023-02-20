@@ -18,7 +18,7 @@ class RoverCamera:
         # initialize stuff
     #    pass
 
-    def __init(self,comms:RoverComms,port,vid_length,photoPath,photoResolution,videoPath,fps,videoResolution):
+    def __init(self,comms:RoverComms,port:list,vid_length:int,photoPath:str,photoResolution:tuple,videoPath:str,fps:int,videoResolution:tuple):
         self.port = port #camera 1 2 3
         self.comms = comms
     #for photo

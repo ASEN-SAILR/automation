@@ -7,26 +7,27 @@ import RoverComms
 from ublox_gps import UbloxGps
 
 class RoverGPS:
-    def __init__(self,comms:RoverComms,port): # -> None:
+    def __init__(self,comms:RoverComms,port:str): # -> None:
         #member vars
 
         #initialize stuff
         self.comms = comms
         self.port = port
 
-    def writeTele(self):
+    def readAndWriteAndSendTele(self):
         t = time.time()
         while True:
-            if time.time()-t>5:
-                t = time.time()
-                comms.writeTelemetry(self.readGPS())
+            gps = UbloxGps(self.port)
+            geo = gps.geo_coords() #read GPS
+            coor = [geo.lon,geo.lat]
+            self.comms.writeAndSendTelemetry(coor) #write and send
 
     def startTele(self):
-        self.recordingProcess = Process(target=self.writeTele,args=None)
+        self.recordingProcess = Process(target=self.readAndWriteAndSendTele,args=None)
         self.recordingProcess.start()
 
     def stopTele(self):
-        self.recordingProcess = Process(target=self.writeTele,args=None)
+        self.recordingProcess = Process(target=self.readAndWriteAndSendTele,args=None)
         self.recordingProcess.terminate()
 
 
@@ -86,11 +87,10 @@ class RoverGPS:
         """
         return self.bearingToTarget(self.readGPS(),tarCoor)-currHeading
 
-    def readGPS(self):
-
-        gps = UbloxGps(self.port)
-        geo = gps.geo_coords()
-        return [geo.lon,geo.lat]
+    def getGPS(self):
+        with open(self.comms.obcTelemPath) as f:
+            file = f.read().splitlines()
+        return file[0]
 
 port = serial.Serial('/dev/ttyACM0', baudrate=38400, timeout=1)
 gps = RoverGPS(port,[12.02,34.42])

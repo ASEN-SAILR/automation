@@ -70,7 +70,7 @@ class RoverComms:
         with open(self.obcCommandPath) as f:
             file = f.read().splitlines()
         print(file[0])
-        return
+
         line = file[0]
 
         #probably not need to send error when multiple commands because we read the newest command instead of throwing error
@@ -97,7 +97,7 @@ class RoverComms:
         """
 
         with open(self.obcTelemPath, 'a') as f:
-            f.write('\n'+str(self.checkConnection())+' '+gpsCoor)
+            f.write('\n'+' '+gpsCoor)
 
         self.syncTelem()
         
