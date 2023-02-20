@@ -1,6 +1,7 @@
 # Luke
 # https://github.com/adafruit/Adafruit_CircuitPython_RPLIDAR
 import numpy as np
+import time
 import logging
 from adafruit_rplidar import RPLidar 
 
@@ -81,11 +82,42 @@ class RoverLidar:
     def getSingleScan(self) -> list:
         """
         Gets measurements from a single call to _lidar.iter_scans()
+        kinda sucks don't use.
         TODO: how many rotations does this correspond to?
         """
-        measurements = np.array(list(self._lidar.iter_scans()))
-        logging.debug(f"`measurements` has dimensions of {measurements.shape}")
-        return measurements
+        scan = []
+        for temp_scan in self._lidar.iter_scans():           
+            
+            #I don't think the following for loop is needed 
+            for (_, angle, distance) in temp_scan:
+                pass
+            scan = temp_scan
+            break
+        scan = np.ndarray(scan)
+        logging.warning("This method kinda sucks. Use RoverLidar.getTimedScan instead.")
+        logging.debug(f"`measurements` has dimensions of {scan.shape}")
+        return scan
+    
+    def getTimedScan(self, scan_time):
+        """
+        scans for a certian amount of time. Actually isn't 
+        going to be super accurate in terms of how long it 
+        scans for beacuse self._lidar.iter_scans() takes a 
+        variable amount of time.
+        """
+        start_time = time.time()
+        scan = []
+        for temp_scan in self._lidar.iter_scans():
+            if(start_time+scan_time<time.time()):
+                break
+            # print(temp_scan)
+        
+            for (_, angle, distance) in temp_scan:
+                pass
+            scan.extend(temp_scan)
+        scan = np.ndarray(scan)
+        logging.debug(f"`measurements` has dimensions of {scan.shape}")
+        return scan
 
     def splitScan(self, scan):
         qualitites = scan[:,0]
@@ -159,7 +191,7 @@ class RoverLidar:
         self.startSensing()
 
         # collect data from lidar
-        scan = self.getSingleScan()
+        scan = self.getTimedScan(1) #scans for 1 second 
 
         # stop the LiDAR sensing, keep motor running
         # TODO: ensure the LiDAR stops
