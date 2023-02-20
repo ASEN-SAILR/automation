@@ -2,17 +2,35 @@
 
 import serial
 import math
+import time
+import RoverComms
 from ublox_gps import UbloxGps
 
 class RoverGPS:
-    def __init__(self,port,tarCoor): # -> None:
+    def __init__(self,comms:RoverComms,port): # -> None:
         #member vars
 
         #initialize stuff
-        self.tarCoor = tarCoor
+        self.comms = comms
         self.port = port
 
-    def bearingToTarget(self,currCoor): # -> float:
+    def writeTele(self):
+        t = time.time()
+        while True:
+            if time.time()-t>5:
+                t = time.time()
+                comms.writeTelemetry(self.readGPS())
+
+    def startTele(self):
+        self.recordingProcess = Process(target=self.writeTele,args=None)
+        self.recordingProcess.start()
+
+    def stopTele(self):
+        self.recordingProcess = Process(target=self.writeTele,args=None)
+        self.recordingProcess.terminate()
+
+
+    def bearingToTarget(self,tarCoor): # -> float:
         """
         input: 
             currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
@@ -23,7 +41,7 @@ class RoverGPS:
         #output: bearing in deg from north, ie. 89 (float)
         
         lat1, lon1 = self.readGPS()
-        lat2, lon2 = self.tarCoor
+        lat2, lon2 = tarCoor
 
         deg2rad = math.pi/180
         lat1 = lat1*deg2rad
@@ -36,13 +54,13 @@ class RoverGPS:
         bearing = math.atan2(a,b) #in rad
         return bearing*180/math.pi #convert to deg
 
-    def distanceToTarget(self,currCoor,tarCoor): # -> float: 
+    def distanceToTarget(self,tarCoor): # -> float: 
         """
         input: currCoor, tarCoor = [lat,lon], ie. [23.0231,-34.204] (object of floats)
         output: distance to target in meter (float)
         """
         lat1, lon1 = self.readGPS()
-        lat2, lon2 = self.tarCoor
+        lat2, lon2 = tarCoor
 
         deg2rad = math.pi/180
         lat1 = lat1*deg2rad
@@ -59,15 +77,14 @@ class RoverGPS:
         meter = EarthRadiusMeter * c
         return meter;
 
-    def angleToTarget(self,currHeading): # -> float:
+    def angleToTarget(self,tarCoor,currHeading): # -> float:
         """
         input: 
             currHeading = current heading to target from magnetometer in deg (float)
-            currCoor, tarCoor = current and target coordinate [lat,lon], ie. [23.0231,-34.204] (object of strings)
         output: 
             angle to target with respect to current heading in deg, positive mean to the right (float)
         """
-        return self.bearingToTarget(self.readGPS(),self.tarCoor)-currHeading
+        return self.bearingToTarget(self.readGPS(),tarCoor)-currHeading
 
     def readGPS(self):
 
@@ -75,7 +92,10 @@ class RoverGPS:
         geo = gps.geo_coords()
         return [geo.lon,geo.lat]
 
-port = serial.Serial('/dev/serial0', baudrate=38400, timeout=1)
+port = serial.Serial('/dev/ttyACM0', baudrate=38400, timeout=1)
 gps = RoverGPS(port,[12.02,34.42])
+
 while True:
-    gps.readGPS()
+    t = time.time()
+    print(gps.readGPS())
+    print(time.time()-t)

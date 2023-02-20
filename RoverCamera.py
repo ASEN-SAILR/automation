@@ -4,6 +4,7 @@ from multiprocessing import Process
 import cv2
 import numpy as np
 import time
+import RoverComms
 
 class RoverCamera:
     #def __init__(self, port, storage_path, vid_length) -> None:
@@ -17,27 +18,18 @@ class RoverCamera:
         # initialize stuff
     #    pass
 
-    def __init(self,port,storage_path,vid_length):
+    def __init(self,comms:RoverComms,port,vid_length,photoPath,photoResolution,videoPath,fps,videoResolution):
         self.port = port #camera 1 2 3
-        self.storage_path = storage_path
+        self.comms = comms
+    #for photo
         self.vid_length = vid_length #second
-
-
-    def setPhotoSetting(self,photoPath,resolution):
-        """
-        setter for photo paramaters
-        """
         self.photoPath = photoPath
         self.photoCounter = 0
-        self.photoResolution = resolution
-
-    def setVideoSetting(self,videoPath,fps,resolution):
-        """
-        setter for video paramters
-        """
+        self.photoResolution = photoResolution
+    #for video
         self.videoPath = videoPath
         self.fps = fps
-        self.videoResolution = resolution
+        self.videoResolution = videoResolution
         self.videoCounter = 0
 
     def _record(self):
@@ -61,6 +53,7 @@ class RoverCamera:
 
         out.release() #stop recording and write video file into path
         cap.release() #turn off camera
+        comms.syncVideo()
 
         # Destroy all the windows
         #cv2.destroyAllWindows()
@@ -134,8 +127,9 @@ class RoverCamera:
         
         # final output
         cv2.imwrite(self.photoPath+num2str(self.photoCounter)+".avi",output)
-        photoCounter++
+        self.photoCounter += 1
         # save output as .jpg
+        comms.syncImage()
 
         #cv2.imshow('final result',output)
         #cv2.waitKey(0)
