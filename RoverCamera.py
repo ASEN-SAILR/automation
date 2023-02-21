@@ -1,7 +1,7 @@
 # https://www.turing.com/kb/python-multiprocessing-vs-multithreading
 # suphakan
 from multiprocessing import Process
-import cv2
+#import cv2
 import numpy as np
 import time
 import RoverComms
@@ -18,19 +18,19 @@ class RoverCamera:
         # initialize stuff
     #    pass
 
-    def __init(self,comms:RoverComms,port,vid_length,photoPath,photoResolution,videoPath,fps,videoResolution):
+    def __init__(self,comms:RoverComms,port:list,vid_length:int,photoPath:str,photoResolution:tuple,videoPath:str,fps:int,videoResolution:tuple):
         self.port = port #camera 1 2 3
         self.comms = comms
     #for photo
         self.vid_length = vid_length #second
         self.photoPath = photoPath
-        self.photoCounter = 0
+        self.photoCounter = 0 #this will be on name of new photo
         self.photoResolution = photoResolution
     #for video
         self.videoPath = videoPath
         self.fps = fps
         self.videoResolution = videoResolution
-        self.videoCounter = 0
+        self.videoCounter = 0 #this will be on name of new video
 
     def _record(self):
         """
@@ -41,7 +41,7 @@ class RoverCamera:
         cap=cv2.VideoCapture(self.port[0]) #port one
         #"desktop/:C/test" + "0" + ".avi"
         out = cv2.VideoWriter(self.videoPath+num2str(self.videoCounter)+".avi",cv2.VideoWriter_fourcc('M','J','P','G'),self.fps, self.videoResolution)
-        videoCounter++
+        videoCounter+=videoCounter
 
         start = time.time()
 
