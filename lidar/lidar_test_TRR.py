@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import time
 #https://github.com/SkoltechRobotics/rplidar
 
+NAME = "TRR_scan_20230221_trash_"
+
 def radialToCart(ang,dist,type = "rad"):
     if type == "deg":
         ang = [val*3.1415/180 for val in ang]
@@ -17,6 +19,8 @@ def radialToCart(ang,dist,type = "rad"):
 PORT_NAME = 'COM9'
 SCAN_TIME = 2
 lidar = RPLidar(None, PORT_NAME, timeout=3)
+# lidar.reset()
+time.sleep(1)
 
 
 
@@ -26,14 +30,14 @@ max_distance = 0
 def process_data(data):
     print(data)
 
-scan_time = 2
+scan_time = 1
 
 scan_data = np.array([0]*360)
 all_scans = list([])
 try:
 #    print(lidar.get_info())
     count = 0
-    while count<20:
+    while count<15:
         count+=1
         start_time = time.time()
         scan = []
@@ -47,7 +51,7 @@ try:
             scan.extend(temp_scan)
             
         print(f"scan {count}")
-        np.save(f"TRR_scan_{count}.npy",np.array(scan))
+        np.save(os.path.join(r"C:\\Users\\luker\\Documents\\repos\\SAILR\\automation\\lidar\\data",f"{NAME}{count}.npy"),np.array(scan))
         all_scans.append(scan)
 
 
@@ -70,13 +74,13 @@ for i,scan in enumerate(all_scans):
     #plot
     fig, ax = plt.subplots(figsize=(8,8))
     plt.scatter(x,y);
-    ax.set_title(f'TTR Test 20230217 #A{i}', fontsize=18)
+    ax.set_title(f"{NAME}{i}", fontsize=18)
     ax.set_xlabel('x', fontsize=14)
     ax.set_ylabel('y', fontsize=14)
     ax.grid()
     ax.set_aspect('equal')
-    plt.savefig(f"TTR Test 20230217 #A{i}.jpg",dpi=200)
-
+    plt.savefig(os.path.join(r"C:\\Users\\luker\Documents\\repos\\SAILR\\automation\\lidar\\images",f"{NAME}{i}.jpg"),dpi=200)
+    plt.close(fig)
 
 
 #stop (disconnects, but doesn't turn it off, idk why)
