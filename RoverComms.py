@@ -15,8 +15,7 @@ print(cmd_dict['id'])
 import os
 
 class RoverComms:
-    def __init__(self,obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path):# -> None:
-    
+    def __init__(self,obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path):
         # onboard computer vars
         self.obcCommandPath = obcCommandPath
         self.obcTelemPath = obcTelemPath
@@ -88,7 +87,7 @@ class RoverComms:
         "dist" : float(lin[3]),
         "LOI" : lin[4].split(',')}
 
-    def writeTelemetry(self,gpsCoor): # -> bool:
+    def writeAndSendTelemetry(self,gpsCoor:str): # -> bool:
         """
         write telemetry to telemetry file
 
@@ -97,7 +96,7 @@ class RoverComms:
         """
 
         with open(self.obcTelemPath, 'a') as f:
-            f.write('\n'+' '+gpsCoor)
+            f.write(gpsCoor+'\n')
 
         self.syncTelem()
         
@@ -116,13 +115,10 @@ class RoverComms:
 
 
     def checkConnection(self,):
-        if 0 == os.system('ping '+self.gs_ip+' -c 3 -W 5'):
+        if 0 == os.system('ping '+self.gs_ip+' -c 3 -W 1'):
             return 1
         else:
             return 0
 
 
-comm = RoverComms("commandTest.txt","teleTest.txt",'0','0','0','129.0.0.1','0','0','0')
-#print(comm.isNewCommand())
-comm.writeTelemetry('102.123124,103.241214')
-print(comm.readCommand())
+

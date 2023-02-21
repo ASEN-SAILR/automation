@@ -1,10 +1,13 @@
 # Suphakan
 
-import serial
+#import serial
 import math
 import time
 import RoverComms
-from ublox_gps import UbloxGps
+from multiprocessing import Process
+#from ublox_gps import UbloxGps
+
+## all coordinates must be in deg-decimal form, not hour-min-sec
 
 class RoverGPS:
     def __init__(self,comms:RoverComms,port:str): # -> None:
@@ -12,26 +15,24 @@ class RoverGPS:
 
         #initialize stuff
         self.comms = comms
-        self.port = port
+        #self.port = serial.Serial(port, baudrate=38400, timeout=1)
 
     def readAndWriteAndSendTele(self):
-        t = time.time()
         while True:
-            gps = UbloxGps(self.port)
-            geo = gps.geo_coords() #read GPS
-            coor = [geo.lon,geo.lat]
-            self.comms.writeAndSendTelemetry(coor) #write and send
+            #gps = UbloxGps(self.port)
+            #geo = gps.geo_coords() #read GPS
+            self.comms.writeAndSendTelemetry('1,2') 
+            #self.comms.writeAndSendTelemetry(str(geo.lon)+','+str(geo.lat)) #write and send
 
     def startTele(self):
-        self.recordingProcess = Process(target=self.readAndWriteAndSendTele,args=None)
-        self.recordingProcess.start()
+        self.Process = Process(target=self.readAndWriteAndSendTele)
+        self.Process.start()
 
     def stopTele(self):
-        self.recordingProcess = Process(target=self.readAndWriteAndSendTele,args=None)
-        self.recordingProcess.terminate()
+        self.Process.terminate()
 
 
-    def bearingToTarget(self,tarCoor): # -> float:
+    def __bearingToTarget(self,tarCoor:list): # -> float:
         """
         input: 
             currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
@@ -41,7 +42,7 @@ class RoverGPS:
         #input: currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
         #output: bearing in deg from north, ie. 89 (float)
         
-        lat1, lon1 = self.readGPS()
+        lat1, lon1 = self.__getGPS()
         lat2, lon2 = tarCoor
 
         deg2rad = math.pi/180
@@ -60,7 +61,7 @@ class RoverGPS:
         input: currCoor, tarCoor = [lat,lon], ie. [23.0231,-34.204] (object of floats)
         output: distance to target in meter (float)
         """
-        lat1, lon1 = self.readGPS()
+        lat1, lon1 = self.__getGPS()
         lat2, lon2 = tarCoor
 
         deg2rad = math.pi/180
@@ -85,17 +86,13 @@ class RoverGPS:
         output: 
             angle to target with respect to current heading in deg, positive mean to the right (float)
         """
-        return self.bearingToTarget(self.readGPS(),tarCoor)-currHeading
+        return self.__bearingToTarget(tarCoor)-currHeading
 
-    def getGPS(self):
+    def __getGPS(self):
         with open(self.comms.obcTelemPath) as f:
             file = f.read().splitlines()
-        return file[0]
+        coor = file[0].split(',')
+        coor = [float(coor[0]),float(coor[1])]
+        #print(coor)
+        return coor
 
-port = serial.Serial('/dev/ttyACM0', baudrate=38400, timeout=1)
-gps = RoverGPS(port,[12.02,34.42])
-
-while True:
-    t = time.time()
-    print(gps.readGPS())
-    print(time.time()-t)
