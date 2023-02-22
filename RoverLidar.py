@@ -199,7 +199,7 @@ class RoverLidar:
 
 
 
-    def getObstacles(self):
+    def getObstacles(self,scan_time,scan=None):
         """
         Inputs 
             map: 2d bool array, (0 -> empty, 1 -> object)
@@ -207,10 +207,13 @@ class RoverLidar:
             color: color of zone where there are obstacles
             obstacles: coordiantes of obstacles located in map[(x1,y1),(x2,y2),...,(xn,yn)]  
         """
-        scan = self.getTimedScan(2)
+
+        #if a scan is not specifid, take a scan for time specified by `scan_time`
+        if scan == None:
+            scan = self.getTimedScan(scan_time)
 
         _, angles, distances = self.splitScan(scan)
-        distances /= 1000
+        distances /= 1000 # mm to m
 
         x_points,y_points = radialToCart(ang=angles, dist=distances, type='deg')
         x_mag = self.x_lim[1]-self.x_lim[0]
