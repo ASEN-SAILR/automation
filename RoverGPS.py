@@ -1,12 +1,13 @@
 # Suphakan
 #https://github.com/sparkfun/Qwiic_Ublox_Gps_Py
-#import serial
+from ublox_gps import UbloxGps
+import serial
 
 import math
 import time
 import RoverComms
 from multiprocessing import Process
-from ublox_gps import UbloxGps
+
 
 ## all coordinates must be in deg-decimal form, not hour-min-sec
 
