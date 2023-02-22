@@ -1,11 +1,12 @@
 # Suphakan
-
+#https://github.com/sparkfun/Qwiic_Ublox_Gps_Py
 #import serial
+
 import math
 import time
 import RoverComms
 from multiprocessing import Process
-#from ublox_gps import UbloxGps
+from ublox_gps import UbloxGps
 
 ## all coordinates must be in deg-decimal form, not hour-min-sec
 
@@ -15,21 +16,21 @@ class RoverGPS:
 
         #initialize stuff
         self.comms = comms
-        #self.port = serial.Serial(port, baudrate=38400, timeout=1)
+        self.port = serial.Serial(port, baudrate=38400, timeout=1)
 
     def readAndWriteAndSendTele(self):
         while True:
-            #gps = UbloxGps(self.port)
-            #geo = gps.geo_coords() #read GPS
-            self.comms.writeAndSendTelemetry('1,2') 
-            #self.comms.writeAndSendTelemetry(str(geo.lon)+','+str(geo.lat)) #write and send
+            gps = UbloxGps(self.port)
+            geo = gps.geo_coords() #read GPS
+            #self.comms.writeAndSendTelemetry('1,2') 
+            self.comms.writeAndSendTelemetry(str(geo.lon)+','+str(geo.lat)) #write and send
 
     def startTele(self):
-        self.Process = Process(target=self.readAndWriteAndSendTele)
-        self.Process.start()
+        self.process = Process(target=self.readAndWriteAndSendTele)
+        self.process.start()
 
     def stopTele(self):
-        self.Process.terminate()
+        self.process.terminate()
 
 
     def __bearingToTarget(self,tarCoor:list): # -> float:
@@ -56,7 +57,7 @@ class RoverGPS:
         bearing = math.atan2(a,b) #in rad
         return bearing*180/math.pi #convert to deg
 
-    def distanceToTarget(self,tarCoor): # -> float: 
+    def distanceToTarget(self,tarCoor:list): # -> float: 
         """
         input: currCoor, tarCoor = [lat,lon], ie. [23.0231,-34.204] (object of floats)
         output: distance to target in meter (float)
@@ -79,7 +80,7 @@ class RoverGPS:
         meter = EarthRadiusMeter * c
         return meter;
 
-    def angleToTarget(self,tarCoor,currHeading): # -> float:
+    def angleToTarget(self,tarCoor:list,currHeading:float): # -> float:
         """
         input: 
             currHeading = current heading to target from magnetometer in deg (float)
@@ -88,7 +89,7 @@ class RoverGPS:
         """
         return self.__bearingToTarget(tarCoor)-currHeading
 
-    def __getGPS(self):
+    def __getGPS(self): # -> list of float
         with open(self.comms.obcTelemPath) as f:
             file = f.read().splitlines()
         coor = file[0].split(',')
