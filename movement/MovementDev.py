@@ -135,7 +135,7 @@ class RoverMove:
 			return 1
 		else:
 			return 0
-	#Tested: No	
+	#Tested: Yes, working as intended	
 	#Input: Array of values of X,Y
 	def get_delta_rotation(Obstacles):
 		if len(Obstacles) == 0:
@@ -171,19 +171,19 @@ class RoverMove:
 		AngleToTurn = AngleToTurn + BufferAngle
 		return AngleToTurn
 	
-	#Tested: No
+	#Tested: Yes, working as intended
 	#Input: Array of values of X,Y
 	def get_delta_distance(Obstacles):
 		# determines distance to move rover to avoid obstacles
 		Flag = 0
 		Iteration_prev = 0
-		ValueY = 0
+		ValueX = 0
 		for Iteration in Obstacles:
-			if Iteration.Y > Iteration_prev:
-				ValueY = Iteration.Y
-			Iteration_prev = Iteration.Y
+			if Iteration[0] > Iteration_prev:
+				ValueX = Iteration[0]
+			Iteration_prev = Iteration[0]
 		BufferDistance = 1
-		DistanceToMove = ValueY + BufferDistance
+		DistanceToMove = ValueX + BufferDistance
 		return DistanceToMove
 
 	#Tested: No
