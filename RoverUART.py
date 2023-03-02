@@ -1,15 +1,18 @@
 # Luke
+import struct
+import serial
 class RoverUART:
-    def __init__(self) -> None:
+    def __init__(self,teensy_port) -> None:
         #member vars
-
+        self.ser = serial.Serial(teensy_port, 115200, timeout=1)
+    
         #initialize
 
-        pass
+        
 
     def sendStopCmd(self):
         """
-        send stop command to teensy
+        TODO: send stop command to teensy
         """
         cmdString = "we need a standard for this"
         self.sendUartCmd(cmdString)
@@ -18,12 +21,12 @@ class RoverUART:
         """
         sends teensy a command to rotate over UART connection
         """
-        cmdString = "we need a standard for this"
+        cmdString = "r" + struct.pack("<f",rad)
         self.sendUartCmd(cmdString)
 
     def sendTranslateCmd(self,rotation):
         """
-        sends teensy a command to translate over UART connection
+        TODO: sends teensy a command to translate over UART connection
         """
         cmdString = "we need a standard for this"
         self.sendUartCmd(cmdString)
@@ -33,4 +36,13 @@ class RoverUART:
         """
         sends the cmd specified by cmd
         """
+        self.ser.write(cmd)
+
+    def readFromTeensy(self):
+        # TODO: reads message from teensy
         pass
+
+    def teensyMsgAvail(self):
+        if self.ser.in_waiting>0:
+            return True
+        return False
