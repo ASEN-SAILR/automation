@@ -2,6 +2,7 @@
 #import RoverGPS
 #import RoverLidar
 import numpy as np
+import pdb
 from multiprocessing import Process
 ### Class that will handle the motion of the rover
 class RoverMove:
@@ -119,10 +120,10 @@ class RoverMove:
 					[Status,Obstacles] = check_obstacles(Map)
 				else:
 					break
-			while Status is "yellow":
+			while Status == "yellow":
 				#TODO
 				x = 0
-			while Status is "red":
+			while Status == "red":
 				#TODO
 				x = 0
 	
@@ -134,47 +135,55 @@ class RoverMove:
 			return 1
 		else:
 			return 0
-	#Tested: No	
+	#Tested: Yes, working as intended	
+	#Input: Array of values of X,Y
 	def get_delta_rotation(Obstacles):
+		if len(Obstacles) == 0:
+			return 0
 		# priming variables
 		Flag = 0
+		RightValueY = 0
 		RightValueX = 0
+		LeftValueY = 0
 		LeftValueX = 0
 		# determines angle to rotate to avoid obstacles
-		for XIteration in len(Obstacles):
-			for YIteration in Obstacles[XIteration]:
-			# takes most negative x value (left-most)
-				if YIteration == 1:
-					if Flag is 0:
-						LeftValueX = Obstacles[XIteration]
-						LeftValueY = Obstacles[XIteration][YIteration]
-						Flag = 1
-		if ?:
-			# turns right
-			# trig to find angle to turn
-			AngleToTurn = np.arctan2(RightValueX,RightValueY)
-		else:
-			# turns left
-			AngleToTurn = np.arctan2(LeftValueX,LeftValueY)
-		# returns degrees
-		AngleToTurn = np.rad2deg(AngleToTurn)
+		# finds the furthest right and the furthest left obstacles
+		for Iteration in Obstacles:
+			#pdb.set_trace()
+			if Iteration[1] < LeftValueY:
+				LeftValueY = Iteration[1]
+				LeftValueX = Iteration[0]
+			if Iteration[1] > RightValueY:
+				RightValueY = Iteration[1]
+				RightValueX = Iteration[0]
+		# trig to find angle to turn
+		AngleToTurnRight = np.rad2deg(np.arctan2(RightValueY,RightValueX))
+		AngleToTurnLeft = np.rad2deg(np.arctan2(LeftValueY,LeftValueX))
+		# chooses the shorter angle
 		# adds buffer to account for rover size
 		BufferAngle = 10
+		if abs(AngleToTurnLeft) > AngleToTurnRight:
+			AngleToTurn = AngleToTurnRight
+		else:
+			AngleToTurn = AngleToTurnLeft
+			BufferAngle = -BufferAngle
+		#pdb.set_trace()
 		AngleToTurn = AngleToTurn + BufferAngle
 		return AngleToTurn
 	
-	#Tested: No
+	#Tested: Yes, working as intended
+	#Input: Array of values of X,Y
 	def get_delta_distance(Obstacles):
 		# determines distance to move rover to avoid obstacles
 		Flag = 0
 		Iteration_prev = 0
-		ValueY = 0
+		ValueX = 0
 		for Iteration in Obstacles:
-			if Iteration.Y > Iteration_prev:
-				ValueY = Iteration.Y
-			Iteration_prev = Iteration.Y
+			if Iteration[0] > Iteration_prev:
+				ValueX = Iteration[0]
+			Iteration_prev = Iteration[0]
 		BufferDistance = 1
-		DistanceToMove = ValueY + BufferDistance
+		DistanceToMove = ValueX + BufferDistance
 		return DistanceToMove
 
 	#Tested: No

@@ -1,7 +1,7 @@
 # https://www.turing.com/kb/python-multiprocessing-vs-multithreading
 # suphakan
 from multiprocessing import Process
-#import cv2
+import cv2
 import numpy as np
 import time
 import RoverComms

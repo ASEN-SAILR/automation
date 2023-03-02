@@ -15,7 +15,7 @@ print(cmd_dict['id'])
 import os
 
 class RoverComms:
-    def __init__(self,obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path):
+    def __init__(self,obcCommandPath:str,obcTelemPath:str,obcVideoPath:str,obcImagePath:str,gs_ssh_password:str,gs_ip:str,gs_telem_path:str,gs_video_path:str,gs_image_path:str):
         # onboard computer vars
         self.obcCommandPath = obcCommandPath
         self.obcTelemPath = obcTelemPath
