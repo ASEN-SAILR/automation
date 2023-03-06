@@ -97,6 +97,7 @@ class RoverMove:
 			self.sendRotation(DeltaHeading)
 
 			#If fail, spit error
+			success = 0
 			while not success:
 				success = check_motion_status() #ask teensy, teesny should know :)
 			
@@ -106,21 +107,32 @@ class RoverMove:
 			[Status,Obstacles] = check_obstacles(Map)
 			while Status is none:
 				if check_desired_heading():
-					self.sendTranslation(DISTANCE)
+					self.sendTranslation(1) #Moves 1 meter
+					success = 0
 					while not success:
 						success = check_motion_status()
-					send_video(seconds=30)
-
 					Map = get_lidar_map()
 					[Status,Obstacles] = check_obstacles(Map)
 				else:
 					break
 			while Status is "yellow":
-				#TODO
-				x = 0
+				#Needs testing
+				Distance = get_delta_distance(Obstacles) #Gets the distance to clear clearance zone
+				self.sendTranslation(Distance)
+				success = 0
+				while not success:
+					success = check_motion_status()
+				Map = get_lidar_map()
+				[Status,Obstacles] = check_obstacles(Map)
 			while Status is "red":
-				#TODO
-				x = 0
+				#Needs testing
+				Angle = get_delta_rotation(Obstacles) #Gets angle to rotate to set object in clearance zone
+				self.sendRotation(Angle)
+				success = 0
+				while not success:
+					success = check_motion_status()
+				Map = get_lidar_map()
+				[Status,Obstacles] = check_obstacles(Map)
 		
 	def check_desired_heading(MagHeading,DesHeading):
 		# checks if rover is pointing at LOI
