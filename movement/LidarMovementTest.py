@@ -1,24 +1,26 @@
-# Trevor 
-#import RoverGPS
-#import RoverLidar
+# Trevor
+import sys
+sys.path.append("../")
+import time
+import RoverGPS as gps
+import RoverLidar as lidar 
 import numpy as np
-import pdb
 from multiprocessing import Process
 ### Class that will handle the motion of the rover
 class RoverMove:
-	"""def __init__(self,gps:RoverGPS,lidar:RoverLidar) -> None:
-		
+	def __init__(self,gps:gps,lidar:lidar) -> None:
+		"""
 		inputs:
 			gps: instance of class RoverGPS
 			lidar: instance of class RoverLidar
-		
+		"""
 		#member variables here
 
 		self.gps = gps
 		self.lidar = lidar
 		self.process = None
-"""
-	#Tested: No
+
+	#Testing: Not complete
 	def motionInProgress(self) :
 		"""
 		checks if the rover is executing a manual or autnonomous command
@@ -31,9 +33,11 @@ class RoverMove:
 			True if executing motion
 			False if not executin motion
 		"""
-		return self.process.is_alive()
+		success = 0
+		while not success:
+			success = check_motion_status
+		return
 
-	#Tested: No
 	def startMove(self,command:dict):
 		"""
 		Begins multiprocessing process for manual or autonomous process for rover. 
@@ -60,7 +64,8 @@ class RoverMove:
 		else:
 			# throw error?
 			return
-	#Tested: No
+
+	#Possibly not needed
 	def stopMove(self) -> bool:
 		"""
 		stop the rover after next action is complete
@@ -72,7 +77,7 @@ class RoverMove:
 			bool
 		"""
 
-	#Tested: No
+	
 	def emergencyStopRover(self) -> bool:
 		"""
 		stop rover immediately. Terminate self.process ASAP. 
@@ -83,58 +88,74 @@ class RoverMove:
 		return
 
 	### Autonomous Mode ###
-	#Tested: No
 	def autonomous(self,LOI):
 		"""
 		autonomously move the rover to a LOI
 
 		TODO: update function calls to match current classes
 		"""
+		atlocation = 0
 		#make the rover move autonomously to LOI
 		while not atlocation:
-			#Finding change in heading desired to point to LOI
-			CurrCoordinate = get_gps()
-			MagHeading = get_heading()
-			DesHeading = bearing_to_target(CurrCoordinate,LOI)
-			DeltaHeading = get_delta_heading(MagHeading,DesHeading)
+			#SKIPPING FOR NOW FOR TESTING LIDAR
+			'''#Finding change in heading desired to point to LOI
+			CurrCoordinate = gps.RoverGPS.get_gps()
+			MagHeading = gps.RoverGPS.get_heading()
+			DesHeading = gps.RoverGPS.bearing_to_target(CurrCoordinate,LOI)
+			DeltaHeading = gps.RoverGPS.get_delta_heading(MagHeading,DesHeading)
 			
 			#Sending command to teensy
 			self.sendRotation(DeltaHeading)
 
-			#If fail, spit error
-			while not success:
-				success = check_motion_status() #ask teensy, teesny should know :)
-			
-			#Getting lidar map and finding what zone they are in
-			#Priming for loop
-			Map = get_lidar_map()
-			[Status,Obstacles] = check_obstacles(Map)
-			while Status is none:
-				if check_desired_heading():
-					self.sendTranslation(DISTANCE)
-					while not success:
-						success = check_motion_status()
-					send_video(seconds=30)
+			#Will wait until motion is complete
+			motionInProgress()
 
-					Map = get_lidar_map()
-					[Status,Obstacles] = check_obstacles(Map)
+			#Getting lidar map and finding what zone they are in
+			#Priming for loop'''
+			#Fake values to skip GPS stuff
+			DesHeading = 1
+			MagHeading = 1
+
+			time_to_scan = 2 #seconds
+			#Gets current lidar obstacles and status
+			[Status,Obstacles] = lidar.RoverLidar.getObstacles()
+			while Status is none:
+				if check_desired_heading(MagHeading,DesHeading):
+					#Commenting out movement to test lidar
+					#self.sendTranslation(1) #Moves 1 meter
+					#Waits until motion is complete
+					#self.motionInProgress()
+					[Status,Obstacles] = lidar.RoverLidar.getObstacles()
 				else:
 					break
-			while Status == "yellow":
-				#TODO
-				x = 0
-			while Status == "red":
-				#TODO
-				x = 0
-	
-	#Tested: Yes, working as intended	
+			while Status is "yellow":
+				#Needs testing
+				Distance = self.get_delta_distance(Obstacles) #Gets the distance to clear clearance zone
+				#Might need to check for distance more than a meter to make sure rover does not go further than it can see
+				#self.sendTranslation(Distance)
+				#Waits for motion to complete
+				#self.motionInProgress()
+				print("Move",Distance,"meters")
+				time.sleep(1)
+				[Status,Obstacles] = lidar.RoverLidar.getObstacles()
+			while Status is "red":
+				#Needs testing
+				Angle = self.get_delta_rotation(Obstacles) #Gets angle to rotate to set object in clearance zone
+				#self.sendRotation(Angle)
+				#Waits for motion to complete
+				#self.motionInProgress()
+				print("Rotate",Angle,"degrees")
+				time.sleep(1)
+				[Status,Obstacles] = lidar.RoverLidar.getObstacles()
+
 	def check_desired_heading(MagHeading,DesHeading):
 		# checks if rover is pointing at LOI
-		BufferAngle = 5
+		BufferAngle = 2
 		if (MagHeading > (DesHeading - BufferAngle)) and (MagHeading < (DesHeading + BufferAngle)):
 			return 1
 		else:
 			return 0
+	
 	#Tested: Yes, working as intended	
 	#Input: Array of values of X,Y
 	def get_delta_rotation(Obstacles):
@@ -186,7 +207,7 @@ class RoverMove:
 		DistanceToMove = ValueX + BufferDistance
 		return DistanceToMove
 
-	#Tested: No
+	#Possibly not needed
 	def manual(self,type:str,dist:float,angle:float) -> bool:
 		"""
 		passes on  a single command to teensy to be executed
@@ -204,7 +225,7 @@ class RoverMove:
 
 		return
 
-	#Tested: No
+	#Possibly not needed
 	def sendRotation(self,angle:float) -> bool:
 		"""
 		sends a rotation to the teesny/controls to be executed
@@ -217,7 +238,7 @@ class RoverMove:
 		"""
 		return
 
-	#Tested: No
+	#Possibly not needed
 	def sendTranslation(self,distance:float) -> bool:
 		"""
 		sends a translation to the teesny/controls to be executed
