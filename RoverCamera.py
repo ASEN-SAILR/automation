@@ -32,7 +32,7 @@ class RoverCamera:
         self.videoResolution = videoResolution
         self.videoCounter = 0 #this will be on name of new video
 
-    def _record(self):
+    def record(self):
         """
         The process that will actually be recording video. 
         Record in self.vidLength length chunks.
@@ -62,7 +62,7 @@ class RoverCamera:
         """
         begin a process for recording video
         """
-        self.recordingProcess = Process(target=self._record,args=None)
+        self.recordingProcess = Process(target=self.record,args=None)
         self.recordingProcess.start()
         #tbc
 
