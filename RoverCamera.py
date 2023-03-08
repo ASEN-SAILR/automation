@@ -4,6 +4,7 @@ from multiprocessing import Process
 import cv2
 import numpy as np
 import time
+import RoverComms
 
 class RoverCamera:
     #def __init__(self, port, storage_path, vid_length) -> None:
@@ -17,30 +18,21 @@ class RoverCamera:
         # initialize stuff
     #    pass
 
-    def __init(self,port,storage_path,vid_length):
+    def __init__(self,comms:RoverComms,port:list,vid_length:int,photoPath:str,photoResolution:tuple,videoPath:str,fps:int,videoResolution:tuple):
         self.port = port #camera 1 2 3
-        self.storage_path = storage_path
+        self.comms = comms
+    #for photo
         self.vid_length = vid_length #second
-
-
-    def setPhotoSetting(self,photoPath,resolution):
-        """
-        setter for photo paramaters
-        """
         self.photoPath = photoPath
-        self.photoCounter = 0
-        self.photoResolution = resolution
-
-    def setVideoSetting(self,videoPath,fps,resolution):
-        """
-        setter for video paramters
-        """
+        self.photoCounter = 0 #this will be on name of new photo
+        self.photoResolution = photoResolution
+    #for video
         self.videoPath = videoPath
         self.fps = fps
-        self.videoResolution = resolution
-        self.videoCounter = 0
+        self.videoResolution = videoResolution
+        self.videoCounter = 0 #this will be on name of new video
 
-    def _record(self):
+    def record(self):
         """
         The process that will actually be recording video. 
         Record in self.vidLength length chunks.
@@ -49,7 +41,7 @@ class RoverCamera:
         cap=cv2.VideoCapture(self.port[0]) #port one
         #"desktop/:C/test" + "0" + ".avi"
         out = cv2.VideoWriter(self.videoPath+num2str(self.videoCounter)+".avi",cv2.VideoWriter_fourcc('M','J','P','G'),self.fps, self.videoResolution)
-        videoCounter+=1
+        videoCounter+=videoCounter
 
         start = time.time()
 
@@ -61,6 +53,7 @@ class RoverCamera:
 
         out.release() #stop recording and write video file into path
         cap.release() #turn off camera
+        comms.syncVideo()
 
         # Destroy all the windows
         #cv2.destroyAllWindows()
@@ -69,7 +62,7 @@ class RoverCamera:
         """
         begin a process for recording video
         """
-        self.recordingProcess = Process(target=self._record,args=None)
+        self.recordingProcess = Process(target=self.record,args=None)
         self.recordingProcess.start()
         #tbc
 
@@ -134,8 +127,9 @@ class RoverCamera:
         
         # final output
         cv2.imwrite(self.photoPath+num2str(self.photoCounter)+".avi",output)
-        photoCounter+=1
+        self.photoCounter += 1
         # save output as .jpg
+        comms.syncImage()
 
         #cv2.imshow('final result',output)
         #cv2.waitKey(0)

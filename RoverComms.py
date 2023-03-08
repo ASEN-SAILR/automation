@@ -15,22 +15,22 @@ print(cmd_dict['id'])
 import os
 
 class RoverComms:
-    def __init__(self,obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath):# -> None:
-
+    def __init__(self,obcCommandPath:str,obcTelemPath:str,obcVideoPath:str,obcImagePath:str,gs_ssh_password:str,gs_ip:str,gs_telem_path:str,gs_video_path:str,gs_image_path:str):
         # onboard computer vars
-        # self.obcCommandPath = obcCommandPath not needed
+        self.obcCommandPath = obcCommandPath
         self.obcTelemPath = obcTelemPath
         self.obcVideoPath = obcVideoPath
         self.obcImagePath = obcImagePath
         self.currCmdNum = 0
 
         # ground station vars
-        # self.gs_ssh_password = gs_ssh_password #'asen4018'
-        # self.gs_ip = gs_ip #'192.168.56.102'
+        self.gs_ssh_password = gs_ssh_password #'asen4018'
+        self.gs_ip = gs_ip #'192.168.56.102'
 
-        # self.gs_telem_path = gs_telem_path 
-        # self.gs_video_path = +':/root/comms-gs/test.txt'
-        # self.gs_image_path = +':/root/comms-gs/test.txt'
+        self.gs_telem_path = gs_telem_path 
+        self.gs_video_path = gs_video_path
+        self.gs_image_path = gs_image_path
+
         # initialize stuff as needed
 
     #probably not needed now?
@@ -66,10 +66,11 @@ class RoverComms:
             None if there is no command
         """
 
-        with open(self.commandPath) as f:
+        with open(self.obcCommandPath) as f:
             file = f.read().splitlines()
+        print(file[0])
 
-        line = file.readline()
+        line = file[0]
 
         #probably not need to send error when multiple commands because we read the newest command instead of throwing error
 
@@ -86,7 +87,7 @@ class RoverComms:
         "dist" : float(lin[3]),
         "LOI" : lin[4].split(',')}
 
-    def writeTelemetry(self,toWrite): # -> bool:
+    def writeAndSendTelemetry(self,gpsCoor:str): # -> bool:
         """
         write telemetry to telemetry file
 
@@ -95,24 +96,29 @@ class RoverComms:
         """
 
         with open(self.obcTelemPath, 'a') as f:
-            f.write('\n'+toWrite)
+            f.write(gpsCoor+'\n')
 
-        syncOutbound(self.obcTelemPath)
+        self.syncTelem()
         
 
-    def syncOutbound(self,): #return False if lose comm, True if successful
+    def syncTelem(self,):
 
-        # os.system("sshpass -p '"+system_password+"' rsync -ave ssh /root/comms-gs/test.txt 192.168.56.102:/root/comms-gs/test.txt")
+        os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
 
-        os.system("sshpass -p '"+self.system_password+"' rsync -ave ssh "+self.sender_path+" "+self.receiver_path)
+    def syncVideo(self,):
 
+        os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
+
+    def syncImage(self,):
+
+        os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
 
 
     def checkConnection(self,):
-        return (lambda a: True if 0 == a.system('ping '+ground_station_ip+' -n 3 -l 32 -w 3 > clear') else False)
-            
+        if 0 == os.system('ping '+self.gs_ip+' -c 3 -W 1'):
+            return 1
+        else:
+            return 0
 
-comm = RoverComms("commandTest.txt","teleTest.txt",3)
-#print(comm.isNewCommand())
-comm.writeTelemetry('102,103')
-print(comm.readCommand())
+
+
