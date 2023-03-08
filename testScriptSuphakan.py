@@ -40,8 +40,8 @@ def main():
     videoPath = obcVideoPath
     fps = 30 
     videoResolution = (640,360) #format: tuple (480,480)
-    video = RoverCamera(comms,camPort,vidLength,photoPath,photoResolution,videoPath,fps,videoResolution) #need comms so that we can send video after recording
-    #video.startRecording() 
+    cam = RoverCamera(comms,camPort,vidLength,photoPath,photoResolution,videoPath,fps,videoResolution) #need comms so that we can send video after recording
+    #cam.startRecording() 
 
     # start uart comms with Teensy
     teensy_port = r"/dev/tty/1"
@@ -58,7 +58,12 @@ def main():
     # start move
     #move = RoverMove(gps,lidar)
 
-    if True: #True to test GPS reading background process
+    if True:
+        cam.record()
+        print("Record and sync video done.")
+        cam.take360()
+        print("Take 360 and sync done.")
+    if False: #True to test GPS reading background process
         gps.startTele()
         t = time.time()
         while time.time()-t<1:pass
