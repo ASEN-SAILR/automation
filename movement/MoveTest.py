@@ -26,5 +26,5 @@ if Value1 == 1.6:
 	print('get_delta_distance passed')
 else:
 	print('get_delta_distance failed')
-pdb.set_trace()
+
 

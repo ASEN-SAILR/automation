@@ -1,5 +1,5 @@
 # Trevor 
-import RoverGPS
+import RoverGPS as gps
 import RoverLidar
 import numpy as np
 from multiprocessing import Process
@@ -17,6 +17,7 @@ class RoverMove:
 		self.lidar = lidar
 		self.process = None
 
+	#Testing: Not complete
 	def motionInProgress(self) :
 		"""
 		checks if the rover is executing a manual or autnonomous command
@@ -93,9 +94,9 @@ class RoverMove:
 		#make the rover move autonomously to LOI
 		while not atlocation:
 			#Finding change in heading desired to point to LOI
-			CurrCoordinate = get_gps()
+			CurrCoordinate = gps.get_gps()
 			MagHeading = get_heading()
-			DesHeading = bearing_to_target(CurrCoordinate,LOI)
+			DesHeading = gps.bearing_to_target(CurrCoordinate,LOI)
 			DeltaHeading = get_delta_heading(MagHeading,DesHeading)
 			
 			#Sending command to teensy
