@@ -29,7 +29,10 @@ class RoverMove:
 			True if executing motion
 			False if not executin motion
 		"""
-		return self.process.is_alive()
+		success = 0
+		while not success:
+			success = check_motion_status
+		return
 
 	def startMove(self,command:dict):
 		"""
@@ -58,6 +61,7 @@ class RoverMove:
 			# throw error?
 			return
 
+	#Possibly not needed
 	def stopMove(self) -> bool:
 		"""
 		stop the rover after next action is complete
@@ -69,6 +73,7 @@ class RoverMove:
 			bool
 		"""
 
+	
 	def emergencyStopRover(self) -> bool:
 		"""
 		stop rover immediately. Terminate self.process ASAP. 
@@ -96,11 +101,9 @@ class RoverMove:
 			#Sending command to teensy
 			self.sendRotation(DeltaHeading)
 
-			#If fail, spit error
-			success = 0
-			while not success:
-				success = check_motion_status() #ask teensy, teesny should know :)
-			
+			#Will wait until motion is complete
+			motionInProgress()
+
 			#Getting lidar map and finding what zone they are in
 			#Priming for loop
 			Map = get_lidar_map()
@@ -108,9 +111,8 @@ class RoverMove:
 			while Status is none:
 				if check_desired_heading():
 					self.sendTranslation(1) #Moves 1 meter
-					success = 0
-					while not success:
-						success = check_motion_status()
+					#Waits until motion is complete
+					motionInProgress()
 					Map = get_lidar_map()
 					[Status,Obstacles] = check_obstacles(Map)
 				else:
@@ -118,25 +120,24 @@ class RoverMove:
 			while Status is "yellow":
 				#Needs testing
 				Distance = get_delta_distance(Obstacles) #Gets the distance to clear clearance zone
+				#Might need to check for distance more than a meter to make sure rover does not go further than it can see
 				self.sendTranslation(Distance)
-				success = 0
-				while not success:
-					success = check_motion_status()
+				#Waits for motion to complete
+				motionInProgress()
 				Map = get_lidar_map()
 				[Status,Obstacles] = check_obstacles(Map)
 			while Status is "red":
 				#Needs testing
 				Angle = get_delta_rotation(Obstacles) #Gets angle to rotate to set object in clearance zone
 				self.sendRotation(Angle)
-				success = 0
-				while not success:
-					success = check_motion_status()
+				#Waits for motion to complete
+				motionInProgress()
 				Map = get_lidar_map()
 				[Status,Obstacles] = check_obstacles(Map)
-		
+
 	def check_desired_heading(MagHeading,DesHeading):
 		# checks if rover is pointing at LOI
-		BufferAngle = 5
+		BufferAngle = 2
 		if (MagHeading > (DesHeading - BufferAngle)) and (MagHeading < (DesHeading + BufferAngle)):
 			return 1
 		else:
@@ -193,6 +194,7 @@ class RoverMove:
 		DistanceToMove = ValueX + BufferDistance
 		return DistanceToMove
 
+	#Possibly not needed
 	def manual(self,type:str,dist:float,angle:float) -> bool:
 		"""
 		passes on  a single command to teensy to be executed
@@ -210,6 +212,7 @@ class RoverMove:
 
 		return
 
+	#Possibly not needed
 	def sendRotation(self,angle:float) -> bool:
 		"""
 		sends a rotation to the teesny/controls to be executed
@@ -222,6 +225,7 @@ class RoverMove:
 		"""
 		return
 
+	#Possibly not needed
 	def sendTranslation(self,distance:float) -> bool:
 		"""
 		sends a translation to the teesny/controls to be executed
