@@ -1,13 +1,13 @@
 # Trevor
 import sys
-sys.path.append(../)
+sys.path.append("../")
 import RoverGPS as gps
-import RoverLidar as lidar
+import RoverLidar as lidar 
 import numpy as np
 from multiprocessing import Process
 ### Class that will handle the motion of the rover
 class RoverMove:
-	def __init__(self,gps:RoverGPS,lidar:RoverLidar) -> None:
+	def __init__(self,gps:gps,lidar:lidar) -> None:
 		"""
 		inputs:
 			gps: instance of class RoverGPS
@@ -93,6 +93,7 @@ class RoverMove:
 
 		TODO: update function calls to match current classes
 		"""
+		atlocation = 0
 		#make the rover move autonomously to LOI
 		while not atlocation:
 			#SKIPPING FOR NOW FOR TESTING LIDAR
@@ -113,7 +114,7 @@ class RoverMove:
 			#Fake values to skip GPS stuff
 			DesHeading = 1
 			MagHeading = 1
-			Map = lidar.get_lidar_map()
+			Map = lidar.getMap()
 			[Status,Obstacles] = lidar.check_obstacles(Map)
 			while Status is none:
 				if check_desired_heading(MagHeading,DesHeading):
@@ -121,7 +122,7 @@ class RoverMove:
 					#Waits until motion is complete
 					self.motionInProgress()
 					pdb.set_trace()
-					Map = lidar.get_lidar_map()
+					Map = lidar.getMap()
 					[Status,Obstacles] = lidar.check_obstacles(Map)
 				else:
 					break
@@ -132,7 +133,7 @@ class RoverMove:
 				self.sendTranslation(Distance)
 				#Waits for motion to complete
 				self.motionInProgress()
-				Map = lidar.get_lidar_map()
+				Map = lidar.getMap()
 				[Status,Obstacles] = lidar.check_obstacles(Map)
 			while Status is "red":
 				#Needs testing
@@ -140,7 +141,7 @@ class RoverMove:
 				self.sendRotation(Angle)
 				#Waits for motion to complete
 				self.motionInProgress()
-				Map = lidar.get_lidar_map()
+				Map = lidar.getMap()
 				[Status,Obstacles] = lidar.check_obstacles(Map)
 
 	def check_desired_heading(MagHeading,DesHeading):

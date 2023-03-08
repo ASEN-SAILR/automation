@@ -27,4 +27,6 @@ if Value1 == 1.6:
 else:
 	print('get_delta_distance failed')
 
-
+#Testing autonomous function
+move.RoverMove.autonomous(1,1)
+pdb.set_trace()
