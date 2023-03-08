@@ -1,6 +1,7 @@
 # Trevor
 import sys
 sys.path.append("../")
+import time
 import RoverGPS as gps
 import RoverLidar as lidar 
 import numpy as np
@@ -119,9 +120,10 @@ class RoverMove:
 			[Status,Obstacles] = lidar.getObstacles(time_to_scan)
 			while Status is none:
 				if check_desired_heading(MagHeading,DesHeading):
-					self.sendTranslation(1) #Moves 1 meter
+					#Commenting out movement to test lidar
+					#self.sendTranslation(1) #Moves 1 meter
 					#Waits until motion is complete
-					self.motionInProgress()
+					#self.motionInProgress()
 					[Status,Obstacles] = lidar.getObstacles(time_to_scan)
 				else:
 					break
@@ -129,16 +131,20 @@ class RoverMove:
 				#Needs testing
 				Distance = self.get_delta_distance(Obstacles) #Gets the distance to clear clearance zone
 				#Might need to check for distance more than a meter to make sure rover does not go further than it can see
-				self.sendTranslation(Distance)
+				#self.sendTranslation(Distance)
 				#Waits for motion to complete
-				self.motionInProgress()
+				#self.motionInProgress()
+				print("Move",Distance,"meters")
+				time.sleep(1)
 				[Status,Obstacles] = lidar.getObstacles(time_to_scan)
 			while Status is "red":
 				#Needs testing
 				Angle = self.get_delta_rotation(Obstacles) #Gets angle to rotate to set object in clearance zone
-				self.sendRotation(Angle)
+				#self.sendRotation(Angle)
 				#Waits for motion to complete
-				self.motionInProgress()
+				#self.motionInProgress()
+				print("Rotate",Angle,"degrees")
+				time.sleep(1)
 				[Status,Obstacles] = lidar.getObstacles(time_to_scan)
 
 	def check_desired_heading(MagHeading,DesHeading):

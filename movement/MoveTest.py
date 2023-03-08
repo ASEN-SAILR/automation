@@ -4,9 +4,9 @@ import pdb
 
 #Testing check_desired_heading function
 #Should return true
-Value1 = move.RoverMove.check_desired_heading(50,54)
+Value1 = move.RoverMove.check_desired_heading(50,51)
 #Should return false
-Value2 = move.RoverMove.check_desired_heading(50,56)
+Value2 = move.RoverMove.check_desired_heading(50,53)
 if Value1 == 1 and Value2 == 0:
 	print('check_desired_heading passed')
 else:
