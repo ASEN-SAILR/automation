@@ -199,7 +199,7 @@ class RoverLidar:
 
 
 
-    def getObstacles(self,scan_time,scan=None):
+    def getObstacles(self,scan_time=None,scan=None):
         """
         Inputs 
             map: 2d bool array, (0 -> empty, 1 -> object)
@@ -209,7 +209,10 @@ class RoverLidar:
         """
 
         #if a scan is not specifid, take a scan for time specified by `scan_time`
-        if scan == None:
+        if scan_time is None and scan is None:
+            raise Exception("One of scan_time and scan must be defined")
+        
+        if scan is None:
             scan = self.getTimedScan(scan_time)
 
         _, angles, distances = self.splitScan(scan)
@@ -237,5 +240,13 @@ class RoverLidar:
 
         # objects are points where there are more hits than the threshold 
         objects = np.array(coords[counts>self.threshold], dtype=np.int_)
+        
+        if objects.size == 0:
+            color = None
+        else:
+            for object in objects:
+                if abs(object[1]) < self.red_lim:
+                    color = "red" 
+            color = "yellow"
 
-        return objects[:,0]*self.resolution,objects[:,1]*self.resolution,x_chopped,y_chopped
+        return color,objects

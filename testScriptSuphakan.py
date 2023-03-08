@@ -32,7 +32,7 @@ def main():
 
 
     # start video recording (class)
-    camPort = r"/dev/tty/0"
+    camPort = "/dev/tty/0"
     videoPath = r"/videos/" #example path
     vidLength = 5 #unit is second
     photoPath = obcImagePath
