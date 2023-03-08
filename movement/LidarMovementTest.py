@@ -99,10 +99,10 @@ class RoverMove:
 		while not atlocation:
 			#SKIPPING FOR NOW FOR TESTING LIDAR
 			'''#Finding change in heading desired to point to LOI
-			CurrCoordinate = gps.get_gps()
-			MagHeading = get_heading()
-			DesHeading = gps.bearing_to_target(CurrCoordinate,LOI)
-			DeltaHeading = get_delta_heading(MagHeading,DesHeading)
+			CurrCoordinate = gps.RoverGPS.get_gps()
+			MagHeading = gps.RoverGPS.get_heading()
+			DesHeading = gps.RoverGPS.bearing_to_target(CurrCoordinate,LOI)
+			DeltaHeading = gps.RoverGPS.get_delta_heading(MagHeading,DesHeading)
 			
 			#Sending command to teensy
 			self.sendRotation(DeltaHeading)
@@ -115,16 +115,17 @@ class RoverMove:
 			#Fake values to skip GPS stuff
 			DesHeading = 1
 			MagHeading = 1
-			time_to_scan = 2
+
+			time_to_scan = 2 #seconds
 			#Gets current lidar obstacles and status
-			[Status,Obstacles] = lidar.getObstacles(time_to_scan)
+			[Status,Obstacles] = self.lidar.RoverLidar.getObstacles()
 			while Status is none:
 				if check_desired_heading(MagHeading,DesHeading):
 					#Commenting out movement to test lidar
 					#self.sendTranslation(1) #Moves 1 meter
 					#Waits until motion is complete
 					#self.motionInProgress()
-					[Status,Obstacles] = lidar.getObstacles(time_to_scan)
+					[Status,Obstacles] = self.lidar.RoverLidar.getObstacles()
 				else:
 					break
 			while Status is "yellow":
@@ -136,7 +137,7 @@ class RoverMove:
 				#self.motionInProgress()
 				print("Move",Distance,"meters")
 				time.sleep(1)
-				[Status,Obstacles] = lidar.getObstacles(time_to_scan)
+				[Status,Obstacles] = self.lidar.RoverLidar.getObstacles()
 			while Status is "red":
 				#Needs testing
 				Angle = self.get_delta_rotation(Obstacles) #Gets angle to rotate to set object in clearance zone
@@ -145,7 +146,7 @@ class RoverMove:
 				#self.motionInProgress()
 				print("Rotate",Angle,"degrees")
 				time.sleep(1)
-				[Status,Obstacles] = lidar.getObstacles(time_to_scan)
+				[Status,Obstacles] = self.lidar.RoverLidar.getObstacles()
 
 	def check_desired_heading(MagHeading,DesHeading):
 		# checks if rover is pointing at LOI
