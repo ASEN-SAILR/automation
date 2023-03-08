@@ -49,7 +49,7 @@ class RoverCamera:
         cap=cv2.VideoCapture(self.port[0]) #port one
         #"desktop/:C/test" + "0" + ".avi"
         out = cv2.VideoWriter(self.videoPath+num2str(self.videoCounter)+".avi",cv2.VideoWriter_fourcc('M','J','P','G'),self.fps, self.videoResolution)
-        videoCounter++
+        videoCounter+=1
 
         start = time.time()
 
@@ -134,7 +134,7 @@ class RoverCamera:
         
         # final output
         cv2.imwrite(self.photoPath+num2str(self.photoCounter)+".avi",output)
-        photoCounter++
+        photoCounter+=1
         # save output as .jpg
 
         #cv2.imshow('final result',output)

@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-capture = cv2.VideoCapture(-1)
+capture = cv2.VideoCapture(0)
 result,frame=capture.read()
 	
 cv2.resize(frame, (1920,1080))
