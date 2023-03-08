@@ -1,12 +1,12 @@
-import MovementDev as move
+import LidarMovementTest as move
 import numpy as np
 import pdb
 
 #Testing check_desired_heading function
 #Should return true
-Value1 = move.RoverMove.check_desired_heading(50,54)
+Value1 = move.RoverMove.check_desired_heading(50,51)
 #Should return false
-Value2 = move.RoverMove.check_desired_heading(50,56)
+Value2 = move.RoverMove.check_desired_heading(50,53)
 if Value1 == 1 and Value2 == 0:
 	print('check_desired_heading passed')
 else:
@@ -27,4 +27,6 @@ if Value1 == 1.6:
 else:
 	print('get_delta_distance failed')
 
-
+#Testing autonomous function
+move.RoverMove.autonomous(1,1)
+pdb.set_trace()
