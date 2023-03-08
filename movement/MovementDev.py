@@ -114,16 +114,15 @@ class RoverMove:
 			#Fake values to skip GPS stuff
 			DesHeading = 1
 			MagHeading = 1
-			Map = lidar.getMap()
-			[Status,Obstacles] = lidar.check_obstacles(Map)
+			time_to_scan = 2
+			#Gets current lidar obstacles and status
+			[Status,Obstacles] = lidar.getObstacles(time_to_scan)
 			while Status is none:
 				if check_desired_heading(MagHeading,DesHeading):
 					self.sendTranslation(1) #Moves 1 meter
 					#Waits until motion is complete
 					self.motionInProgress()
-					pdb.set_trace()
-					Map = lidar.getMap()
-					[Status,Obstacles] = lidar.check_obstacles(Map)
+					[Status,Obstacles] = lidar.getObstacles(time_to_scan)
 				else:
 					break
 			while Status is "yellow":
@@ -133,16 +132,14 @@ class RoverMove:
 				self.sendTranslation(Distance)
 				#Waits for motion to complete
 				self.motionInProgress()
-				Map = lidar.getMap()
-				[Status,Obstacles] = lidar.check_obstacles(Map)
+				[Status,Obstacles] = lidar.getObstacles(time_to_scan)
 			while Status is "red":
 				#Needs testing
 				Angle = self.get_delta_rotation(Obstacles) #Gets angle to rotate to set object in clearance zone
 				self.sendRotation(Angle)
 				#Waits for motion to complete
 				self.motionInProgress()
-				Map = lidar.getMap()
-				[Status,Obstacles] = lidar.check_obstacles(Map)
+				[Status,Obstacles] = lidar.getObstacles(time_to_scan)
 
 	def check_desired_heading(MagHeading,DesHeading):
 		# checks if rover is pointing at LOI
