@@ -12,11 +12,11 @@ from multiprocessing import Process
 ## all coordinates must be in deg-decimal form, not hour-min-sec
 
 class RoverGPS:
-    def __init__(self,comms:RoverComms,port:str): # -> None:
+    def __init__(self,port:str): # -> None:
         #member vars
 
         #initialize stuff
-        self.comms = comms
+        #self.comms = comms
         self.port = serial.Serial(port, baudrate=38400, timeout=1)
 
     def readAndWriteAndSendTele(self):
@@ -25,7 +25,10 @@ class RoverGPS:
             geo = gps.geo_coords() #read GPS
             #self.comms.writeAndSendTelemetry('1,2') 
             self.comms.writeAndSendTelemetry(str(geo.lon)+','+str(geo.lat)) #write and send
-
+    def readGPS(self):
+        gps = UbloxGps(self.port)
+        geo = gps.geo_coords()
+        return [geo.lon,geo.lat]
     def startTele(self):
         self.process = Process(target=self.readAndWriteAndSendTele)
         self.process.start()
@@ -44,7 +47,7 @@ class RoverGPS:
         #input: currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
         #output: bearing in deg from north, ie. 89 (float)
         
-        lat1, lon1 = self.__getGPS()
+        lat1, lon1 = self.readGPS() #self.__getGPS()
         lat2, lon2 = tarCoor
 
         deg2rad = math.pi/180
@@ -63,7 +66,7 @@ class RoverGPS:
         input: currCoor, tarCoor = [lat,lon], ie. [23.0231,-34.204] (object of floats)
         output: distance to target in meter (float)
         """
-        lat1, lon1 = self.__getGPS()
+        lat1, lon1 = self.readGPS() #self.__getGPS()
         lat2, lon2 = tarCoor
 
         deg2rad = math.pi/180

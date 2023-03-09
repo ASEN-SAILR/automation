@@ -5,12 +5,9 @@ import adafruit_lis3mdl
 
 class RoverMagnet:
     def __init__(self): # -> None:
-        #member vars
-
         #initialize stuff
-        port = ""
-        self.port = serial.Serial(port, baudrate=38400, timeout=1)
-        self.sensor = adafruit_lis3mdl.LIS3MDL(port)
+        i2c = board.I2C()  # uses board.SCL and board.SDA
+        self.sensor = adafruit_lis3mdl.LIS3MDL(i2c)
 
 
     def vector_2_degrees(x, y):
