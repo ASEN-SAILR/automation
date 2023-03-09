@@ -4,7 +4,7 @@ import board
 import adafruit_lis3mdl
 
 class RoverMagnet:
-    def __init__(self,port:str): # -> None:
+    def __init__(self): # -> None:
         #initialize stuff
         i2c = board.I2C()  # uses board.SCL and board.SDA
         self.sensor = adafruit_lis3mdl.LIS3MDL(i2c)
