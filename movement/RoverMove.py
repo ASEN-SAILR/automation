@@ -99,7 +99,7 @@ class RoverMove:
 		LOI = [100,100]
 		while not atlocation:
 			#Finding change in heading desired to point to LOI
-			MagHeading = gps.RoverGPS.get_heading()
+			MagHeading = self.gps.RoverGPS.get_heading()
 			DeltaHeading = gps.RoverGPS.angleToTarget(LOI,MagHeading)
 			
 			#Sending command to teensy
