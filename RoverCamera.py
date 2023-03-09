@@ -4,7 +4,7 @@ from multiprocessing import Process
 import cv2
 import numpy as np
 import time
-# import RoverComms
+import RoverComms
 import threading
 
 # class camThread(threading.Thread):
@@ -50,9 +50,9 @@ class RoverCamera:
         # initialize stuff
     #    pass
 
-    def __init__(self,port:list,vid_length:int,photoPath:str,photoResolution:tuple,videoPath:str,fps:int,videoResolution:tuple):
+    def __init__(self,comms:RoverComms,port:list,vid_length:int,photoPath:str,photoResolution:tuple,videoPath:str,fps:int,videoResolution:tuple):
         self.port = port #camera 1 2 3
-        # self.comms = comms
+        self.comms = comms
     #for photo
         self.vid_length = vid_length #second
         self.photoPath = photoPath
@@ -73,7 +73,7 @@ class RoverCamera:
         cap=cv2.VideoCapture(self.port[0]) #port one
         #"desktop/:C/test" + "0" + ".avi"
         out = cv2.VideoWriter(self.videoPath+str(self.videoCounter)+".avi",cv2.VideoWriter_fourcc('M','J','P','G'),self.fps, self.videoResolution)
-        videoCounter+=videoCounter
+        self.videoCounter+=self.videoCounter
 
         start = time.time()
 
@@ -85,7 +85,7 @@ class RoverCamera:
 
         out.release() #stop recording and write video file into path
         cap.release() #turn off camera
-        # comms.syncVideo()
+        self.comms.syncVideo()
 
         # Destroy all the windows
         #cv2.destroyAllWindows()
@@ -119,7 +119,7 @@ class RoverCamera:
 
         #send command
 
-    def take360(self,previewName, camID):
+    def take360(self):
         # Create two threads as follows
         # thread1 = camThread("Camera 1", self.port[0])
         # thread2 = camThread("Camera 2", self.port[1])
@@ -169,9 +169,7 @@ class RoverCamera:
         cv2.imwrite(self.photoPath+str(self.photoCounter)+".jpg",output)
         self.photoCounter += 1
         # save output as .jpg
-        # comms.syncImage()
-
-        cv2.waitKey(0)
+        self.comms.syncImage()
 
 #######
 
