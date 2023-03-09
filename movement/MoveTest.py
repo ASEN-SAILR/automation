@@ -9,6 +9,20 @@ import pdb
 # start lidar
 #lidar_port = r"/dev/tty/2"
 #lidar = RoverLidar(lidar_port) # more params?
+lidar_port = r"/dev/tty/2"
+lidar = RoverLidar(port_name=lidar_port)
+x_lim=np.array((0,3)) 
+y_lim=np.array((-2,2))
+threshold=0
+red_lim=np.array((0.5,0.5))
+resolution=0.1
+lidar.setMapParams(
+				x_lim=x_lim, 
+				y_lim=y_lim, 
+				threshold=threshold, 
+				red_lim=red_lim, 
+				resolution=resolution
+				)
 
 # start gps 
 gps_port = r"/dev/tty/2"
