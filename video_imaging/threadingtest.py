@@ -1,10 +1,5 @@
-
 import cv2
-import numpy as np
 import threading
-
-USB\VID_0C45&PID_6366&MI_00\6&d2e721e&0&0000
-USB\VID_0C45&PID_6366&MI_00\6&22cae259&0&0000
 
 class camThread(threading.Thread):
     def __init__(self, previewName, camID):
@@ -12,14 +7,18 @@ class camThread(threading.Thread):
         self.previewName = previewName
         self.camID = camID
     def run(self):
-        print "Starting " + self.previewName
+        print("Starting " + self.previewName)
         camPreview(self.previewName, self.camID)
 
 def camPreview(previewName, camID):
     cv2.namedWindow(previewName)
-    cam = cv2.VideoCapture(camID)
+    cam = cv2.VideoCapture(camID,cv2.CAP_DSHOW)
+    cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
     if cam.isOpened():  # try to get the first frame
         rval, frame = cam.read()
+        cv2.imwrite('frame'+str(camID)+'.jpg',frame)
     else:
         rval = False
 
@@ -27,24 +26,20 @@ def camPreview(previewName, camID):
         cv2.imshow(previewName, frame)
         rval, frame = cam.read()
         key = cv2.waitKey(20)
+        
         if key == 27:  # exit on ESC
             break
     cv2.destroyWindow(previewName)
 
 # Create two threads as follows
-thread1 = camThread("Camera 1", 1)
-thread2 = camThread("Camera 2", 2)
+thread1 = camThread("Camera 1", 0)
+thread2 = camThread("Camera 2", 1)
+thread3 = camThread("Camera 3", 2)
 thread1.start()
 thread2.start()
+thread3.start()
 
-#port = list of camera ID from /dev
-# result2, frame2 = cv2.VideoCapture("USB\VID_0C45&PID_6366&MI_00"
-result0,frame0 = cam0.read()
-result1,frame1 = cam1.read()
-result2,frame2 = cam2.read()
-
-image_paths=[frame0,frame1,frame2]
-print(type(frame0))
+image_paths=['frame0.jpg','frame1.jpg','frame3.jpg']
 # initialized a list of images
 imgs = []
  
@@ -78,3 +73,4 @@ cv2.imwrite('Pano.jpg',output)
 cv2.imshow('final result',output)
 
 cv2.waitKey(0)
+

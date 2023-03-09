@@ -14,16 +14,16 @@ def main():
     # leaving these in for testing on automation end but should be taken out
     commands_path = r"/commands.txt"
     telemetry_path = r"telemetry.txt"
-    # onboard computer comms vars
+    # # onboard computer comms vars
     obcCommandPath = commands_path
     obcTelemPath = telemetry_path
-    obcVideoPath = "/video"
-    obcImagePath = "/images"
+    obcVideoPath = "videos"
+    obcImagePath = "images"
     #currCmdNum = 0 #not needed, automatically defined in RoverComms
     # ground station comms vars
     gs_ssh_password = "asen-sailr"
-    gs_ip = "192.168.56.102"
-    gs_home_path = "/home/ground-station/asen-sailr/"
+    gs_ip = "10.203.140.107"
+    gs_home_path = "/home/ground-station/comms-gs/"
     gs_telem_path = gs_home_path+"telemetry.txt"
     gs_video_path = gs_home_path+"videos"
     gs_image_path = gs_home_path+"images"
@@ -32,11 +32,11 @@ def main():
 
 
     # start video recording (class)
-    camPort = "/dev/tty/0"
+    camPort = [0,1,2]
     videoPath = r"/videos/" #example path
     vidLength = 5 #unit is second
     photoPath = obcImagePath
-    photoResolution = (640,360) #format: tuple (480,480)
+    photoResolution = (1920,1080) #format: tuple (480,480)
     videoPath = obcVideoPath
     fps = 30 
     videoResolution = (640,360) #format: tuple (480,480)
@@ -53,7 +53,7 @@ def main():
 
     # start gps 
     gps_port = r"/dev/tty/2"
-    gps = RoverGPS(comms,gps_port) # more params?
+    # gps = RoverGPS(comms,gps_port) # more params?
 
     # start move
     #move = RoverMove(gps,lidar)

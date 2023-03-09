@@ -96,12 +96,11 @@ class RoverMove:
 		"""
 		atlocation = 0
 		#make the rover move autonomously to LOI
+		LOI = [100,100]
 		while not atlocation:
 			#Finding change in heading desired to point to LOI
-			CurrCoordinate = gps.RoverGPS.get_gps()
-			MagHeading = gps.RoverGPS.get_heading()
-			DesHeading = gps.RoverGPS.bearing_to_target(CurrCoordinate,LOI)
-			DeltaHeading = gps.RoverGPS.get_delta_heading(MagHeading,DesHeading)
+			MagHeading = self.gps.RoverGPS.get_heading()
+			DeltaHeading = gps.RoverGPS.angleToTarget(LOI,MagHeading)
 			
 			#Sending command to teensy
 			#self.sendRotation(DeltaHeading)
@@ -127,6 +126,7 @@ class RoverMove:
 					time.sleep(1)
 				else:
 					break
+					
 			'''while Status is "yellow":
 				#Needs testing
 				Distance = self.get_delta_distance(Obstacles) #Gets the distance to clear clearance zone
