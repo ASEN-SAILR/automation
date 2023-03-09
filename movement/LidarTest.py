@@ -9,12 +9,12 @@ import pdb
 # start lidar
 #lidar_port = r"/dev/tty/2"
 #lidar = RoverLidar(lidar_port) # more params?
-lidar_port = r"/dev/tty/2"
+lidar_port = r"/dev/ttyUSB0"
 lidar = RoverLidar(port_name=lidar_port)
-x_lim=np.array((0,3)) 
-y_lim=np.array((-2,2))
+x_lim=np.array((0,1)) 
+y_lim=np.array((-.5,.5))
 threshold=0
-red_lim=np.array((0.5,0.5))
+red_lim=np.array((-0.25,0.25))
 resolution=0.1
 lidar.setMapParams(
 				x_lim=x_lim, 
@@ -24,11 +24,12 @@ lidar.setMapParams(
 				resolution=resolution
 				)
 
+move = RoverMove(lidar)
 # start gps 
 #gps_port = r"/dev/tty/2"
 #gps = RoverGPS(gps_port) # more params?
 
-# start move
+'''# start move
 move = RoverMove(lidar)
 #Testing check_desired_heading function
 #Should return true
@@ -54,7 +55,7 @@ if Value1 == 1.6:
 	print('get_delta_distance passed')
 else:
 	print('get_delta_distance failed')
-
+'''
 
 
 #Testing autonomous function

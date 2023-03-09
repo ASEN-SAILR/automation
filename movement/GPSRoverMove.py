@@ -10,7 +10,7 @@ import pdb
 from multiprocessing import Process
 ### Class that will handle the motion of the rover
 class RoverMove:
-        def __init__(self,lidar:RoverLidar) -> None:
+        def __init__(self,gps:RoverGPS,magnet:RoverMagnet) -> None:
                 """
                 inputs:
                         gps: instance of class RoverGPS
@@ -18,9 +18,8 @@ class RoverMove:
                 """
                 #member variables here
 
-                #self.gps = gps
-                #self.magnet = magnet
-                self.lidar = lidar
+                self.gps = gps
+                self.magnet = magnet
                 self.process = None
 
         #Testing: Not complete
@@ -101,7 +100,7 @@ class RoverMove:
                 #make the rover move autonomously to LOI
                 LOI = [0,0]
                 while not atlocation:
-                        '''#Finding change in heading desired to point to LOI
+                        #Finding change in heading desired to point to LOI
                         MagHeading = magnet.get_heading()
                         DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
                         print(DeltaHeading)
@@ -112,30 +111,27 @@ class RoverMove:
                         #motionInProgress()
 
                         #Getting lidar map and finding what zone they are in
-                        #Priming for loop
-                        '''
+                        #Priming for loop'''
+                        
                         time_to_scan = 2 #seconds
                         #Gets current lidar obstacles and status
-                        [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                        time.sleep(2)
+                        #[Status,Obstacles] = lidar.RoverLidar.getObstacles()
                         #pdb.set_trace()
-                        
-                        #Just for testing Lidar
-                        DeltaHeading = 0
-                        while Status is None:
+                        Status = "none"
+                        while Status is "none":
                                 if self.check_desired_heading(DeltaHeading):
                                         #Commenting out movement to test lidar
                                         #self.sendTranslation(1) #Moves 1 meter
                                         #Waits until motion is complete
                                         #self.motionInProgress()
-                                        [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                        time.sleep(2)
-                                        #DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
-                                        print("Nothing in the way")
+                                        #[Status,Obstacles] = lidar.RoverLidar.getObstacles()
+                                        DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
+                                        print("Current heading:",MagHeading,"DeltaHeading:",DeltaHeading)
+                                        pdb.set_trace()
                                 else:
                                         break
                                         
-                        while Status is "yellow":
+                        '''while Status is "yellow":
                                 #Needs testing
                                 Distance = self.get_delta_distance(Obstacles) #Gets the distance to clear clearance zone
                                 #Might need to check for distance more than a meter to make sure rover does not go further than it can see
@@ -143,8 +139,8 @@ class RoverMove:
                                 #Waits for motion to complete
                                 #self.motionInProgress()
                                 print("Move",Distance,"meters")
-                                [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                time.sleep(2)
+                                time.sleep(1)
+                                [Status,Obstacles] = lidar.RoverLidar.getObstacles()
                         while Status is "red":
                                 #Needs testing
                                 Angle = self.get_delta_rotation(Obstacles) #Gets angle to rotate to set object in clearance zone
@@ -152,8 +148,9 @@ class RoverMove:
                                 #Waits for motion to complete
                                 #self.motionInProgress()
                                 print("Rotate",Angle,"degrees")
-                                [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                time.sleep(2)
+                                time.sleep(1)
+                                [Status,Obstacles] = lidar.RoverLidar.getObstacles()
+                        '''
 
         def check_desired_heading(self,DeltaHeading):
                 if abs(DeltaHeading) < 2:# checks if rover is pointing at LOI
