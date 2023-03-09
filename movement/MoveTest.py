@@ -1,8 +1,8 @@
-import RoverMove
+from RoverMove import RoverMove
 import sys
 sys.path.append("../")
-import RoverGPS
-import RoverLidar
+from RoverGPS import RoverGPS
+from RoverLidar import RoverLidar
 import numpy as np
 import pdb
 
