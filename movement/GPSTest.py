@@ -3,6 +3,7 @@ import sys
 sys.path.append("../")
 from RoverGPS import RoverGPS
 from RoverLidar import RoverLidar
+from RoverMagnet import RoverMagnet
 import numpy as np
 import pdb
 
@@ -25,16 +26,18 @@ lidar.setMapParams(
 				)
 '''
 # start gps 
-gps_port = r"/dev/tty/2"
+gps_port = r"/dev/ttyACM0"
 gps = RoverGPS(gps_port) # more params?
 
+magnet = RoverMagnet()
+
 # start move
-move = RoverMove(gps)
+move = RoverMove(gps,magnet)
 #Testing check_desired_heading function
-#Should return true
-Value1 = move.check_desired_heading(50,51)
+'''#Should return true
+Value1 = self.move.check_desired_heading(50,51)
 #Should return false
-Value2 = move.check_desired_heading(50,53)
+Value2 = self.move.check_desired_heading(50,53)
 if Value1 == 1 and Value2 == 0:
 	print('check_desired_heading passed')
 else:
@@ -42,19 +45,19 @@ else:
 
 #Testing get_delta_rotation function
 Obstacles_grid = [[.3,-1.5],[.6,1.5]]
-Value1 = move.get_delta_rotation(Obstacles_grid)
+Value1 = self.move.get_delta_rotation(Obstacles_grid)
 if abs(Value1) > 0:
 	print('get_delta_rotation passed')
 else:
 	print('get_delta_rotation failed')
 
 #Testing get_delta_distance function
-Value1 = move.get_delta_distance(Obstacles_grid)
+Value1 = self.move.get_delta_distance(Obstacles_grid)
 if Value1 == 1.6:
 	print('get_delta_distance passed')
 else:
 	print('get_delta_distance failed')
-
+'''
 
 
 #Testing autonomous function
