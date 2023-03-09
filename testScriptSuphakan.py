@@ -14,7 +14,7 @@ def main():
     # leaving these in for testing on automation end but should be taken out
     commands_path = r"/commands.txt"
     telemetry_path = r"telemetry.txt"
-    # onboard computer comms vars
+    # # onboard computer comms vars
     obcCommandPath = commands_path
     obcTelemPath = telemetry_path
     obcVideoPath = "videos"
@@ -32,11 +32,11 @@ def main():
 
 
     # start video recording (class)
-    camPort = "/dev/tty/0"
+    camPort = [0,1,2]
     videoPath = r"/videos/" #example path
     vidLength = 5 #unit is second
     photoPath = obcImagePath
-    photoResolution = (640,360) #format: tuple (480,480)
+    photoResolution = (1920,1080) #format: tuple (480,480)
     videoPath = obcVideoPath
     fps = 30 
     videoResolution = (640,360) #format: tuple (480,480)
