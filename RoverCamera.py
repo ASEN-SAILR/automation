@@ -4,39 +4,39 @@ from multiprocessing import Process
 import cv2
 import numpy as np
 import time
-import RoverComms
+# import RoverComms
 import threading
 
-class camThread(threading.Thread):
-    def __init__(self, previewName, camID):
-        threading.Thread.__init__(self)
-        self.previewName = previewName
-        self.camID = camID
+# class camThread(threading.Thread):
+#     def __init__(self, previewName, camID):
+#         threading.Thread.__init__(self)
+#         self.previewName = previewName
+#         self.camID = camID
 
-    def run(self):
-        print("Starting " + self.previewName)
-        self.camPreview(self.previewName, self.camID)
+#     def run(self):
+#         print("Starting " + self.previewName)
+#         self.camPreview(self.previewName, self.camID)
 
-    def camPreview(previewName, camID):
-        cv2.namedWindow(previewName)
-        cam = cv2.VideoCapture(camID,cv2.CAP_DSHOW)
-        cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+#     def camPreview(previewName, camID):
+#         cv2.namedWindow(previewName)
+#         cam = cv2.VideoCapture(camID,cv2.CAP_DSHOW)
+#         cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+#         cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
-        if cam.isOpened():  # try to get the first frame
-            rval, frame = cam.read()
-            cv2.imwrite('frame'+str(camID)+'.jpg',frame)
-        else:
-            rval = False
+#         if cam.isOpened():  # try to get the first frame
+#             rval, frame = cam.read()
+#             cv2.imwrite('frame'+str(camID)+'.jpg',frame)
+#         else:
+#             rval = False
 
-        while rval:
-            cv2.imshow(previewName, frame)
-            rval, frame = cam.read()
-            key = cv2.waitKey(20)
+#         while rval:
+#             cv2.imshow(previewName, frame)
+#             rval, frame = cam.read()
+#             key = cv2.waitKey(20)
             
-            if key == 27:  # exit on ESC
-                break
-        cv2.destroyWindow(previewName)
+#             if key == 27:  # exit on ESC
+#                 break
+#         cv2.destroyWindow(previewName)
 
 class RoverCamera:
     #def __init__(self, port, storage_path, vid_length) -> None:
@@ -50,9 +50,9 @@ class RoverCamera:
         # initialize stuff
     #    pass
 
-    def __init__(self,comms:RoverComms,port:list,vid_length:int,photoPath:str,photoResolution:tuple,videoPath:str,fps:int,videoResolution:tuple):
+    def __init__(self,port:list,vid_length:int,photoPath:str,photoResolution:tuple,videoPath:str,fps:int,videoResolution:tuple):
         self.port = port #camera 1 2 3
-        self.comms = comms
+        # self.comms = comms
     #for photo
         self.vid_length = vid_length #second
         self.photoPath = photoPath
@@ -72,7 +72,7 @@ class RoverCamera:
         
         cap=cv2.VideoCapture(self.port[0]) #port one
         #"desktop/:C/test" + "0" + ".avi"
-        out = cv2.VideoWriter(self.videoPath+num2str(self.videoCounter)+".avi",cv2.VideoWriter_fourcc('M','J','P','G'),self.fps, self.videoResolution)
+        out = cv2.VideoWriter(self.videoPath+str(self.videoCounter)+".avi",cv2.VideoWriter_fourcc('M','J','P','G'),self.fps, self.videoResolution)
         videoCounter+=videoCounter
 
         start = time.time()
@@ -85,7 +85,7 @@ class RoverCamera:
 
         out.release() #stop recording and write video file into path
         cap.release() #turn off camera
-        comms.syncVideo()
+        # comms.syncVideo()
 
         # Destroy all the windows
         #cv2.destroyAllWindows()
@@ -121,14 +121,24 @@ class RoverCamera:
 
     def take360(self,previewName, camID):
         # Create two threads as follows
-        thread1 = camThread("Camera 1", self.port[0])
-        thread2 = camThread("Camera 2", self.port[1])
-        thread3 = camThread("Camera 3", self.port[2])
-        thread1.start()
-        thread2.start()
-        thread3.start()
+        # thread1 = camThread("Camera 1", self.port[0])
+        # thread2 = camThread("Camera 2", self.port[1])
+        # thread3 = camThread("Camera 3", self.port[2])
+        # thread1.start()
+        # thread2.start()
+        # thread3.start()
 
-        image_paths=['frame0.jpg','frame1.jpg','frame3.jpg']
+        capture0 = cv2.VideoCapture(self.port[0])
+        result,frame0=capture0.read()
+        cv2.imwrite('frame'+str(self.port[0])+'.jpg',frame0)
+        capture1 = cv2.VideoCapture(self.port[1])
+        result,frame1=capture1.read()
+        cv2.imwrite('frame'+str(self.port[1])+'.jpg',frame1)
+        capture2 = cv2.VideoCapture(self.port[0])
+        result,frame2=capture2.read()
+        cv2.imwrite('frame'+str(self.port[2])+'.jpg',frame2)
+
+        image_paths=['frame0.jpg','frame1.jpg','frame2.jpg']
         # initialized a list of images
         imgs = []
         
@@ -156,10 +166,10 @@ class RoverCamera:
             print('Your Panorama is ready!!!')
         
         # final output
-        cv2.imwrite(self.photoPath+num2str(self.photoCounter)+".jpg",output)
+        cv2.imwrite(self.photoPath+str(self.photoCounter)+".jpg",output)
         self.photoCounter += 1
         # save output as .jpg
-        comms.syncImage()
+        # comms.syncImage()
 
         cv2.waitKey(0)
 
