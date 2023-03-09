@@ -240,13 +240,17 @@ class RoverLidar:
 
         # objects are points where there are more hits than the threshold 
         objects = np.array(coords[counts>self.threshold], dtype=np.int_)
-        
+        objects = objects*self.resolution
+
         if objects.size == 0:
             color = None
         else:
-            for object in objects:
-                if abs(object[1]) < self.red_lim:
-                    color = "red" 
             color = "yellow"
+            for object in objects:
+                print(f"comparing {abs(object[1])} with {abs(self.red_lim[0])}")
+    
 
-        return color,objects
+                if abs(object[1]) < abs(self.red_lim[0]):
+                    color = "red" 
+
+        return color,objects,coords*self.resolution
