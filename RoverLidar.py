@@ -247,7 +247,7 @@ class RoverLidar:
         else:
             color = "yellow"
             for object in objects:
-                print(f"comparing {abs(object[1])} with {abs(self.red_lim[0])}")
+                #print(f"comparing {abs(object[1])} with {abs(self.red_lim[0])}")
     
 
                 if abs(object[1]) < abs(self.red_lim[0]):
