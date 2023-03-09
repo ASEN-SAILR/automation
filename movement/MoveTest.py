@@ -7,15 +7,15 @@ import numpy as np
 import pdb
 
 # start lidar
-lidar_port = r"/dev/tty/2"
-lidar = RoverLidar(lidar_port) # more params?
+#lidar_port = r"/dev/tty/2"
+#lidar = RoverLidar(lidar_port) # more params?
 
 # start gps 
 gps_port = r"/dev/tty/2"
-gps = RoverGPS(comms,gps_port) # more params?
+gps = RoverGPS(gps_port) # more params?
 
 # start move
-move = RoverMove(gps,lidar)
+move = RoverMove(gps)
 #Testing check_desired_heading function
 #Should return true
 Value1 = move.check_desired_heading(50,51)

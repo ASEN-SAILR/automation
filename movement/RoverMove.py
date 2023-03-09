@@ -8,7 +8,7 @@ import numpy as np
 from multiprocessing import Process
 ### Class that will handle the motion of the rover
 class RoverMove:
-	def __init__(self,gps:gps,lidar:lidar) -> None:
+	def __init__(self,gps:gps) -> None:
 		"""
 		inputs:
 			gps: instance of class RoverGPS
@@ -17,7 +17,6 @@ class RoverMove:
 		#member variables here
 
 		self.gps = gps
-		self.lidar = lidar
 		self.process = None
 
 	#Testing: Not complete
@@ -101,7 +100,7 @@ class RoverMove:
 			#Finding change in heading desired to point to LOI
 			MagHeading = self.gps.RoverGPS.get_heading()
 			DeltaHeading = gps.RoverGPS.angleToTarget(LOI,MagHeading)
-			
+			print(DeltaHeading)
 			#Sending command to teensy
 			#self.sendRotation(DeltaHeading)
 
@@ -114,6 +113,7 @@ class RoverMove:
 			time_to_scan = 2 #seconds
 			#Gets current lidar obstacles and status
 			#[Status,Obstacles] = lidar.RoverLidar.getObstacles()
+			pdb.set_trace()
 			Status = "none"
 			while Status is "none":
 				if check_desired_heading(MagHeading,DesHeading):
@@ -123,7 +123,7 @@ class RoverMove:
 					#self.motionInProgress()
 					#[Status,Obstacles] = lidar.RoverLidar.getObstacles()
 					print("Current heading:",MagHeading,"| Desired heading:",DesHeading)
-					time.sleep(1)
+					pdb.set_trace()
 				else:
 					break
 					
