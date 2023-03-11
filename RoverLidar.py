@@ -16,8 +16,8 @@ def radialToCart(ang, dist:np.ndarray, type = "rad"):
 class RoverLidar:
     def __init__(self,port_name) -> None:
 
-        self._lidar = RPLidar(None, port_name, timeout=3)
-
+        #self._lidar = RPLidar(None, port_name, timeout=3)
+        self.port_name = port_name
         self.x_lim = None
         self.y_lim = None
         self.threshold = None
@@ -212,6 +212,7 @@ class RoverLidar:
         if scan_time is None and scan is None:
             raise Exception("One of scan_time and scan must be defined")
         
+        self._lidar = RPLidar(None,self.port_name,timeout=3)
         if scan is None:
             scan = self.getTimedScan(scan_time)
 
@@ -252,5 +253,6 @@ class RoverLidar:
 
                 if abs(object[1]) < abs(self.red_lim[0]):
                     color = "red" 
-
+        self._lidar.stop()
+        self._lidar.disconnect()
         return color,objects,coords*self.resolution
