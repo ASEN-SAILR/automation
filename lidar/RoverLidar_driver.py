@@ -1,9 +1,10 @@
-# import sys
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
  
 # setting path
-# sys.path.append('../.')
+sys.path.append('../.')
+sys.path.append('.')
 
 from RoverLidar import RoverLidar
 import logging
@@ -17,8 +18,8 @@ if __name__ == "__main__":
         format='%(asctime)s %(levelname)-8s %(filename)s:%(lineno)-3s %(funcName)10s-   %(message)s',
         level=logging.DEBUG,
         datefmt='%Y-%m-%d %H:%M:%S')
-    # lidar_port = "/dev/tty/USB0"a
-    lidar_port = "COM9"
+    lidar_port = "/dev/ttyUSB0"
+    #lidar_port = "COM9"
     lidar = RoverLidar(port_name=lidar_port)
     logging.info("about to set mapParams")
     x_lim=np.array((0,3)) 
@@ -35,11 +36,11 @@ if __name__ == "__main__":
                     )
     # path = r"C:\Users\luker\OneDrive - UCB-O365\Classes\2023_spring\ASEN 4028\Teams Shortcuts\General\JPL Senior Projects\Testing\LiDAR Testing Material\data\TRR_scan_15_spray_paint.npy"
     # scan = np.load(path)
-    objects,x_chopped,y_chopped = lidar.getObstacles(2)
+    color,objects,points = lidar.getObstacles(2)
 
 
     fig,ax = plt.subplots()
-    ax.scatter(x_chopped,y_chopped)
+    ax.scatter(points[:,0],points[:,1])
     ax.set_title(DATA_NAME+"hits")
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")
