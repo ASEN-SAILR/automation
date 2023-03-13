@@ -1,16 +1,14 @@
 import cv2
 import numpy as np
 
-cap=cv2.VideoCapture(2)
+cap=cv2.VideoCapture(0)
 
-
-out = cv2.VideoWriter('outpy.avi',cv2.VideoWriter_fourcc('M','J','P','G'),5, [640,480])
 
 while(True):
 
     ret,frame = cap.read()
+    frame = cv2.resize(frame,[640,480])
     
-    out.write(frame)
 
     cv2.imshow('frame',frame)
     

@@ -23,8 +23,9 @@ lidar.setMapParams(
 				red_lim=red_lim, 
 				resolution=resolution
 				)
+buffer_dist = resolution/2
 
-move = RoverMove(lidar)
+move = RoverMove(lidar,buffer_dist)
 # start gps 
 #gps_port = r"/dev/tty/2"
 #gps = RoverGPS(gps_port) # more params?
