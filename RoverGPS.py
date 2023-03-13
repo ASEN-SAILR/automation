@@ -49,7 +49,7 @@ class RoverGPS:
         
         lat1, lon1 = self.readGPS() #self.__getGPS()
         lat2, lon2 = tarCoor
-
+        #print(lat1,lon1)
         deg2rad = math.pi/180
         lat1 = lat1*deg2rad
         lon1 = lon1*deg2rad
