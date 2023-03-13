@@ -13,6 +13,10 @@ print(cmd_dict['id'])
 """
 
 import os
+import cv2
+import socket
+import pickle
+import struct
 
 class RoverComms:
     def __init__(self,obcCommandPath:str,obcTelemPath:str,obcVideoPath:str,obcImagePath:str,gs_ssh_password:str,gs_ip:str,gs_telem_path:str,gs_video_path:str,gs_image_path:str):
@@ -22,6 +26,8 @@ class RoverComms:
         self.obcVideoPath = obcVideoPath
         self.obcImagePath = obcImagePath
         self.currCmdNum = 0
+
+        self.obc_ip = '10.203.178.120'
 
         # ground station vars
         self.gs_ssh_password = gs_ssh_password #'asen4018'
@@ -119,6 +125,54 @@ class RoverComms:
             return 1
         else:
             return 0
+
+    def liveVideoServer(self,):
+
+        # Create a socket object
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        host_name = socket.gethostname()
+        # host_ip = socket.gethostbyname(host_name)
+        host_ip = self.obc_ip
+        print('Host IP:', host_ip)
+        port = 9999
+        socket_address = (host_ip, port)
+
+        # Bind the socket to a public host and a port
+        server_socket.bind(socket_address)
+
+        # Listen for incoming connections
+        server_socket.listen(5)
+
+        print('Waiting for client...')
+        while True:
+            # Accept a client connection
+            client_socket, client_address = server_socket.accept()
+            print('Client connected:', client_address)
+
+            # Open the webcam
+            cap = cv2.VideoCapture(0)
+            cap.set(cv2.CAP_PROP_FPS,30)
+            # Set the video dimensions
+            frame_width = int(cap.get(3))
+            frame_height = int(cap.get(4))
+
+            # Send the video dimensions to the client
+            client_socket.send(struct.pack("I", frame_width))
+            client_socket.send(struct.pack("I", frame_height))
+
+            # Start streaming the video
+            while True:
+                # Read a frame from the webcam
+                ret, frame = cap.read()
+
+                # Convert the frame to a byte string
+                data = pickle.dumps(frame)
+
+                # Send the frame size to the client
+                client_socket.send(struct.pack("I", len(data)))
+
+                # Send the frame to the client
+                client_socket.send(data)
 
 
 
