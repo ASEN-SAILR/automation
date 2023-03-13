@@ -1,15 +1,9 @@
-import numpy as np
+import numpy
 import cv2
 
-capture = cv2.VideoCapture(0)
-result,frame=capture.read()
-	
-cv2.resize(frame, (1920,1080))
-
-cv2.imwrite('testphoto.jpg',frame)
-
-cv2.imshow('1',frame)
-
+cap0=cv2.VideoCapture(0)
+re,frame0=cap0.read()
+out=cv2.imwrite("/home/sailr/SeniorProjects/automation/images/testphoto.jpg",frame0)
 
 
 

@@ -7,38 +7,7 @@ import time
 import RoverComms
 import threading
 
-<<<<<<< HEAD
-class camThread(threading.Thread):
-    def __init__(self, previewName, camID):
-        threading.Thread.__init__(self)
-        self.previewName = previewName
-        self.camID = camID
 
-    def run(self):
-        print("Starting " + self.previewName)
-        self.camPreview()
-
-    def camPreview(self):
-        cv2.namedWindow(self.previewName)
-        cam = cv2.VideoCapture(camID,cv2.CAP_DSHOW)
-        cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
-
-        if cam.isOpened():  # try to get the first frame
-            rval, frame = cam.read()
-            cv2.imwrite('frame'+str(self.camID)+'.jpg',frame)
-        else:
-            rval = False
-
-        while rval:
-            cv2.imshow(previewName, frame)
-            rval, frame = cam.read()
-            key = cv2.waitKey(20)
-            
-            if key == 27:  # exit on ESC
-                break
-        cv2.destroyWindow(self.previewName)
-=======
 # class camThread(threading.Thread):
 #     def __init__(self, previewName, camID):
 #         threading.Thread.__init__(self)
@@ -69,7 +38,6 @@ class camThread(threading.Thread):
 #             if key == 27:  # exit on ESC
 #                 break
 #         cv2.destroyWindow(previewName)
->>>>>>> 3c975edc9a87624038823975864032477ffde377
 
 class RoverCamera:
     #def __init__(self, port, storage_path, vid_length) -> None:
@@ -83,7 +51,7 @@ class RoverCamera:
         # initialize stuff
     #    pass
 
-    def __init__(self,comms:RoverComms,port:list,vid_length:int,photoPath:str,photoResolution:tuple,videoPath:str,fps:int,videoResolution:tuple):
+    def __init__(self,comms,port:list,vid_length:int,photoPath:str,photoResolution:tuple,videoPath:str,fps:int,videoResolution:tuple):
         self.port = port #camera 1 2 3
         self.comms = comms
     #for photo
@@ -93,6 +61,7 @@ class RoverCamera:
         self.photoResolution = photoResolution
     #for video
         self.videoPath = videoPath
+        print(videoPath)
         self.fps = fps
         self.videoResolution = videoResolution
         self.videoCounter = 0 #this will be on name of new video
@@ -103,40 +72,44 @@ class RoverCamera:
         Record in self.vidLength length chunks.
         """
         
-        cap=cv2.VideoCapture(self.port[0]) #port one
+        cap=cv2.VideoCapture(self.port[0]) #porto
         #"desktop/:C/test" + "0" + ".avi"
-        out = cv2.VideoWriter(self.videoPath+str(self.videoCounter)+".avi",cv2.VideoWriter_fourcc('M','J','P','G'),self.fps, self.videoResolution)
+        out = cv2.VideoWriter("/home/sailr/SeniorProjects/automation/videos/video.avi",cv2.VideoWriter_fourcc(*'MJPG'),self.fps,self.videoResolution)
         self.videoCounter+=self.videoCounter
 
         start = time.time()
-
         while(time.time()-start<self.vid_length):#break to stop recording after videoLength second
             ret,frame = cap.read()
-            out.write(frame)
+            frame = cv2.resize(frame,self.videoResolution)
+            if ret:
+                out.write(frame)
+                print('video capturing')
+            else:
+                print('vidoe capture not working')
             #cv2.imshow('frame',frame)
             #if cv2.waitKey(1) & 0xFF == ord('q'):  
 
-        out.release() #stop recording and write video file into path
-        cap.release() #turn off camera
+        print(str(time.time()-start))
+        #cap.release() #stop recording and write video file into path
+        #out.release() #turn off camera
         self.comms.syncVideo()
 
-        # Destroy all the windows
+        # stroy all the windows
         #cv2.destroyAllWindows()
 
-    def startRecording(self):
+    #def startRecording(self):
         """
         begin a process for recording video
         """
-        self.recordingProcess = Process(target=self.record,args=None)
-        self.recordingProcess.start()
+      #  self.recordingProcess = Process(target=self.record,args=None)     #   self.recordingProcess.start()
         #tbc
 
     
-    def stopRecording(self):
+   # def stopRecording(self):
         """
         stop the recordingProcess
         """
-        self.recordingProcess.terminate()
+    #    self.recordingProcess.terminate()
         #tbc
 
     # uneeded? Should we send at certain cadence?
@@ -153,69 +126,63 @@ class RoverCamera:
         #send command
 
     def take360(self):
-        # Create two threads as follows
-<<<<<<< HEAD
-        thread1 = camThread("Camera 1", self.port[0])
-        thread2 = camThread("Camera 2", self.port[1])
-        thread3 = camThread("Camera 3", self.port[2])
-        thread1.start()
-        thread2.start()
-        thread3.start()
-=======
-        # thread1 = camThread("Camera 1", self.port[0])
-        # thread2 = camThread("Camera 2", self.port[1])
-        # thread3 = camThread("Camera 3", self.port[2])
-        # thread1.start()
-        # thread2.start()
-        # thread3.start()
 
-        capture0 = cv2.VideoCapture(self.port[0])
+        capture0=cv2.VideoCapture(self.port[0])
+        capture0.set(cv2.CAP_PROP_AUTOFOCUS,1)
         result,frame0=capture0.read()
-        cv2.imwrite('frame'+str(self.port[0])+'.jpg',frame0)
-        capture1 = cv2.VideoCapture(self.port[1])
-        result,frame1=capture1.read()
-        cv2.imwrite('frame'+str(self.port[1])+'.jpg',frame1)
-        capture2 = cv2.VideoCapture(self.port[0])
-        result,frame2=capture2.read()
-        cv2.imwrite('frame'+str(self.port[2])+'.jpg',frame2)
->>>>>>> 3c975edc9a87624038823975864032477ffde377
+        #cv2.imwrite('frame'+str(self.port[0])+'.jpg',frame0)
+        capture0.release()
 
-        image_paths=['frame0.jpg','frame1.jpg','frame2.jpg']
-        # initialized a list of images
-        imgs = []
+        capture1 = cv2.VideoCapture(self.port[1])
+        capture1.set(cv2.CAP_PROP_AUTOFOCUS,1)
+        result,frame1=capture1.read()
+        #cv2.imwrite('frame'+str(self.port[1])+'.jpg',frame1)
+        capture1.release()
         
-        for i in range(len(image_paths)):
-            imgs.append(image_paths[i])
+
+        capture2 = cv2.VideoCapture(self.port[2])
+        capture2.set(cv2.CAP_PROP_AUTOFOCUS,1)
+        result,frame2=capture2.read()
+        #cv2.imwrite('frame'+str(self.port[2])+'.jpg',frame2)
+        capture2.release()
+        
+        #frame0=cv2.imread('frame'+str(self.port[0])+'.jpg')
+        #frame1=cv2.imread('frame'+str(self.port[1])+'.jpg')
+        #frame2=cv2.imread('frame'+str(self.port[2])+'.jpg')
+
+        # initialized a list of images
+        imgs = [frame2,frame1,frame0]
+        
+        #for i in range(len(image_paths)):
+         #   imgs.append(image_paths[i])
             # this is optional if your input images isn't too large
-            # you don't need to scale down the image
+            ## you don't need to scale down the image
             # in my case the input images are of dimensions 3000x1200
             # and due to this the resultant image won't fit the screen
             # scaling down the images
         # showing the original pictures
-        cv2.imshow('1',imgs[0])
-        cv2.imshow('2',imgs[1])
-        cv2.imshow('3',imgs[2])
+        #cv2.imshow('1',imgs[0])
+        #cv2.imshow('2',imgs[1])
+        #cv2.imshow('3',imgs[2])
         
-        stitchy=cv2.Stitcher.create()
-        (dummy,output)=stitchy.stitch(imgs)
+        #stitchy=cv2.Stitcher.create()
+
+        #(dummy,output)=stitchy.stitch(imgs)
         
-        if dummy != cv2.STITCHER_OK:
+        #if dummy != cv2.STITCHER_OK:
         # checking if the stitching procedure is successful
         # .stitch() function returns a true value if stitching is
         # done successfully
-            print("Stitching was not successful")
-        else:
-            print('Your Panorama is ready!!!')
+         #   print("Stitching was not successful")
+        #else:
+         #   print('Your Panorama is ready!!!')
         
         # final output
-        cv2.imwrite(self.photoPath+str(self.photoCounter)+".jpg",output)
+        pano = cv2.hconcat(imgs)
+        cv2.imwrite("/home/sailr/SeniorProjects/automation/images/pano.jpg",pano)
         self.photoCounter += 1
         # save output as .jpg
         self.comms.syncImage()
-<<<<<<< HEAD
-
-=======
->>>>>>> 3c975edc9a87624038823975864032477ffde377
 
 #######
 

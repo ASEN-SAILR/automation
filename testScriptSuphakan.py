@@ -15,15 +15,15 @@ def main():
     commands_path = r"/commands.txt"
     telemetry_path = r"telemetry.txt"
     # # onboard computer comms vars
+    obcVideoPath = "~/SeniorProjects/automation/videos/"
     obcCommandPath = commands_path
     obcTelemPath = telemetry_path
-    obcVideoPath = "videos"
-    obcImagePath = "images"
+    obcImagePath = "~/SeniorProjects/automation/images/"
     #currCmdNum = 0 #not needed, automatically defined in RoverComms
     # ground station comms vars
     gs_ssh_password = "asen-sailr"
-    gs_ip = "10.203.140.107"
-    gs_home_path = "/home/ground-station/comms-gs/"
+    gs_ip = "192.168.1.3"
+    gs_home_path = "~/comms-gs/"
     gs_telem_path = gs_home_path+"telemetry.txt"
     gs_video_path = gs_home_path+"videos"
     gs_image_path = gs_home_path+"images"
@@ -32,14 +32,13 @@ def main():
 
 
     # start video recording (class)
-    camPort = [0,1,2]
-    videoPath = r"/videos/" #example path
-    vidLength = 5 #unit is second
+    camPort = [0,4,8]
+    vidLength = 15 #unit is second
     photoPath = obcImagePath
-    photoResolution = (1920,1080) #format: tuple (480,480)
+    photoResolution = [640,360] #format: tuple (480,480)
     videoPath = obcVideoPath
-    fps = 30 
-    videoResolution = (640,360) #format: tuple (480,480)
+    fps = 4 
+    videoResolution =[640,360] #format: tuple (480,480)
     cam = RoverCamera(comms,camPort,vidLength,photoPath,photoResolution,videoPath,fps,videoResolution) #need comms so that we can send video after recording
     #cam.startRecording() 
 

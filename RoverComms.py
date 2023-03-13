@@ -27,9 +27,10 @@ class RoverComms:
         self.gs_ssh_password = gs_ssh_password #'asen4018'
         self.gs_ip = gs_ip #'192.168.56.102'
 
-        self.gs_telem_path = gs_telem_path 
-        self.gs_video_path = gs_video_path
-        self.gs_image_path = gs_image_path
+        gs_str_stem = "ground-station@"+gs_ip+":"
+        self.gs_telem_path = gs_str_stem + gs_telem_path
+        self.gs_video_path = gs_str_stem + gs_video_path
+        self.gs_image_path = gs_str_stem + gs_image_path
 
         # initialize stuff as needed
 
@@ -102,15 +103,15 @@ class RoverComms:
         
 
     def syncTelem(self,):
-
+        print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
         os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
 
     def syncVideo(self,):
-
+        print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
         os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
 
     def syncImage(self,):
-
+        print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
         os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
 
 
