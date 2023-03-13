@@ -3,7 +3,7 @@ import sys
 sys.path.append("../")
 from RoverGPS import RoverGPS
 from RoverLidar import RoverLidar
-from RoverMagnet import RoverMagnet
+#from RoverMagnet import RoverMagnet
 import numpy as np
 import pdb
 
@@ -29,10 +29,10 @@ lidar.setMapParams(
 gps_port = r"/dev/ttyACM0"
 gps = RoverGPS(gps_port) # more params?
 
-magnet = RoverMagnet()
+#magnet = RoverMagnet()
 
 # start move
-move = RoverMove(gps,magnet)
+move = RoverMove(gps)
 #Testing check_desired_heading function
 '''#Should return true
 Value1 = self.move.check_desired_heading(50,51)

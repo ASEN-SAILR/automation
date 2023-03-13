@@ -37,7 +37,7 @@ def main():
     photoPath = obcImagePath
     photoResolution = [640,360] #format: tuple (480,480)
     videoPath = obcVideoPath
-    fps = 4 
+    fps = 30 
     videoResolution =[640,360] #format: tuple (480,480)
     cam = RoverCamera(comms,camPort,vidLength,photoPath,photoResolution,videoPath,fps,videoResolution) #need comms so that we can send video after recording
     #cam.startRecording() 

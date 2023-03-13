@@ -72,7 +72,8 @@ class RoverCamera:
         Record in self.vidLength length chunks.
         """
         
-        cap=cv2.VideoCapture(self.port[0]) #porto
+        cap=cv2.VideoCapture(self.port[0]) #port
+        cap.set(cv2.CAP_PROP_FPS,self.fps)
         #"desktop/:C/test" + "0" + ".avi"
         out = cv2.VideoWriter("/home/sailr/SeniorProjects/automation/videos/video.avi",cv2.VideoWriter_fourcc(*'MJPG'),self.fps,self.videoResolution)
         self.videoCounter+=self.videoCounter
