@@ -63,3 +63,12 @@ class RoverUART:
         if self.ser.in_waiting>0:
             return self.ser.readline()
         return -1
+
+    def readAll(self):
+        """
+        read from serial buffer until empty
+        """
+        buffer = []
+        while self.ser.in_waiting>0:
+             buffer.append(self.ser.readline())
+        return buffer
