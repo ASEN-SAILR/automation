@@ -1,3 +1,1 @@
-3 manual translation 1.09 -
-2 autonomous - - 102,105
-1 stop - -
+1, manual, LOI, 40.0150, -105.2705, 14:10:29
