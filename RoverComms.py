@@ -38,7 +38,7 @@ class RoverComms:
         self.gs_video_path = gs_str_stem + gs_video_path
         self.gs_image_path = gs_str_stem + gs_image_path
 
-
+        self.current_cmd_num = 0
         # initialize stuff as needed
 
     #probably not needed now?
@@ -63,43 +63,35 @@ class RoverComms:
         
         """
         return the lastest command in the file
+        if there is no new command return an empty dictionary
         """
 
         with open(self.obcCommandPath) as f:
             file = f.read().splitlines()
         
         command_dict = {}
-        lastest_command = file[-1].split(',')
-        
-        print(len(lastest_command))
+        try:
+            lastest_command = file[-1].split(',')
 
-        if len(lastest_command) == 3 and (lastest_command[1] == 'start' or lastest_command[1] == 'stop'):
-            command_dict.update({'commandType':'startStop', 'command':lastest_command[1]})
-        elif len(lastest_command) == 3 and (lastest_command[1] == 'manual' or lastest_command[1] == 'autonomous'):
-            command_dict.update({'commandType':'changeMode', 'command':lastest_command[1]})
-        elif len(lastest_command) == 5:
-            command_dict.update({'commandType':lastest_command[1], 'manualType':lastest_command[2], 'command':float(lastest_command[3])})
-        elif len(lastest_command) == 6:
-            command_dict.update({'commandType':lastest_command[1], 'LOI':[float(lastest_command[3]),float(lastest_command[4])]})
-        else:
-            None
+            if int(lastest_command[0]) == self.current_cmd_num:
+                if len(lastest_command) == 3 and (lastest_command[1] == 'start' or lastest_command[1] == 'stop'):
+                    command_dict.update({'commandType':'startStop', 'command':lastest_command[1]})
+                elif len(lastest_command) == 3 and (lastest_command[1] == 'manual' or lastest_command[1] == 'autonomous'):
+                    command_dict.update({'commandType':'changeMode', 'command':lastest_command[1]})
+                elif len(lastest_command) == 5:
+                    command_dict.update({'commandType':lastest_command[1], 'manualType':lastest_command[2], 'command':float(lastest_command[3])})
+                elif len(lastest_command) == 6:
+                    command_dict.update({'commandType':lastest_command[1], 'LOI':[float(lastest_command[3]),float(lastest_command[4])]})
+                else:
+                    None
+
+                self.current_cmd_num = lastest_command[0]
+
+        except:
+            print("command file empty")
+        
     
         return command_dict
-            
-        #probably not need to send error when multiple commands because we read the newest command instead of throwing error
-
-        # if int(line[0]) == self.currCmdNum: #this means no new command
-        #     return None
-
-        # #if new command found, update currCmdNum and return a dictionary of command
-        # self.currCmdNum = int(line[0])
-
-        # lin = line.split()
-        # print(lin)
-        # return {"mode" : lin[1],
-        # "command" : lin[2],
-        # "dist" : float(lin[3]),
-        # "LOI" : lin[4].split(',')}
 
     def writeAndSendTelemetry(self,gpsCoor:str): # -> bool:
         """
