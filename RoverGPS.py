@@ -28,6 +28,7 @@ class RoverGPS:
     def readGPS(self):
         gps = UbloxGps(self.port)
         geo = gps.geo_coords()
+        #print(geo.lon,geo.lat)
         return [geo.lon,geo.lat]
     def startTele(self):
         self.process = Process(target=self.readAndWriteAndSendTele)

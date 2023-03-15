@@ -13,9 +13,10 @@ import pdb
 lidar_port = r"/dev/ttyUSB0"
 lidar = RoverLidar(port_name=lidar_port)
 x_lim=np.array((0,1)) 
-y_lim=np.array((-1,1))
+y_lim=np.array((-.5,.5))
 threshold=0
 red_lim=np.array((0.25,0.25))
+red_width = .5
 resolution=0.1
 lidar.setMapParams(
 				x_lim=x_lim, 
@@ -33,7 +34,7 @@ gps = RoverGPS(gps_port) # more params?
 #magnet = RoverMagnet()
 
 # start move
-move = RoverMove(lidar,gps,buffer_dist)
+move = RoverMove(lidar,gps,buffer_dist,red_width)
 #Testing check_desired_heading function
 '''#Should return true
 Value1 = self.move.check_desired_heading(50,51)
@@ -61,6 +62,7 @@ else:
 '''
 
 
+LOI = [39.74,-104.99]
 #Testing autonomous function
-move.autonomous(1)
+move.autonomous(LOI,red_width)
 pdb.set_trace()
