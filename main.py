@@ -59,15 +59,29 @@ if __name__ == "__main__":
 	uart = RoverUART(teensy_port,baud=115200) 
 
 	# start lidar
-	lidar_port = r"/dev/tty/2"
-	lidar = RoverLidar(lidar_port) # more params?
+	lidar_port = r"/dev/ttyUSB0"
+	lidar = RoverLidar(port_name=lidar_port)
+	x_lim=np.array((0,1)) 
+	y_lim=np.array((-.5,.5))
+	threshold=0
+	red_lim=np.array((0.25,0.25))
+	red_width = .5
+	resolution=0.1
+	lidar.setMapParams(
+			x_lim=x_lim, 
+			y_lim=y_lim, 
+			threshold=threshold, 
+			red_lim=red_lim, 
+			resolution=resolution
+			)
+	buffer_dist = resolution/2
 
 	# start gps 
 	gps_port = r"/dev/tty/2"
 	gps = RoverGPS(comms,gps_port) # more params?
 
 	# start move
-	move = RoverMove(gps,lidar)
+	move = RoverMove(lidar,gps,buffer_dist,red_width)
 
 	#start record process that will be run on background - keep recording and sending videos
 	gps.startTele()
@@ -89,6 +103,9 @@ if __name__ == "__main__":
 				break
 			#once a command is recieved, we need a way to monitor motion
 
+		#TODO: check if at LOI
+		#if move.atloi == True:
+		
 		# check for emergecy stop conidition first
 		if command["mode"] == "stop":
 			# termiate child processes immediately and stop motion ASAP
@@ -110,8 +127,14 @@ if __name__ == "__main__":
 		#current_process.terminate() #we probably want a more elegent way of stopping, this may cause memory leaks
 		move.stopMove()
 
-		if command["mode"] == "autonomous" or command["mode"] == "manual":
-			current_process = Process(target=move.startMove, args=(command,))
+		#if command["mode"] == "autonomous" or command["mode"] == "manual":
+			#current_process = Process(target=move.startMove, args=(command,))
+		if command["type"]=="autonomous":
+			current_process = Process(target=move.autonomous, args=(command['LOI']))
+			current_process.start()
+		elif command["type"]=="manual":
+			current_process = Process(target=move.manual, args=(command["type"],command["dist"],command["angle"]))
+			current_process.start()
 			# move.startMove(command)			
 
 		#TODO take photo when at LOI

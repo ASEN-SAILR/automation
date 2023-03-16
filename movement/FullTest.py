@@ -26,7 +26,7 @@ lidar.setMapParams(
 				resolution=resolution
 				)
 buffer_dist = resolution/2
-
+#buffer_dist = 0
 # start gps 
 gps_port = r"/dev/ttyACM0"
 gps = RoverGPS(gps_port) # more params?
@@ -64,5 +64,5 @@ else:
 
 LOI = [39.74,-104.99]
 #Testing autonomous function
-move.autonomous(LOI,red_width)
+move.autonomous(LOI,red_width,buffer_dist)
 pdb.set_trace()

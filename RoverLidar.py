@@ -255,5 +255,5 @@ class RoverLidar:
                     color = "red" 
         self._lidar.stop()
         self._lidar.disconnect()
-        #print(objects)
+        print(objects)
         return color,objects,coords*self.resolution
