@@ -83,6 +83,7 @@ class RoverMove:
                 return:
                         bool
                 """
+				self.process.terminate()
 
         
         def emergencyStopRover(self) -> bool:
@@ -92,6 +93,7 @@ class RoverMove:
                 return:
                         bool
                 """
+				self.stopMove()
                 return
 
         ### Autonomous Mode ###

@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
 			move.emergencyStop()
 
-			if current_process == ~ None: current_process.terminate()
+			if current_process != None: current_process.terminate()
 			# current_process.close() #may need this???
 
 			#tell the teensy to stop motion
@@ -103,17 +103,20 @@ if __name__ == "__main__":
 
 		# if we are here, there has been a new command specified and 
 		# we need to stop manual or autonomous motion
-		current_process.terminate() #we probably want a more elegent way of stopping, this may cause memory leaks
+		#current_process.terminate() #we probably want a more elegent way of stopping, this may cause memory leaks
+		move.stopMove()
 
 		if command["mode"] == "autonomous" or command["mode"] == "manual":
-			move.startMove(command)			
+			move.startMove(command)
 
 		elif command["mode"] == "photo":
 			# STOP recording 
 			# take pano photo
 			# begin recording 
 			#todo
-			pass
+			cam.stopRecording()
+			cam.take360()
+			cam.startRecording()
 
 		elif command["mode"] == "stop":
 			# allow child processes to stop on their own time (will finish motion)
