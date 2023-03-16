@@ -65,6 +65,7 @@ if __name__ == "__main__":
 	# start gps 
 	gps_port = r"/dev/tty/2"
 	gps = RoverGPS(comms,gps_port) # more params?
+	gsLOI = [0,0]#gps.readGPS()
 
 	# start move
 	move = RoverMove(gps,lidar)
@@ -84,10 +85,21 @@ if __name__ == "__main__":
 	command = None
 	while True:
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
-			command = comms.readCommand()
-			if command is not None or ~current_process.is_alive():
+			if command is not None:
 				break
-			#once a command is recieved, we need a way to monitor motion
+			command = comms.readCommand()
+			#if moving done, take a pano, set new LOI to GS, and resume autonomous
+			if gps.atloi(LOI) and ~current_process.is_alive():
+				video.stopRecording()
+				video.take360()
+				video.startRecording()
+				LOI = gs_LOI
+			#TODO what does the command looks like
+			#command = {"type"=,"LOI"=LOI}
+			#once a command is recieved, we need a way to monitor motion		
+
+		
+		
 
 		# check for emergecy stop conidition first
 		if command["mode"] == "stop":
@@ -95,7 +107,7 @@ if __name__ == "__main__":
 
 			move.emergencyStop()
 
-			if current_process is not None: current_process.terminate()
+			if ~current_process.is_alive(): current_process.terminate()
 			# current_process.close() #may need this???
 
 			#tell the teensy to stop motion
@@ -112,7 +124,7 @@ if __name__ == "__main__":
 
 		if command["mode"] == "autonomous" or command["mode"] == "manual":
 			current_process = Process(target=move.startMove, args=(command,))
-			# move.startMove(command)			
+			# move.startMove(command)
 
 		#TODO take photo when at LOI
 		elif command["mode"] == "photo":
@@ -124,7 +136,7 @@ if __name__ == "__main__":
 			video.take360()
 			video.startRecording()
 
-		
+	
 		#return to top of loop
 			
 
