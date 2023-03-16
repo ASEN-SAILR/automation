@@ -35,7 +35,8 @@ class RoverGPS:
         self.process.start()
 
     def stopTele(self):
-        self.process.terminate()
+        if self.process.is_alive():
+            self.process.terminate()
 
 
     def __bearingToTarget(self,tarCoor:list): # -> float:

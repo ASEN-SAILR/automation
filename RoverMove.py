@@ -83,7 +83,8 @@ class RoverMove:
                 return:
                         bool
                 """
-				self.process.terminate()
+				if self.process.is_alive():
+					self.process.terminate()
 
         
         def emergencyStopRover(self) -> bool:
