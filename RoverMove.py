@@ -5,6 +5,7 @@ import time
 from RoverGPS import RoverGPS
 from RoverLidar import RoverLidar 
 #from RoverMagnet import RoverMagnet
+#from RoverUART import RoverUART
 import numpy as np
 import pdb
 from multiprocessing import Process
@@ -18,6 +19,7 @@ class RoverMove:
                 """
                 #member variables here
 
+				#self.uart = uart
                 self.gps = gps
                 #self.magnet = magnet
                 self.lidar = lidar
@@ -99,7 +101,7 @@ class RoverMove:
 
                 TODO: update function calls to match current classes
                 """
-                MagHeading = 0
+                MagHeading = 0 # self.uart.getMagneticAzm()
                 atlocation = 0 # self.gps.distanceToTarget(LOI) < 1.15 #precision radius(+/-1.15)
                 #make the rover move autonomously to LOI
                 time_to_scan = 2 # seconds
