@@ -95,11 +95,7 @@ if __name__ == "__main__":
 
 			move.emergencyStop()
 
-<<<<<<< HEAD
-			if current_process != None: current_process.terminate()
-=======
 			if current_process is not None: current_process.terminate()
->>>>>>> mainchanges
 			# current_process.close() #may need this???
 
 			#tell the teensy to stop motion
@@ -115,12 +111,8 @@ if __name__ == "__main__":
 		move.stopMove()
 
 		if command["mode"] == "autonomous" or command["mode"] == "manual":
-<<<<<<< HEAD
-			move.startMove(command)
-=======
 			current_process = Process(target=move.startMove, args=(command,))
 			# move.startMove(command)			
->>>>>>> mainchanges
 
 		#TODO take photo when at LOI
 		elif command["mode"] == "photo":
@@ -128,9 +120,9 @@ if __name__ == "__main__":
 			# take pano photo
 			# begin recording 
 			#todo
-			cam.stopRecording()
-			cam.take360()
-			cam.startRecording()
+			video.stopRecording()
+			video.take360()
+			video.startRecording()
 
 		
 		#return to top of loop

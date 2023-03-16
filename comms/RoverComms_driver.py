@@ -1,12 +1,13 @@
 import sys
-sys.append("../.")
-sys.append(".")
+sys.path.append("../.")
+sys.path.append(".")
+import time
 
 from RoverComms import RoverComms
 
 if __name__ == "__main__":
     my_str = 'lol'
-    comms = RoverComms(obcCommandPath="test_commands.txt",
+    comms = RoverComms(obcCommandPath="comms\\excommands.txt",
                        obcTelemPath=my_str,
                        obcVideoPath=my_str,
                        obcImagePath=my_str,
@@ -15,3 +16,7 @@ if __name__ == "__main__":
                        gs_telem_path=my_str,
                        gs_video_path=my_str,
                        gs_image_path=my_str)
+    
+    while True:
+        print(comms.readCommand())
+        time.sleep(1)
