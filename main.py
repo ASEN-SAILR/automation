@@ -71,31 +71,39 @@ if __name__ == "__main__":
 
 	#start record process that will be run on background - keep recording and sending videos
 	gps.startTele()
-	cam.startRecording()
 
 	# Variable that contains the active process: manual or autonomous
-	current_process = None
+	# need to instantiate a process then terminate for logic in while loop to work
+	def foo(): pass
+	current_process = Process(target=foo, args=())
+	current_process.terminate()
 
 	# tracks current command
 	active_command = "stop"
 
 	command = None
 	while True:
-		while command == None: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
+		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
 			command = comms.readCommand()
+			if command is not None or ~current_process.is_alive():
+				break
 			#once a command is recieved, we need a way to monitor motion
 
 		# check for emergecy stop conidition first
-		if command["mode"] == "emergency_stop":
+		if command["mode"] == "stop":
 			# termiate child processes immediately and stop motion ASAP
 
 			move.emergencyStop()
 
+<<<<<<< HEAD
 			if current_process != None: current_process.terminate()
+=======
+			if current_process is not None: current_process.terminate()
+>>>>>>> mainchanges
 			# current_process.close() #may need this???
 
 			#tell the teensy to stop motion
-			uart.sendEmergencyStop()
+			uart.sendStopCmd()
 		
 			# skip over rest of loop and wait for command
 			continue
@@ -107,8 +115,14 @@ if __name__ == "__main__":
 		move.stopMove()
 
 		if command["mode"] == "autonomous" or command["mode"] == "manual":
+<<<<<<< HEAD
 			move.startMove(command)
+=======
+			current_process = Process(target=move.startMove, args=(command,))
+			# move.startMove(command)			
+>>>>>>> mainchanges
 
+		#TODO take photo when at LOI
 		elif command["mode"] == "photo":
 			# STOP recording 
 			# take pano photo
@@ -118,20 +132,7 @@ if __name__ == "__main__":
 			cam.take360()
 			cam.startRecording()
 
-		elif command["mode"] == "stop":
-			# allow child processes to stop on their own time (will finish motion)
-			uart.sendStop()
-			
-			# skip over rest of loop and wait for command
-			continue
-
-		command = comms.readCommand()
-		while move.actionInProgress() and command["mode"] != 'emergency_stop':
-			# will hold until a motion is complete or emergency stop command
-			# comes through from the ground station
-			command = comms.readCommand() #if user inputs command while moving, it will ignore
-										  #should exit this loop with command being None(and rover done action) or emergency stop command
-
+		
 		#return to top of loop
 			
 
