@@ -153,13 +153,16 @@ class RoverMove:
                                 #time.sleep(2)
                         while Status is "red":
                                 #Needs testing
-                                Angle = self.get_delta_rotation(Obstacles,RedWidth) #Gets angle to rotate to set object in clearance zone
-                                #self.sendRotation(Angle)
-                                #Waits for motion to complete
-                                #self.motionInProgress()
-                                print("Rotate",Angle,"degrees")
-                                pdb.set_trace()
-                                [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
+								if self.get_delta_distance(Obstacles)<RedWidth/2:
+    									pass#back off
+								else:
+									Angle = self.get_delta_rotation(Obstacles,RedWidth) #Gets angle to rotate to set object in clearance zone
+									#self.sendRotation(Angle)
+									#Waits for motion to complete
+									#self.motionInProgress()
+									print("Rotate",Angle,"degrees")
+									pdb.set_trace()
+									[Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                 #time.sleep(2)
 
         def check_desired_heading(self,DeltaHeading):
@@ -197,41 +200,44 @@ class RoverMove:
                         ValueX = LeftValueX
                         RedWidth = -RedWidth
                 '''
+				#RightValueX += 0.5 #if we dont add this, we assume the rover turn in place of LiDar, which in fact we turn in place of the middle of the rover(0.5m behind LiDar)
+				#LeftValueX += 0.5
                 DistRight = np.sqrt(RightValueX**2+RightValueY**2)
-                AngleToTurnRight = np.rad2deg(np.arcsin((RedWidth/2)/DistRight))
+                AngleToTurnRight = np.rad2deg(np.arcsin((RedWidth/2)/DistRight)) #add buffer to y?
                 #print(AngleToTurn)
                 DistLeft = np.sqrt(LeftValueX**2+LeftValueY**2)
-                AngleToTurnLeft = np.rad2deg(np.arcsin((-RedWidth/2)/DistLeft))
+                AngleToTurnLeft = np.rad2deg(np.arcsin((-RedWidth/2)/DistLeft)) #add buffer to y?
                 #pdb.set_trace()
-                if RightValueY > 0:
-                         BufferAngle = np.rad2deg(np.arctan(RightValueX/RightValueY))
-                         if not np.isnan(AngleToTurnRight):
-                                  AngleToTurnRight = AngleToTurnRight + BufferAngle
-                         else:
-                                  AngleToTurnRight = 90
+                if not np.isnan(AngleToTurnRight):
+    					if RightValueY > 0:
+                         	AngleToTurnRight += np.rad2deg(np.arctan(RightValueX/RightValueY))
                 else:
-                         if np.isnan(AngleToTurnRight):
-                                  AngleToTurnRight = 90
-                if LeftValueY < 0:
-                         BufferAngle = np.rad2deg(np.arctan(LeftValueX/LeftValueY))
-                         if not np.isnan(AngleToTurnLeft):
-                                  AngleToTurnLeft = AngleToTurnLeft + BufferAngle
-                         else:
-                                  AngleToTurnLeft = -90
+                    	AngleToTurnRight = 90
+                # if LeftValueY < 0:
+                #          BufferAngle = np.rad2deg(np.arctan(LeftValueX/LeftValueY))
+                #          if not np.isnan(AngleToTurnLeft):
+                #                   AngleToTurnLeft = AngleToTurnLeft + BufferAngle
+                #          else:
+                #                   AngleToTurnLeft = -90
+                # else:
+                #          if np.isnan(AngleToTurnLeft):
+                #                   AngleToTurnLeft = -90
+				if not np.isnan(AngleToTurnLeft):
+    					if LeftValueY < 0:
+                        	AngleToTurnLeft += np.rad2deg(np.arctan(LeftValueX/LeftValueY))
                 else:
-                         if np.isnan(AngleToTurnLeft):
-                                  AngleToTurnLeft = -90
+                        AngleToTurnLeft = -90
+
                 #pdb.set_trace()
                 if abs(AngleToTurnLeft) > abs(AngleToTurnRight): 
                          AngleToTurn = AngleToTurnRight
                 elif abs(AngleToTurnLeft) < abs(AngleToTurnRight):
                          AngleToTurn = AngleToTurnLeft
-                else:
-                         print(RightValueY,LeftValueY)
-                         if abs(RightValueY)>abs(LeftValueY):
-                                   AngleToTurn = AngleToTurnLeft
-                         else:
-                                   AngleToTurn = AngleToTurnRight                      
+                elif abs(RightValueY) > abs(LeftValueY): #abs(angleLeft) == abs(angleRight) and abs(rightY) > abs(leftY)
+                        print(RightValueY,LeftValueY)
+                        AngleToTurn = AngleToTurnLeft
+                else: #abs(angleLeft) == abs(angleRight) and abs(rightY) <= abs(leftY)
+                        AngleToTurn = AngleToTurnRight                      
                 return AngleToTurn
                 # trig to find angle to turn
                 #AngleToTurnRight = np.rad2deg(np.arctan2(RightValueY+self.buffer_dist,RightValueX-self.buffer_dist))
