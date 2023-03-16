@@ -100,7 +100,7 @@ class RoverMove:
                 TODO: update function calls to match current classes
                 """
                 MagHeading = 0
-                atlocation = 0
+                atlocation = 0 # self.gps.distanceToTarget(LOI) < 1.15 #precision radius(+/-1.15)
                 #make the rover move autonomously to LOI
                 time_to_scan = 2 # seconds
                 [Status, Obstacles, _] = self.lidar.getObstacles(time_to_scan)
@@ -154,7 +154,7 @@ class RoverMove:
                         while Status is "red":
                                 #Needs testing
 								if self.get_delta_distance(Obstacles)<RedWidth/2:
-    									pass#back off
+    								pass#back off
 								else:
 									Angle = self.get_delta_rotation(Obstacles,RedWidth) #Gets angle to rotate to set object in clearance zone
 									#self.sendRotation(Angle)
@@ -229,7 +229,7 @@ class RoverMove:
                         AngleToTurnLeft = -90
 
                 #pdb.set_trace()
-                if abs(AngleToTurnLeft) > abs(AngleToTurnRight): 
+                if abs(AngleToTurnLeft) > abs(AngleToTurnRight):
                          AngleToTurn = AngleToTurnRight
                 elif abs(AngleToTurnLeft) < abs(AngleToTurnRight):
                          AngleToTurn = AngleToTurnLeft
@@ -237,7 +237,7 @@ class RoverMove:
                         print(RightValueY,LeftValueY)
                         AngleToTurn = AngleToTurnLeft
                 else: #abs(angleLeft) == abs(angleRight) and abs(rightY) <= abs(leftY)
-                        AngleToTurn = AngleToTurnRight                      
+                        AngleToTurn = AngleToTurnRight
                 return AngleToTurn
                 # trig to find angle to turn
                 #AngleToTurnRight = np.rad2deg(np.arctan2(RightValueY+self.buffer_dist,RightValueX-self.buffer_dist))
