@@ -25,7 +25,6 @@ class RoverComms:
         self.obcTelemPath = obcTelemPath
         self.obcVideoPath = obcVideoPath
         self.obcImagePath = obcImagePath
-        self.currCmdNum = 0
 
         self.obc_ip = '10.203.178.120'
 
@@ -70,22 +69,26 @@ class RoverComms:
             file = f.read().splitlines()
         
         command_dict = {}
-        try:
-            lastest_command = file[-1].split(',')
 
-            if int(lastest_command[0]) == self.current_cmd_num:
+        try:
+            lastest_command = file[-1].split(', ')
+            print(lastest_command)
+
+            if int(lastest_command[0]) != self.current_cmd_num:
                 if len(lastest_command) == 3 and (lastest_command[1] == 'start' or lastest_command[1] == 'stop'):
                     command_dict.update({'commandType':'startStop', 'command':lastest_command[1]})
+                    self.current_cmd_num = lastest_command[0]
                 elif len(lastest_command) == 3 and (lastest_command[1] == 'manual' or lastest_command[1] == 'autonomous'):
                     command_dict.update({'commandType':'changeMode', 'command':lastest_command[1]})
+                    self.current_cmd_num = lastest_command[0]
                 elif len(lastest_command) == 5:
                     command_dict.update({'commandType':lastest_command[1], 'manualType':lastest_command[2], 'command':float(lastest_command[3])})
+                    self.current_cmd_num = lastest_command[0]
                 elif len(lastest_command) == 6:
                     command_dict.update({'commandType':lastest_command[1], 'LOI':[float(lastest_command[3]),float(lastest_command[4])]})
+                    self.current_cmd_num = lastest_command[0]
                 else:
                     None
-
-                self.current_cmd_num = lastest_command[0]
 
         except:
             print("command file empty")
