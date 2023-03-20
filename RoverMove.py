@@ -4,6 +4,7 @@ sys.path.append("../")
 import time
 from RoverGPS import RoverGPS
 from RoverLidar import RoverLidar 
+from RoverUART import RoverUART
 #from RoverMagnet import RoverMagnet
 #from RoverUART import RoverUART
 import numpy as np
@@ -11,7 +12,7 @@ import pdb
 from multiprocessing import Process
 ### Class that will handle the motion of the rover
 class RoverMove:
-        def __init__(self,lidar:RoverLidar,gps:RoverGPS,buffer_dist,red_width) -> None:
+        def __init__(self,lidar:RoverLidar,gps:RoverGPS,uart:RoverUART,buffer_dist,red_width) -> None:
                 """
                 inputs:
                         gps: instance of class RoverGPS
@@ -23,6 +24,7 @@ class RoverMove:
                 self.gps = gps
                 #self.magnet = magnet
                 self.lidar = lidar
+		self.uart = uart
                 self.process = None
                 self.buffer_dist = buffer_dist
                 self.red_width = red_width
@@ -113,9 +115,10 @@ class RoverMove:
                         #Finding change in heading desired to point to LOI
                         #MagHeading = magnet.get_heading()
                         
-                        #DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
-                        DeltaHeading = 0
-                        print('Delta heading required:',DeltaHeading,'degrees.')
+                        DeltaHeading = np.deg2rad(self.gps.angleToTarget(LOI,MagHeading))
+                        #DeltaHeading = 0
+                        print('Delta heading required:',DeltaHeading,'radians.')
+                        self.sendRotateCmd(DeltaHeading)
                         #Sending command to teensy
                         #self.sendRotation(DeltaHeading)
 
@@ -140,10 +143,10 @@ class RoverMove:
                                         #Waits until motion is complete
                                         #self.motionInProgress()
 
-                                        print("Nothing in the way")
+                                        print("Nothing in the way, move 1 meter")
+                                        self.sendTranslateCmd(1)
                                         #pdb.set_trace()
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                        print("test")
                                         DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
                                         atloi = self.gps.atloi(LOI)
                                 else:
@@ -157,6 +160,7 @@ class RoverMove:
                                 #Waits for motion to complete
                                 #self.motionInProgress()
                                 print("Move",Distance,"meters")
+                                self.sendTranslateCmd(Distance)
                                 pdb.set_trace()
                                 [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                 #time.sleep(2)
@@ -166,11 +170,12 @@ class RoverMove:
                                 if self.get_delta_distance(Obstacles)<RedWidth/2:
                                         break#back off
                                 else:
-                                        Angle = self.get_delta_rotation(Obstacles,RedWidth,buffer_dist) #Gets angle to rotate to set object in clearance zone
+                                        Angle = np.deg2rad(self.get_delta_rotation(Obstacles,RedWidth,buffer_dist)) #Gets angle to rotate to set object in clearance zone
                                         #self.sendRotation(Angle)
                                         #Waits for motion to complete
                                         #self.motionInProgress()
-                                        print("Rotate",Angle,"degrees")
+                                        print("Rotate",Angle,"radians")
+                                        self.sendRotateCmd(Angle)
                                         pdb.set_trace()
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                         atloi = self.gps.atloi(LOI)
