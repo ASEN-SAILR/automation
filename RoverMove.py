@@ -105,7 +105,7 @@ class RoverMove:
                 TODO: update function calls to match current classes
                 """
                 MagHeading = 0 # self.uart.getMagneticAzm()
-                atloi = 0 # self.gps.atloi(LOI)
+                atloi = 0 # self.gps.distanceToTarget(LOI) < 1.15 #precision radius(+/-1.15)
                 #make the rover move autonomously to LOI
                 time_to_scan = 2 # seconds
                 [Status, Obstacles, _] = self.lidar.getObstacles(time_to_scan)
@@ -141,9 +141,9 @@ class RoverMove:
                                         #self.motionInProgress()
 
                                         print("Nothing in the way")
-                                        pdb.set_trace()
+                                        #pdb.set_trace()
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                        
+                                        print("test")
                                         DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
                                         atloi = self.gps.atloi(LOI)
                                 else:
@@ -215,17 +215,18 @@ class RoverMove:
                 RightValueY = RightValueY + buffer_dist
                 LeftValueY = LeftValueY - buffer_dist
                 # Adding .5 for rover length so rotation is at center
-                RightValueX = RightValueX + .5 - buffer_dist
-                LeftValueX = LeftValueX + .5 - buffer_dist 
+                rover_length = 1/2
+                RightValueX = RightValueX + rover_length - buffer_dist
+                LeftValueX = LeftValueX + rover_length - buffer_dist 
                 #print(RightValueY,RightValueX)
 				#RightValueX += 0.5 #if we dont add this, we assume the rover turn in place of LiDar, which in fact we turn in place of the middle of the rover(0.5m behind LiDar)
 				#LeftValueX += 0.5
                 DistRight = np.sqrt(RightValueX**2+RightValueY**2)
-                AngleToTurnRight = np.rad2deg(np.arcsin((RedWidth/2)/DistRight)) #add buffer to y?
+                AngleToTurnRight = np.rad2deg(np.arcsin((3*RedWidth/4)/DistRight)) #add buffer to y?
                 #pdb.set_trace()
                 #print(AngleToTurn)
                 DistLeft = np.sqrt(LeftValueX**2+LeftValueY**2)
-                AngleToTurnLeft = np.rad2deg(np.arcsin((-RedWidth/2)/DistLeft)) #add buffer to y?
+                AngleToTurnLeft = np.rad2deg(np.arcsin((-3*RedWidth/4)/DistLeft)) #add buffer to y?
                 #pdb.set_trace()
                 if not np.isnan(AngleToTurnRight):
                         if RightValueY > 0:
