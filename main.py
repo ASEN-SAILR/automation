@@ -38,7 +38,7 @@ if __name__ == "__main__":
 	# ground station comms vars
 	gs_ssh_password = "asen-sailr"
 	gs_ip = "192.168.1.3"
-	gs_home_path = "/home/ground-station/asen-sailr/"
+	gs_home_path = "/home/ground-station/comms-gs/"
 	gs_telem_path = gs_home_path+"telemetry.txt"
 	gs_video_path = gs_home_path+"videos"
 	gs_image_path = gs_home_path+"images"
@@ -60,8 +60,8 @@ if __name__ == "__main__":
 	# video.startRecording()
 
 	# start uart comms with Teensy
-	teensy_port = r"/dev/ttyACM0"
-	uart = RoverUART(teensy_port,baud=115200) 
+	teensy_port = r"/dev/ttyACM1"
+	uart = RoverUART(teensy_port) 
 	uart.readLine() #clear the serial buffer 
 
 	# start lidar
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 	buffer_dist = resolution/2
 
 	# start gps 
-	gps_port = r"/dev/ttyACM1"
+	gps_port = r"/dev/ttyACM0"
 	gps = RoverGPS(gps_port,comms) # more params?
 	LOI = [-105.243501,40.012155]
 	gsLOI = [0,0]#gps.readGPS()
@@ -109,8 +109,10 @@ if __name__ == "__main__":
 	while True:
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
 			command = comms.readCommand()
-			logging.info(f"command ({command}) read in from RoverComms ")
+			
 			if command:
+				logging.info(f"command ({command}) read in from RoverComms ")
+			
 				missionDone = False
 				break
 

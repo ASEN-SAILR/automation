@@ -1,6 +1,1 @@
-1, autonomous, 14:49:10
-2, manual, 14:50:29
-3, manual, LOI, 20, 30, 14:50:32
-4, autonomous, 14:54:37
-5, autonomous, LOI, 20, 30, 14:54:46
-6, autonomous, LOI, 15, 25, 15:18:04
+2, autonomous, LOI, 32, 45, 16:03:48

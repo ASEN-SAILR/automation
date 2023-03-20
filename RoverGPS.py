@@ -33,6 +33,7 @@ class RoverGPS:
             coor = readGPS(ser)
             #self.comms.writeAndSendTelemetry('1,2') 
             logging.info(f"writing {coor} to telem file")
+            print("Sending telem")
             self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])) #write and send
 
     def __readGPS(self,ser): #only for testing, on actual rover implementation, never call this
@@ -42,7 +43,7 @@ class RoverGPS:
         return [geo.lon,geo.lat]
     
     def startTele(self):
-        self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port))
+        self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port,))
         self.process.start()
 
     def stopTele(self):
