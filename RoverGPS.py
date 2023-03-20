@@ -12,21 +12,21 @@ from multiprocessing import Process
 ## all coordinates must be in deg-decimal form, not hour-min-sec
 
 class RoverGPS:
-    def __init__(self,port:str): # -> None:
+    def __init__(self,port:str,comms:RoverComms): # -> None:
         #member vars
 
         #initialize stuff
-        #self.comms = comms
+        self.comms = comms
         self.precision = 1.15
         self.port = serial.Serial(port, baudrate=38400, timeout=1)
 
     def readAndWriteAndSendTele(self):
         while True:
-            gps = UbloxGps(self.port)
-            geo = gps.geo_coords() #read GPS
+            coor = self.__readGPS()
             #self.comms.writeAndSendTelemetry('1,2') 
-            self.comms.writeAndSendTelemetry(str(geo.lon)+','+str(geo.lat)) #write and send
-    def readGPS(self):
+            self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])) #write and send
+
+    def __readGPS(self): #only for testing, on actual rover implementation, never call this
         gps = UbloxGps(self.port)
         geo = gps.geo_coords()
         #print(geo.lon,geo.lat)
@@ -52,7 +52,7 @@ class RoverGPS:
         #input: currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
         #output: bearing in deg from north, ie. 89 (float)
         
-        lat1, lon1 = self.readGPS() #self.__getGPS()
+        lat1, lon1 = self.__getGPS()
         lat2, lon2 = tarCoor
         #print(lat1,lon1)
         deg2rad = math.pi/180
@@ -71,7 +71,7 @@ class RoverGPS:
         input: currCoor, tarCoor = [lat,lon], ie. [23.0231,-34.204] (object of floats)
         output: distance to target in meter (float)
         """
-        lat1, lon1 = self.readGPS() #self.__getGPS()
+        lat1, lon1 = self.__getGPS()
         lat2, lon2 = tarCoor
 
         deg2rad = math.pi/180
@@ -98,7 +98,7 @@ class RoverGPS:
         """
         return self.__bearingToTarget(tarCoor)-currHeading
 
-    def getGPS(self): # -> list of float
+    def __getGPS(self): # -> list of float
         with open(self.comms.obcTelemPath) as f:
             file = f.read().splitlines()
         coor = file[0].split(',')
