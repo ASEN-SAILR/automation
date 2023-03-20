@@ -17,6 +17,7 @@ class RoverGPS:
 
         #initialize stuff
         #self.comms = comms
+        self.precision = 1.15
         self.port = serial.Serial(port, baudrate=38400, timeout=1)
 
     def readAndWriteAndSendTele(self):
@@ -28,14 +29,18 @@ class RoverGPS:
     def readGPS(self):
         gps = UbloxGps(self.port)
         geo = gps.geo_coords()
+        #print(geo.lon,geo.lat)
         return [geo.lon,geo.lat]
     def startTele(self):
         self.process = Process(target=self.readAndWriteAndSendTele)
         self.process.start()
 
     def stopTele(self):
-        self.process.terminate()
+        if self.process.is_alive():
+            self.process.terminate()
 
+    def atloi(self,LOI):
+        return self.distanceToTarget(LOI)<self.precision
 
     def __bearingToTarget(self,tarCoor:list): # -> float:
         """
@@ -93,7 +98,7 @@ class RoverGPS:
         """
         return self.__bearingToTarget(tarCoor)-currHeading
 
-    def __getGPS(self): # -> list of float
+    def getGPS(self): # -> list of float
         with open(self.comms.obcTelemPath) as f:
             file = f.read().splitlines()
         coor = file[0].split(',')

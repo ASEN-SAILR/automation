@@ -86,7 +86,7 @@ class RoverCamera:
                 out.write(frame)
                 print('video capturing')
             else:
-                print('vidoe capture not working')
+                print('video capture not working')
             #cv2.imshow('frame',frame)
             #if cv2.waitKey(1) & 0xFF == ord('q'):  
 
@@ -98,19 +98,19 @@ class RoverCamera:
         # stroy all the windows
         #cv2.destroyAllWindows()
 
-    #def startRecording(self):
+    def startRecording(self):
         """
         begin a process for recording video
         """
-      #  self.recordingProcess = Process(target=self.record,args=None)     #   self.recordingProcess.start()
+        self.recordingProcess = Process(target=self.record,args=None)     #   self.recordingProcess.start()
         #tbc
 
     
-   # def stopRecording(self):
+    def stopRecording(self):
         """
         stop the recordingProcess
         """
-    #    self.recordingProcess.terminate()
+        self.recordingProcess.terminate()
         #tbc
 
     # uneeded? Should we send at certain cadence?

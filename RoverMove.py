@@ -5,12 +5,13 @@ import time
 from RoverGPS import RoverGPS
 from RoverLidar import RoverLidar 
 #from RoverMagnet import RoverMagnet
+#from RoverUART import RoverUART
 import numpy as np
 import pdb
 from multiprocessing import Process
 ### Class that will handle the motion of the rover
 class RoverMove:
-        def __init__(self,lidar:RoverLidar,gps:RoverGPS,buffer_dist) -> None:
+        def __init__(self,lidar:RoverLidar,gps:RoverGPS,buffer_dist,red_width) -> None:
                 """
                 inputs:
                         gps: instance of class RoverGPS
@@ -18,11 +19,13 @@ class RoverMove:
                 """
                 #member variables here
 
+				#self.uart = uart
                 self.gps = gps
                 #self.magnet = magnet
                 self.lidar = lidar
                 self.process = None
                 self.buffer_dist = buffer_dist
+                self.red_width = red_width
 
         #Testing: Not complete
         def motionInProgress(self) :
@@ -80,6 +83,8 @@ class RoverMove:
                 return:
                         bool
                 """
+                if self.process.is_alive():
+                        self.process.terminate()
 
         
         def emergencyStopRover(self) -> bool:
@@ -89,26 +94,27 @@ class RoverMove:
                 return:
                         bool
                 """
+                self.stopMove()
                 return
 
         ### Autonomous Mode ###
-        def autonomous(self,LOI):
+        def autonomous(self,LOI,RedWidth,buffer_dist):
                 """
                 autonomously move the rover to a LOI
 
                 TODO: update function calls to match current classes
                 """
-                MagHeading = 0
-                atlocation = 0
+                MagHeading = 0 # self.uart.getMagneticAzm()
+                atloi = 0 # self.gps.atloi(LOI)
                 #make the rover move autonomously to LOI
-                LOI = [0,0]
                 time_to_scan = 2 # seconds
                 [Status, Obstacles, _] = self.lidar.getObstacles(time_to_scan)
-                while not atlocation:
+                while not atloi:
                         #Finding change in heading desired to point to LOI
                         #MagHeading = magnet.get_heading()
                         
-                        DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
+                        #DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
+                        DeltaHeading = 0
                         print('Delta heading required:',DeltaHeading,'degrees.')
                         #Sending command to teensy
                         #self.sendRotation(DeltaHeading)
@@ -123,39 +129,51 @@ class RoverMove:
                         #Gets current lidar obstacles and status
                         #[Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                         #time.sleep(2)
-                        pdb.set_trace()
+                        #pdb.set_trace()
+                        atloi = self.gps.atloi(LOI)
                         
-                        while Status is None:
+                        while Status is None and atloi == 0:
                                 if self.check_desired_heading(DeltaHeading):
                                         #Commenting out movement to test lidar
                                         #self.sendTranslation(1) #Moves 1 meter
+
                                         #Waits until motion is complete
                                         #self.motionInProgress()
-                                        [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                        #time.sleep(2)
-                                        DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
+
                                         print("Nothing in the way")
+                                        pdb.set_trace()
+                                        [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
+                                        
+                                        DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
+                                        atloi = self.gps.atloi(LOI)
                                 else:
                                         break
                                         
-                        while Status is "yellow":
+                        while Status is "yellow" and atloi == 0:
                                 #Needs testing
                                 Distance = self.get_delta_distance(Obstacles) #Gets the distance to clear clearance zone
                                 #Might need to check for distance more than a meter to make sure rover does not go further than it can see
                                 #self.sendTranslation(Distance)
                                 #Waits for motion to complete
                                 #self.motionInProgress()
-                                [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                 print("Move",Distance,"meters")
-                                #time.sleep(2)
-                        while Status is "red":
-                                #Needs testing
-                                Angle = self.get_delta_rotation(Obstacles) #Gets angle to rotate to set object in clearance zone
-                                #self.sendRotation(Angle)
-                                #Waits for motion to complete
-                                #self.motionInProgress()
+                                pdb.set_trace()
                                 [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                print("Rotate",Angle,"degrees")
+                                #time.sleep(2)
+                                atloi = self.gps.atloi(LOI)
+                        while Status is "red" and atloi == 0:
+                                #Needs testing
+                                if self.get_delta_distance(Obstacles)<RedWidth/2:
+                                        break#back off
+                                else:
+                                        Angle = self.get_delta_rotation(Obstacles,RedWidth,buffer_dist) #Gets angle to rotate to set object in clearance zone
+                                        #self.sendRotation(Angle)
+                                        #Waits for motion to complete
+                                        #self.motionInProgress()
+                                        print("Rotate",Angle,"degrees")
+                                        pdb.set_trace()
+                                        [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
+                                        atloi = self.gps.atloi(LOI)
                                 #time.sleep(2)
 
         def check_desired_heading(self,DeltaHeading):
@@ -166,15 +184,15 @@ class RoverMove:
         
         #Tested: Yes, working as intended       
         #Input: Array of values of X,Y
-        def get_delta_rotation(self,Obstacles):
+        def get_delta_rotation(self,Obstacles,RedWidth,buffer_dist):
                 if len(Obstacles) == 0:
                         return 0
                 # priming variables
                 Flag = 0
-                RightValueY = 0
-                RightValueX = 0
-                LeftValueY = 0
-                LeftValueX = 0
+                RightValueY = Obstacles[0][1]
+                RightValueX = Obstacles[0][0]
+                LeftValueY = Obstacles[0][1]
+                LeftValueX = Obstacles[0][0]
                 # determines angle to rotate to avoid obstacles
                 # finds the furthest right and the furthest left obstacles
                 for Iteration in Obstacles:
@@ -185,22 +203,79 @@ class RoverMove:
                         if Iteration[1] > RightValueY:
                                 RightValueY = Iteration[1]
                                 RightValueX = Iteration[0]
+                '''if abs(LeftValueY) > abs(RightValueY):
+                        ValueY = RightValueY
+                        ValueX = RightValueX
+                else:
+                        ValueY = LeftValueY
+                        ValueX = LeftValueX
+                        RedWidth = -RedWidth
+                '''
+                #print(RightValueY,LeftValueY)
+                RightValueY = RightValueY + buffer_dist
+                LeftValueY = LeftValueY - buffer_dist
+                # Adding .5 for rover length so rotation is at center
+                RightValueX = RightValueX + .5 - buffer_dist
+                LeftValueX = LeftValueX + .5 - buffer_dist 
+                #print(RightValueY,RightValueX)
+				#RightValueX += 0.5 #if we dont add this, we assume the rover turn in place of LiDar, which in fact we turn in place of the middle of the rover(0.5m behind LiDar)
+				#LeftValueX += 0.5
+                DistRight = np.sqrt(RightValueX**2+RightValueY**2)
+                AngleToTurnRight = np.rad2deg(np.arcsin((RedWidth/2)/DistRight)) #add buffer to y?
+                #pdb.set_trace()
+                #print(AngleToTurn)
+                DistLeft = np.sqrt(LeftValueX**2+LeftValueY**2)
+                AngleToTurnLeft = np.rad2deg(np.arcsin((-RedWidth/2)/DistLeft)) #add buffer to y?
+                #pdb.set_trace()
+                if not np.isnan(AngleToTurnRight):
+                        if RightValueY > 0:
+                                AngleToTurnRight += np.rad2deg(np.arctan(RightValueY/RightValueX))
+                else:
+                    	AngleToTurnRight = 90
+                # if LeftValueY < 0:
+                #          BufferAngle = np.rad2deg(np.arctan(LeftValueX/LeftValueY))
+                #          if not np.isnan(AngleToTurnLeft):
+                #                   AngleToTurnLeft = AngleToTurnLeft + BufferAngle
+                #          else:
+                #                   AngleToTurnLeft = -90
+                # else:
+                #          if np.isnan(AngleToTurnLeft):
+                #                   AngleToTurnLeft = -90
+                if not np.isnan(AngleToTurnLeft):
+                        if LeftValueY < 0:
+                                AngleToTurnLeft += np.rad2deg(np.arctan(LeftValueY/LeftValueX))
+                else:
+                        AngleToTurnLeft = -90
+
+                #pdb.set_trace()
+                if abs(AngleToTurnLeft) > abs(AngleToTurnRight):
+                         AngleToTurn = AngleToTurnRight
+                elif abs(AngleToTurnLeft) < abs(AngleToTurnRight):
+                         AngleToTurn = AngleToTurnLeft
+                elif abs(RightValueY) > abs(LeftValueY): #abs(angleLeft) == abs(angleRight) and abs(rightY) > abs(leftY)
+                        print(RightValueY,LeftValueY)
+                        AngleToTurn = AngleToTurnLeft
+                else: #abs(angleLeft) == abs(angleRight) and abs(rightY) <= abs(leftY)
+                        AngleToTurn = AngleToTurnRight
+                #pdb.set_trace()
+                return AngleToTurn
                 # trig to find angle to turn
-                AngleToTurnRight = np.rad2deg(np.arctan2(RightValueY+self.buffer_dist,RightValueX-self.buffer_dist))
-                AngleToTurnLeft = np.rad2deg(np.arctan2(LeftValueY-self.buffer_dist,LeftValueX-self.buffer_dist))
-                if LeftValueY == 0:
-                        AngleToTurnLeft = 0
-                if RightValueY == 0:
-                        AngleToTurnRight = 0
+                #AngleToTurnRight = np.rad2deg(np.arctan2(RightValueY+self.buffer_dist,RightValueX-self.buffer_dist))
+                #AngleToTurnLeft = np.rad2deg(np.arctan2(LeftValueY-self.buffer_dist,LeftValueX-self.buffer_dist))
+                #if LeftValueY == 0:
+                 #       AngleToTurnLeft = 0
+                #if RightValueY == 0:
+                 #       AngleToTurnRight = 0
                 # chooses the shorter angle
                 # adds buffer to account for rover size
                 #pdb.set_trace()
+                ''' print(AngleToTurnRight,AngleToTurnLeft)
                 if abs(AngleToTurnRight) > abs(AngleToTurnLeft):
                         AngleToTurn = AngleToTurnLeft
                 else:
                         AngleToTurn = AngleToTurnRight
                 return AngleToTurn
-        
+                '''
         #Tested: Yes, working as intended
         #Input: Array of values of X,Y
         def get_delta_distance(self,Obstacles):
