@@ -292,9 +292,10 @@ class RoverMove:
                 for Iteration in Obstacles:
                         if Iteration[0] > Iteration_prev:
                                 ValueX = Iteration[0]
+                                ValueY = Iteraion[1]
                         Iteration_prev = Iteration[0]
                 BufferDistance = 0
-                DistanceToMove = ValueX + BufferDistance
+                DistanceToMove = np.sqrt(ValueX**2+ValueY**2) + BufferDistance
                 return DistanceToMove
 
         #Possibly not needed
