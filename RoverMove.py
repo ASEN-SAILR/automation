@@ -115,7 +115,7 @@ class RoverMove:
                         #Finding change in heading desired to point to LOI
                         #MagHeading = magnet.get_heading()
                         MagHeading = self.uart.getMagneticAzm()
-                        DeltaHeading = np.deg2rad(self.gps.angleToTarget(LOI,MagHeading))
+                        DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
                         #DeltaHeading = 0
                         print('Delta heading required:',DeltaHeading,'radians.')
                         self.sendRotateCmd(DeltaHeading)
@@ -161,7 +161,7 @@ class RoverMove:
                                 #self.motionInProgress()
                                 print("Move",Distance,"meters")
                                 self.sendTranslateCmd(Distance)
-                                pdb.set_trace()
+                                #pdb.set_trace()
                                 [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                 #time.sleep(2)
                                 atloi = self.gps.atloi(LOI)
@@ -170,13 +170,13 @@ class RoverMove:
                                 if self.get_delta_distance(Obstacles)<RedWidth/2:
                                         break#back off
                                 else:
-                                        Angle = np.deg2rad(self.get_delta_rotation(Obstacles,RedWidth,buffer_dist)) #Gets angle to rotate to set object in clearance zone
+                                        Angle = self.get_delta_rotation(Obstacles,RedWidth,buffer_dist) #Gets angle to rotate to set object in clearance zone
                                         #self.sendRotation(Angle)
                                         #Waits for motion to complete
                                         #self.motionInProgress()
                                         print("Rotate",Angle,"radians")
                                         self.sendRotateCmd(Angle)
-                                        pdb.set_trace()
+                                        #pdb.set_trace()
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                         atloi = self.gps.atloi(LOI)
                                 #time.sleep(2)
