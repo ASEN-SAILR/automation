@@ -24,7 +24,7 @@ class RoverMove:
                 self.gps = gps
                 #self.magnet = magnet
                 self.lidar = lidar
-		self.uart = uart
+                self.uart = uart
                 self.process = None
                 self.buffer_dist = buffer_dist
                 self.red_width = red_width

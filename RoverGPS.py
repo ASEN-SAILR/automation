@@ -12,13 +12,13 @@ from multiprocessing import Process
 ## all coordinates must be in deg-decimal form, not hour-min-sec
 
 class RoverGPS:
-    def __init__(self,port:str,comms:RoverComms): # -> None:
+    def __init__(self,gpsport:str,comms:RoverComms): # -> None:
         #member vars
 
         #initialize stuff
         self.comms = comms
         self.precision = 1.15
-        self.port = serial.Serial(port, baudrate=38400, timeout=1)
+        self.port = serial.Serial(gpsport, baudrate=38400, timeout=1)
 
     def readAndWriteAndSendTele(self):
         while True:
