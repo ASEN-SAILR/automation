@@ -106,7 +106,7 @@ class RoverMove:
 
                 TODO: update function calls to match current classes
                 """
-                MagHeading = 0 # self.uart.getMagneticAzm()
+                MagHeading = self.uart.getMagneticAzm()
                 atloi = 0 # self.gps.distanceToTarget(LOI) < 1.15 #precision radius(+/-1.15)
                 #make the rover move autonomously to LOI
                 time_to_scan = 2 # seconds
@@ -114,8 +114,8 @@ class RoverMove:
                 while not atloi:
                         #Finding change in heading desired to point to LOI
                         #MagHeading = magnet.get_heading()
-                        
-                        DeltaHeading = np.deg2rad(self.gps.angleToTarget(LOI,MagHeading))
+                        MagHeading = self.uart.getMagneticAzm()
+                        DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
                         #DeltaHeading = 0
                         print('Delta heading required:',DeltaHeading,'radians.')
                         self.sendRotateCmd(DeltaHeading)
@@ -161,7 +161,7 @@ class RoverMove:
                                 #self.motionInProgress()
                                 print("Move",Distance,"meters")
                                 self.sendTranslateCmd(Distance)
-                                pdb.set_trace()
+                                #pdb.set_trace()
                                 [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                 #time.sleep(2)
                                 atloi = self.gps.atloi(LOI)
@@ -170,13 +170,13 @@ class RoverMove:
                                 if self.get_delta_distance(Obstacles)<RedWidth/2:
                                         break#back off
                                 else:
-                                        Angle = np.deg2rad(self.get_delta_rotation(Obstacles,RedWidth,buffer_dist)) #Gets angle to rotate to set object in clearance zone
+                                        Angle = self.get_delta_rotation(Obstacles,RedWidth,buffer_dist) #Gets angle to rotate to set object in clearance zone
                                         #self.sendRotation(Angle)
                                         #Waits for motion to complete
                                         #self.motionInProgress()
                                         print("Rotate",Angle,"radians")
                                         self.sendRotateCmd(Angle)
-                                        pdb.set_trace()
+                                        #pdb.set_trace()
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                         atloi = self.gps.atloi(LOI)
                                 #time.sleep(2)
@@ -292,9 +292,10 @@ class RoverMove:
                 for Iteration in Obstacles:
                         if Iteration[0] > Iteration_prev:
                                 ValueX = Iteration[0]
+                                ValueY = Iteraion[1]
                         Iteration_prev = Iteration[0]
                 BufferDistance = 0
-                DistanceToMove = ValueX + BufferDistance
+                DistanceToMove = np.sqrt(ValueX**2+ValueY**2) + BufferDistance
                 return DistanceToMove
 
         #Possibly not needed
