@@ -2,7 +2,7 @@
 #https://github.com/sparkfun/Qwiic_Ublox_Gps_Py
 from ublox_gps import UbloxGps
 import serial
-
+import logging
 import math
 import time
 import RoverComms
@@ -12,27 +12,38 @@ from multiprocessing import Process
 ## all coordinates must be in deg-decimal form, not hour-min-sec
 
 class RoverGPS:
-    def __init__(self,port:str,comms:RoverComms): # -> None:
+    def __init__(self,gpsport:str,comms:RoverComms): # -> None:
         #member vars
 
         #initialize stuff
         self.comms = comms
         self.precision = 1.15
-        self.port = serial.Serial(port, baudrate=38400, timeout=1)
+        self.gps_port = gpsport
+        # self.ser = serial.Serial(port, baudrate=38400, timeout=1)
 
-    def readAndWriteAndSendTele(self):
+    def readAndWriteAndSendTele(self,gps_port):
+        def readGPS(ser): #only for testing, on actual rover implementation, never call this
+            gps = UbloxGps(ser)
+            geo = gps.geo_coords()
+            #print(geo.lon,geo.lat)
+            return [geo.lon,geo.lat]
+        
+        ser = serial.Serial(gps_port, baudrate=38400, timeout=1)
         while True:
-            coor = self.__readGPS()
+            coor = readGPS(ser)
             #self.comms.writeAndSendTelemetry('1,2') 
+            logging.info(f"writing {coor} to telem file")
+            print("Sending telem")
             self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])) #write and send
 
-    def __readGPS(self): #only for testing, on actual rover implementation, never call this
-        gps = UbloxGps(self.port)
+    def __readGPS(self,ser): #only for testing, on actual rover implementation, never call this
+        gps = UbloxGps(ser)
         geo = gps.geo_coords()
         #print(geo.lon,geo.lat)
         return [geo.lon,geo.lat]
+    
     def startTele(self):
-        self.process = Process(target=self.readAndWriteAndSendTele)
+        self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port,))
         self.process.start()
 
     def stopTele(self):

@@ -72,8 +72,9 @@ class RoverComms:
 
         try:
             lastest_command = file[-1].split(', ')
-            print(lastest_command)
-
+            #print(lastest_command)
+            if self.current_cmd_num == last_command[0]:
+                return command_dict
             if int(lastest_command[0]) != self.current_cmd_num:
                 if len(lastest_command) == 3 and (lastest_command[1] == 'start' or lastest_command[1] == 'stop'):
                     command_dict.update({'commandType':'startStop', 'command':lastest_command[1]})
@@ -91,7 +92,8 @@ class RoverComms:
                     None
 
         except:
-            print("command file empty")
+            None
+            # print("command file empty")
         
     
         return command_dict
