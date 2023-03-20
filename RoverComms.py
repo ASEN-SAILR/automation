@@ -129,6 +129,14 @@ class RoverComms:
         else:
             return 0
 
+    def startLive(self):
+        self.process = Process(target=self.liveVideoServer)
+        self.process.start()
+
+    def stopTele(self):
+        if self.process.is_alive():
+            self.process.terminate()
+
     def liveVideoServer(self,):
 
         # Create a socket object
