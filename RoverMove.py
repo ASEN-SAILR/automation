@@ -106,7 +106,7 @@ class RoverMove:
 
                 TODO: update function calls to match current classes
                 """
-                MagHeading = 0 # self.uart.getMagneticAzm()
+                MagHeading = self.uart.getMagneticAzm()
                 atloi = 0 # self.gps.distanceToTarget(LOI) < 1.15 #precision radius(+/-1.15)
                 #make the rover move autonomously to LOI
                 time_to_scan = 2 # seconds
@@ -114,7 +114,7 @@ class RoverMove:
                 while not atloi:
                         #Finding change in heading desired to point to LOI
                         #MagHeading = magnet.get_heading()
-                        
+                        MagHeading = self.uart.getMagneticAzm()
                         DeltaHeading = np.deg2rad(self.gps.angleToTarget(LOI,MagHeading))
                         #DeltaHeading = 0
                         print('Delta heading required:',DeltaHeading,'radians.')
