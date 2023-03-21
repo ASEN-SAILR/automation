@@ -4,6 +4,7 @@ sys.path.append("../")
 import time
 from RoverGPS import RoverGPS
 from RoverLidar import RoverLidar 
+from RoverUART import RoverUART
 #from RoverMagnet import RoverMagnet
 #from RoverUART import RoverUART
 import numpy as np
@@ -11,7 +12,7 @@ import pdb
 from multiprocessing import Process
 ### Class that will handle the motion of the rover
 class RoverMove:
-        def __init__(self,lidar:RoverLidar,gps:RoverGPS,buffer_dist,red_width) -> None:
+        def __init__(self,lidar:RoverLidar,gps:RoverGPS,uart:RoverUART,buffer_dist,red_width) -> None:
                 """
                 inputs:
                         gps: instance of class RoverGPS
@@ -23,6 +24,7 @@ class RoverMove:
                 self.gps = gps
                 #self.magnet = magnet
                 self.lidar = lidar
+		self.uart = uart
                 self.process = None
                 self.buffer_dist = buffer_dist
                 self.red_width = red_width
@@ -104,7 +106,7 @@ class RoverMove:
 
                 TODO: update function calls to match current classes
                 """
-                MagHeading = 0 # self.uart.getMagneticAzm()
+                MagHeading = self.uart.getMagneticAzm()
                 atloi = 0 # self.gps.distanceToTarget(LOI) < 1.15 #precision radius(+/-1.15)
                 #make the rover move autonomously to LOI
                 time_to_scan = 2 # seconds
@@ -112,10 +114,11 @@ class RoverMove:
                 while not atloi:
                         #Finding change in heading desired to point to LOI
                         #MagHeading = magnet.get_heading()
-                        
-                        #DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
-                        DeltaHeading = 0
-                        print('Delta heading required:',DeltaHeading,'degrees.')
+                        MagHeading = self.uart.getMagneticAzm()
+                        DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
+                        #DeltaHeading = 0
+                        print('Delta heading required:',DeltaHeading,'radians.')
+                        self.sendRotateCmd(DeltaHeading)
                         #Sending command to teensy
                         #self.sendRotation(DeltaHeading)
 
@@ -140,10 +143,10 @@ class RoverMove:
                                         #Waits until motion is complete
                                         #self.motionInProgress()
 
-                                        print("Nothing in the way")
+                                        print("Nothing in the way, move 1 meter")
+                                        self.sendTranslateCmd(1)
                                         #pdb.set_trace()
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                        print("test")
                                         DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
                                         atloi = self.gps.atloi(LOI)
                                 else:
@@ -157,7 +160,8 @@ class RoverMove:
                                 #Waits for motion to complete
                                 #self.motionInProgress()
                                 print("Move",Distance,"meters")
-                                pdb.set_trace()
+                                self.sendTranslateCmd(Distance)
+                                #pdb.set_trace()
                                 [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                 #time.sleep(2)
                                 atloi = self.gps.atloi(LOI)
@@ -170,8 +174,9 @@ class RoverMove:
                                         #self.sendRotation(Angle)
                                         #Waits for motion to complete
                                         #self.motionInProgress()
-                                        print("Rotate",Angle,"degrees")
-                                        pdb.set_trace()
+                                        print("Rotate",Angle,"radians")
+                                        self.sendRotateCmd(Angle)
+                                        #pdb.set_trace()
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                         atloi = self.gps.atloi(LOI)
                                 #time.sleep(2)
@@ -287,9 +292,10 @@ class RoverMove:
                 for Iteration in Obstacles:
                         if Iteration[0] > Iteration_prev:
                                 ValueX = Iteration[0]
+                                ValueY = Iteraion[1]
                         Iteration_prev = Iteration[0]
                 BufferDistance = 0
-                DistanceToMove = ValueX + BufferDistance
+                DistanceToMove = np.sqrt(ValueX**2+ValueY**2) + BufferDistance
                 return DistanceToMove
 
         #Possibly not needed
