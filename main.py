@@ -1,12 +1,12 @@
 # Trevor Reed, Luke Roberson, Suphakan Sukwong 
 
 
-import RoverMove
-import RoverComms
-import RoverGPS
-import RoverLidar
-import RoverCamera
-import RoverUART
+from RoverMove import RoverMove
+from RoverComms import RoverComms
+from RoverGPS import RoverGPS
+from RoverLidar import RoverLidar
+from RoverCamera import RoverCamera
+from RoverUART import RoverUART
 import logging
 import numpy as np
 import time
@@ -27,17 +27,17 @@ if __name__ == "__main__":
 
 	# start reading commands from commands log
 	# leaving these in for testing on automation end but should be taken out
-	commands_path = r"~/commands.txt"
-	telemetry_path = r"~/telemetry.txt"
+	commands_path = r"commands.txt"
+	telemetry_path = r"telemetry.txt"
 	# onboard computer comms vars
 	obcCommandPath = commands_path
 	obcTelemPath = telemetry_path
-	obcVideoPath = "~/video"
-	obcImagePath = "~/images"
+	obcVideoPath = "video"
+	obcImagePath = "images"
 	#currCmdNum = 0 #not needed, automatically defined in RoverComms
 	# ground station comms vars
 	gs_ssh_password = "asen-sailr"
-	gs_ip = "192.168.56.102"
+	gs_ip = "192.168.1.3"
 	gs_home_path = "/home/ground-station/asen-sailr/"
 	gs_telem_path = gs_home_path+"telemetry.txt"
 	gs_video_path = gs_home_path+"videos"
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 	# video.startRecording()
 
 	# start uart comms with Teensy
-	teensy_port = r"/dev/tty/1"
+	teensy_port = r"/dev/ttyACM0"
 	uart = RoverUART(teensy_port,baud=115200) 
 	uart.readLine() #clear the serial buffer 
 
@@ -83,13 +83,13 @@ if __name__ == "__main__":
 	buffer_dist = resolution/2
 
 	# start gps 
-	gps_port = r"/dev/tty/2"
-	gps = RoverGPS(comms,gps_port) # more params?
+	gps_port = r"/dev/ttyACM1"
+	gps = RoverGPS(gps_port,comms) # more params?
 	LOI = [-105.243501,40.012155]
 	gsLOI = [0,0]#gps.readGPS()
 
 	# start move
-	move = RoverMove(lidar,gps,buffer_dist,red_width)
+	move = RoverMove(lidar,gps,uart,buffer_dist,red_width)
 
 	#start record process that will be run on background - keep recording and sending videos
 	gps.startTele()
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
 			command = comms.readCommand()
 			logging.info(f"command ({command}) read in from RoverComms ")
-			if command is not None:
+			if command:
 				missionDone = False
 				break
 
@@ -131,7 +131,7 @@ if __name__ == "__main__":
 				#once a command is recieved, we need a way to monitor motion		
 				# check for emergecy stop conidition first
 
-		if command["mode"] == "stop":
+		if command["commandType"] == "stop":
 			logging.info("stop command recieved")
 			# termiate child processes immediately and stop motion ASAP
 			LOI = None
@@ -154,12 +154,12 @@ if __name__ == "__main__":
 
 		#if command["mode"] == "autonomous" or command["mode"] == "manual":
 			#current_process = Process(target=move.startMove, args=(command,))
-		if command["type"]=="autonomous":
+		if command["commandType"]=="autonomous":
 			logging.info("autonomous command recieved")
 			LOI = command["LOI"]
 			current_process = Process(target=move.autonomous, args=(LOI))
 			current_process.start()
-		elif command["type"]=="manual":
+		elif command["commandType"]=="manual":
 			logging.info(f"manual command recieved: {command}")
 			LOI = None
 			# current_process = Process(target=move.manual, args=(command["type"],command["dist"],command["angle"]))
@@ -167,7 +167,7 @@ if __name__ == "__main__":
 			current_process.start()		
 
 		#TODO take photo when at LOI
-		elif command["mode"] == "photo":
+		elif command["commandType"] == "photo":
 			# STOP recording 
 			# take pano photo
 			# begin recording 
