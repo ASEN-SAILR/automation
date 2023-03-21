@@ -19,6 +19,9 @@ if __name__ == "__main__":
         format='%(asctime)s %(levelname)-8s %(filename)s:%(lineno)-3s -   %(message)s',
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S')
+	
+	logging.getLogger("numpy").setLevel(logging.WARNING)
+	logging.getLogger("multiprocessing").setLevel(logging.WARNING)
 
 	# start reading commands from commands log
 	# leaving these in for testing on automation end but should be taken out
@@ -80,7 +83,7 @@ if __name__ == "__main__":
 
 	# tracks current command
 	active_command = "stop"
-
+	
 	command = None
 	while True:
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()

@@ -20,3 +20,4 @@ if __name__ == "__main__":
     while True:
         print(comms.readCommand())
         time.sleep(1)
+    
