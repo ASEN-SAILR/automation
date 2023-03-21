@@ -7,6 +7,8 @@ import math
 import time
 import RoverComms
 from multiprocessing import Process
+from datetime import datetime
+import pytz
 
 
 ## all coordinates must be in deg-decimal form, not hour-min-sec
@@ -34,7 +36,7 @@ class RoverGPS:
             #self.comms.writeAndSendTelemetry('1,2') 
             logging.info(f"writing {coor} to telem file")
             print("Sending telem")
-            self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])) #write and send
+            self.comms.writeAndSendTelemetry('[lon,lat]: ['+str(coor[0])+','+str(coor[1])+'], '+str(datetime.now(pytz.timezone('US/Mountain')[:-13])) #write and send
 
     def __readGPS(self,ser): #only for testing, on actual rover implementation, never call this
         gps = UbloxGps(ser)
