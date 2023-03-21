@@ -62,6 +62,7 @@ if __name__ == "__main__":
 	# start uart comms with Teensy
 	teensy_port = r"/dev/tty/1"
 	uart = RoverUART(teensy_port,baud=115200) 
+	uart.readLine() #clear the serial buffer 
 
 	# start lidar
 	lidar_port = r"/dev/ttyUSB0"
