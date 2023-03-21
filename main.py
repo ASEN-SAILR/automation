@@ -16,10 +16,10 @@ DISTANCE = 1 #distance to move in a straight line
 if __name__ == "__main__":
 	#initialize logging
 	logging.basicConfig(
-        filename='rover_log.log',
-        format='%(asctime)s %(levelname)-8s %(filename)s:%(lineno)-3s -   %(message)s',
-        level=logging.INFO,
-        datefmt='%Y-%m-%d %H:%M:%S')
+		filename='rover_log.log',
+		format='%(asctime)s %(levelname)-8s %(filename)s:%(lineno)-3s -   %(message)s',
+		level=logging.INFO,
+		datefmt='%Y-%m-%d %H:%M:%S')
 	
 	logging.getLogger("numpy").setLevel(logging.WARNING)
 	logging.getLogger("multiprocessing").setLevel(logging.WARNING)
@@ -107,21 +107,21 @@ if __name__ == "__main__":
 			command = comms.readCommand()
 			
 			if command is not None:
-    			missionDone = False
+				missionDone = False
 				break
-			
+
 			#if no new command, at LOI, and autonomous done
 			if LOI is not None and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
 				if LOI == gsLOI: #the rover reached LOI and now back at gsLOI
-    				if ~missionDone:
-    					missionDone = True
-    					print("Mission done. Rover is now back at ground station. Waiting for a new command...")
-				else: #the rover is at the LOI
-					video.stopRecording()
-					video.take360()
-					video.startRecording()
-					#TODO what does the command looks like
-					command = {"type"="autonomous","LOI"=gsLOI}
+					if ~missionDone:
+						missionDone = True
+						print("Mission done. Rover is now back at ground station. Waiting for a new command...")
+				else:#TODO:the rover is at the LOI
+					# video.stopRecording()
+					# video.take360()
+					# video.startRecording()
+					# #TODO what does the command looks like
+					# command = {"type"="autonomous","LOI"=gsLOI}
 
 			#once a command is recieved, we need a way to monitor motion		
 
@@ -150,11 +150,11 @@ if __name__ == "__main__":
 		#if command["mode"] == "autonomous" or command["mode"] == "manual":
 			#current_process = Process(target=move.startMove, args=(command,))
 		if command["type"]=="autonomous":
-    		LOI = command["LOI"]
+			LOI = command["LOI"]
 			current_process = Process(target=move.autonomous, args=(LOI))
 			current_process.start()
 		elif command["type"]=="manual":
-    		LOI = None
+			LOI = None
 			current_process = Process(target=move.manual, args=(command["type"],command["dist"],command["angle"]))
 			current_process.start()
 			# move.startMove(command)			
