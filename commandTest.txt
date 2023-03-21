@@ -1,1 +1,9 @@
 1, manual, LOI, 40.0150, -105.2705, 14:10:29
+2, autonomous, 14:10:40
+3, manual, 14:10:43
+4, manual, translate, 123, 14:10:45
+5, manual, translate, -123, 14:10:47
+6, manual, rotate, -123, 14:10:49
+7, manual, rotate, 123, 14:10:51
+8, stop, 14:10:57
+9, start, 14:10:59

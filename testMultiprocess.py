@@ -3,7 +3,7 @@ import time
 
 def main():
     process = Process(target=printt)
-    # process.start()
+    process.start()
     # time.sleep(5)
     # print(process.is_alive())
     if process.is_alive():
