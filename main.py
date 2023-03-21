@@ -107,6 +107,7 @@ if __name__ == "__main__":
 	command = None
 	logging.info("main loop begining")
 	while True:
+		logging.info("waiting for command")
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
 			command = comms.readCommand()
 			
@@ -159,7 +160,7 @@ if __name__ == "__main__":
 		if command["commandType"]=="autonomous":
 			logging.info("autonomous command recieved")
 			LOI = command["LOI"]
-			current_process = Process(target=move.autonomous, args=(LOI))
+			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2))
 			current_process.start()
 		elif command["commandType"]=="manual":
 			logging.info(f"manual command recieved: {command}")

@@ -10,6 +10,7 @@ from RoverUART import RoverUART
 import numpy as np
 import pdb
 from multiprocessing import Process
+import logging
 ### Class that will handle the motion of the rover
 class RoverMove:
         def __init__(self,lidar:RoverLidar,gps:RoverGPS,uart:RoverUART,buffer_dist,red_width) -> None:
@@ -28,6 +29,7 @@ class RoverMove:
                 self.process = None
                 self.buffer_dist = buffer_dist
                 self.red_width = red_width
+                logging.info("rover move initialized")
 
         #Testing: Not complete
         def motionInProgress(self) :
@@ -106,6 +108,7 @@ class RoverMove:
 
                 TODO: update function calls to match current classes
                 """
+                logging.info("begining  autonomous move")
                 MagHeading = self.uart.getMagneticAzm()
                 atloi = 0 # self.gps.distanceToTarget(LOI) < 1.15 #precision radius(+/-1.15)
                 #make the rover move autonomously to LOI
@@ -118,7 +121,7 @@ class RoverMove:
                         DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
                         #DeltaHeading = 0
                         print('Delta heading required:',DeltaHeading,'radians.')
-                        self.sendRotateCmd(DeltaHeading)
+                        self.uart.sendRotateCmd(DeltaHeading)
                         #Sending command to teensy
                         #self.sendRotation(DeltaHeading)
 
@@ -144,7 +147,7 @@ class RoverMove:
                                         #self.motionInProgress()
 
                                         print("Nothing in the way, move 1 meter")
-                                        self.sendTranslateCmd(1)
+                                        self.uart.sendTranslateCmd(1)
                                         #pdb.set_trace()
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                         DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
@@ -152,7 +155,7 @@ class RoverMove:
                                 else:
                                         break
                                         
-                        while Status is "yellow" and atloi == 0:
+                        while Status == "yellow" and atloi == 0:
                                 #Needs testing
                                 Distance = self.get_delta_distance(Obstacles) #Gets the distance to clear clearance zone
                                 #Might need to check for distance more than a meter to make sure rover does not go further than it can see
@@ -160,12 +163,12 @@ class RoverMove:
                                 #Waits for motion to complete
                                 #self.motionInProgress()
                                 print("Move",Distance,"meters")
-                                self.sendTranslateCmd(Distance)
+                                self.uart.sendTranslateCmd(Distance)
                                 #pdb.set_trace()
                                 [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                 #time.sleep(2)
                                 atloi = self.gps.atloi(LOI)
-                        while Status is "red" and atloi == 0:
+                        while Status == "red" and atloi == 0:
                                 #Needs testing
                                 if self.get_delta_distance(Obstacles)<RedWidth/2:
                                         break#back off
@@ -175,7 +178,7 @@ class RoverMove:
                                         #Waits for motion to complete
                                         #self.motionInProgress()
                                         print("Rotate",Angle,"radians")
-                                        self.sendRotateCmd(Angle)
+                                        self.uart.sendRotateCmd(Angle)
                                         #pdb.set_trace()
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                         atloi = self.gps.atloi(LOI)
@@ -292,7 +295,7 @@ class RoverMove:
                 for Iteration in Obstacles:
                         if Iteration[0] > Iteration_prev:
                                 ValueX = Iteration[0]
-                                ValueY = Iteraion[1]
+                                ValueY = Iteration[1]
                         Iteration_prev = Iteration[0]
                 BufferDistance = 0
                 DistanceToMove = np.sqrt(ValueX**2+ValueY**2) + BufferDistance

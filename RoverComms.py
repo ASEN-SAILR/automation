@@ -37,7 +37,7 @@ class RoverComms:
         self.gs_video_path = gs_str_stem + gs_video_path
         self.gs_image_path = gs_str_stem + gs_image_path
 
-        self.current_cmd_num = 0
+        self.current_cmd_num = -1
         # initialize stuff as needed
 
     #probably not needed now?
@@ -73,7 +73,7 @@ class RoverComms:
         try:
             lastest_command = file[-1].split(', ')
             #print(lastest_command)
-            if self.current_cmd_num == last_command[0]:
+            if self.current_cmd_num == lastest_command[0]:
                 return command_dict
             if int(lastest_command[0]) != self.current_cmd_num:
                 if len(lastest_command) == 3 and (lastest_command[1] == 'start' or lastest_command[1] == 'stop'):
@@ -93,7 +93,7 @@ class RoverComms:
 
         except:
             None
-            # print("command file empty")
+            print("command file empty")
         
     
         return command_dict

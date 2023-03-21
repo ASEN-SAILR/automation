@@ -6,7 +6,8 @@ import logging
 
 class RoverUART:
     def __init__(self,teensy_port) -> None:
-        #member vars
+        #member var
+        logging.info(f"attaching to {teensy_port}")
         self.ser = serial.Serial(teensy_port, 115200, timeout=1)
 
     def sendStopCmd(self):
@@ -74,11 +75,11 @@ class RoverUART:
         """
         read from serial buffer until a newline is reached
         """
-        if self.ser.in_waiting>0:
-            to_return = self.ser.readline()
-            logging.info(f"read {to_return} from teensy")
-            return to_return
-        return -1
+        #if self.ser.in_waiting>0:
+        to_return = self.ser.readline()
+        logging.info(f"read {to_return} from teensy")
+        return to_return
+        #return "nothing read"
 
     def readAll(self):
         """
