@@ -36,7 +36,7 @@ class RoverGPS:
         return [geo.lon,geo.lat]
     
     def startTele(self):
-        self.process = Process(target=self.readAndWriteAndSendTele)
+        self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port))
         self.process.start()
 
     def stopTele(self):
