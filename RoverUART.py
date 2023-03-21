@@ -2,6 +2,7 @@
 import struct
 import serial
 import time
+import logging
 
 class RoverUART:
     def __init__(self,teensy_port) -> None:
@@ -20,6 +21,7 @@ class RoverUART:
         """
         sends teensy a command to rotate over UART connection
         """
+        logging.info(f"sending rotation command: rad: {rad}")
         mode = "r"
         cmdString = mode.encode("utf-8") + struct.pack("<f",float(rad))
         self.sendUartCmd(cmdString)
@@ -28,6 +30,7 @@ class RoverUART:
         """
         sends teensy a command to translate over UART connection
         """
+        logging.info(f"sending translation command: meter: {meter}")
         mode = "t"
         cmdString = mode.encode("utf-8") + struct.pack("<f",float(meter))
         self.sendUartCmd(cmdString)
@@ -36,15 +39,20 @@ class RoverUART:
         """
         gets the azimuth to magnetic north
         """
+        logging.info(f"asking for magnetic azm")
         mode = "m"
         cmdString = mode.encode("utf-8") + struct.pack("<f",float(0.0))
         self.sendUartCmd(cmdString)
-        #time.sleep(0.25)
-        #string = self.readLine()
-        #if string[0] != 'm':
-        #    return -999
-        #return float(string[1:-1])
-        return
+        time.sleep(0.25)
+        mystring = self.readLine().decode('utf-8').rstrip()
+        if mystring[0] != 'm':
+            return -999
+        try:
+            return float(mystring[1:-1])
+        except:
+            logging.warning("mag string was not in expected form. string: {mystring}")
+            return 0
+        
 
 
 
@@ -52,6 +60,7 @@ class RoverUART:
         """
         sends the command specified by cmd
         """
+        logging.info(f"sending {cmd} to teensy")
         self.ser.write(cmd)
  
     def msgsWaiting(self):
@@ -66,7 +75,9 @@ class RoverUART:
         read from serial buffer until a newline is reached
         """
         if self.ser.in_waiting>0:
-            return self.ser.readline()
+            to_return = self.ser.readline()
+            logging.info(f"read {to_return} from teensy")
+            return to_return
         return -1
 
     def readAll(self):

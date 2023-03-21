@@ -8,6 +8,7 @@ import RoverLidar
 import RoverCamera
 import RoverUART
 import logging
+import numpy as np
 import time
 from multiprocessing import Process
 
@@ -17,7 +18,7 @@ if __name__ == "__main__":
 	#initialize logging
 	logging.basicConfig(
 		filename='rover_log.log',
-		format='%(asctime)s %(levelname)-8s %(filename)s:%(lineno)-3s -   %(message)s',
+		format='%(asctime)s %(levelname)-8s %(filename)s:%(lineno)-3s %(funcName)10s-   %(message)s',
 		level=logging.INFO,
 		datefmt='%Y-%m-%d %H:%M:%S')
 	
@@ -46,17 +47,17 @@ if __name__ == "__main__":
 	
 
 	# start video recording (class)
-	camPort = r"/dev/tty/0"
-	videoPath = r"~/videos/" #example path
-	vid_length = 5 #unit is second
-	photoPath = obcImagePath
-	photoResolution = (640,360) #format: tuple (480,480)
-	videoPath = obcVideoPath
-	fps = 30 
-	videoResolution = (640,360) #format: tuple (480,480)
-	video = RoverCamera(comms,camPort,videoPath,vidLength=5) #need comms so that we can send video after recording
-	comms,port,vid_length,photoPath,photoResolution,videoPath,fps,videoResolution
-	video.startRecording()
+	# camPort = r"/dev/tty/0"
+	# videoPath = r"~/videos/" #example path
+	# vid_length = 5 #unit is second
+	# photoPath = obcImagePath
+	# photoResolution = (640,360) #format: tuple (480,480)
+	# videoPath = obcVideoPath
+	# fps = 30 
+	# videoResolution = (640,360) #format: tuple (480,480)
+	# video = RoverCamera(comms,camPort,videoPath,vidLength=5) #need comms so that we can send video after recording
+	# comms,port,vid_length,photoPath,photoResolution,videoPath,fps,videoResolution
+	# video.startRecording()
 
 	# start uart comms with Teensy
 	teensy_port = r"/dev/tty/1"
@@ -83,7 +84,7 @@ if __name__ == "__main__":
 	# start gps 
 	gps_port = r"/dev/tty/2"
 	gps = RoverGPS(comms,gps_port) # more params?
-	LOI = None
+	LOI = [-105.243501,40.012155]
 	gsLOI = [0,0]#gps.readGPS()
 
 	# start move
@@ -96,16 +97,18 @@ if __name__ == "__main__":
 	# need to instantiate a process then terminate for logic in while loop to work
 	def foo(): pass
 	current_process = Process(target=foo, args=())
+	current_process.start()
 	if current_process.is_alive():current_process.terminate()
 
 	# tracks current command
 	active_command = "stop"
 	
 	command = None
+	logging.info("main loop begining")
 	while True:
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
 			command = comms.readCommand()
-			
+			logging.info(f"command ({command}) read in from RoverComms ")
 			if command is not None:
 				missionDone = False
 				break
@@ -113,21 +116,22 @@ if __name__ == "__main__":
 			#if no new command, at LOI, and autonomous done
 			if LOI is not None and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
 				if LOI == gsLOI: #the rover reached LOI and now back at gsLOI
+					logging.info("rover at LOI")
 					if ~missionDone:
 						missionDone = True
 						print("Mission done. Rover is now back at ground station. Waiting for a new command...")
-				else:#TODO:the rover is at the LOI
-					# video.stopRecording()
-					# video.take360()
-					# video.startRecording()
-					# #TODO what does the command looks like
-					# command = {"type"="autonomous","LOI"=gsLOI}
+			else:#TODO:the rover is at the LOI
+				pass
+				# video.stopRecording()
+				# video.take360()
+				# video.startRecording()
+				# #TODO what does the command looks like
+				# command = {"type"="autonomous","LOI"=gsLOI}
+				#once a command is recieved, we need a way to monitor motion		
+				# check for emergecy stop conidition first
 
-			#once a command is recieved, we need a way to monitor motion		
-
-		
-		# check for emergecy stop conidition first
 		if command["mode"] == "stop":
+			logging.info("stop command recieved")
 			# termiate child processes immediately and stop motion ASAP
 			LOI = None
 			move.emergencyStop()
@@ -150,14 +154,16 @@ if __name__ == "__main__":
 		#if command["mode"] == "autonomous" or command["mode"] == "manual":
 			#current_process = Process(target=move.startMove, args=(command,))
 		if command["type"]=="autonomous":
+			logging.info("autonomous command recieved")
 			LOI = command["LOI"]
 			current_process = Process(target=move.autonomous, args=(LOI))
 			current_process.start()
 		elif command["type"]=="manual":
+			logging.info(f"manual command recieved: {command}")
 			LOI = None
-			current_process = Process(target=move.manual, args=(command["type"],command["dist"],command["angle"]))
-			current_process.start()
-			# move.startMove(command)			
+			# current_process = Process(target=move.manual, args=(command["type"],command["dist"],command["angle"]))
+			current_process = Process(target=move.manual, args=("rotation",0,0))
+			current_process.start()		
 
 		#TODO take photo when at LOI
 		elif command["mode"] == "photo":
@@ -166,9 +172,10 @@ if __name__ == "__main__":
 			# begin recording 
 			#todo
 			LOI = None
-			video.stopRecording()
-			video.take360()
-			video.startRecording()
+			# video.stopRecording()
+			# video.take360()
+			# video.startRecording()
+
 
 	
 		#return to top of loop
