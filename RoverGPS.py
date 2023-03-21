@@ -22,15 +22,21 @@ class RoverGPS:
         # self.ser = serial.Serial(port, baudrate=38400, timeout=1)
 
     def readAndWriteAndSendTele(self,gps_port):
+        def readGPS(ser): #only for testing, on actual rover implementation, never call this
+            gps = UbloxGps(ser)
+            geo = gps.geo_coords()
+            #print(geo.lon,geo.lat)
+            return [geo.lon,geo.lat]
+        
         ser = serial.Serial(gps_port, baudrate=38400, timeout=1)
         while True:
-            coor = self.__readGPS(gps_port)
+            coor = readGPS(ser)
             #self.comms.writeAndSendTelemetry('1,2') 
             logging.info(f"writing {coor} to telem file")
             self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])) #write and send
 
-    def __readGPS(self,port): #only for testing, on actual rover implementation, never call this
-        gps = UbloxGps(port)
+    def __readGPS(self,ser): #only for testing, on actual rover implementation, never call this
+        gps = UbloxGps(ser)
         geo = gps.geo_coords()
         #print(geo.lon,geo.lat)
         return [geo.lon,geo.lat]
