@@ -85,8 +85,10 @@ class RoverUART:
         """
         read from serial buffer until empty
         """
+        print("in readAll()")
         buffer = []
         while self.ser.in_waiting>0:
+             print(".")
              #buffer.append(self.ser.readline().decode("utf-8").rstrip())
              buffer.append(self.ser.readline().decode("utf-8").rstrip())
         return buffer
