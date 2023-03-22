@@ -292,13 +292,17 @@ class RoverMove:
                 Flag = 0
                 Iteration_prev = 0
                 ValueX = 0
+                ValueY = 0
                 for Iteration in Obstacles:
                         if Iteration[0] > Iteration_prev:
                                 ValueX = Iteration[0]
                                 ValueY = Iteration[1]
                         Iteration_prev = Iteration[0]
-                BufferDistance = 0
-                DistanceToMove = np.sqrt(ValueX**2+ValueY**2) + BufferDistance
+                BufferDistance = .5
+                ValueX = ValueX + BufferDistance
+                DistanceToObj = np.sqrt(ValueX**2+ValueY**2)
+                Angle = np.arctan2(ValueY,ValueX)
+		DistanceToMove = DistanceToObj/np.cos(Angle)
                 return DistanceToMove
 
         #Possibly not needed
