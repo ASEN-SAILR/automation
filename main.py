@@ -85,8 +85,8 @@ if __name__ == "__main__":
 	# start gps 
 	gps_port = r"/dev/ttyACM0"
 	gps = RoverGPS(gps_port,comms) # more params?
-	LOI = [-105.243501,40.012155]
-	gsLOI = [0,0]#gps.readGPS()
+	#LOI = [-105.243501,40.012155]
+	gsLOI = gps.getGPS()
 
 	# start move
 	move = RoverMove(lidar,gps,uart,buffer_dist,red_width)
@@ -119,6 +119,7 @@ if __name__ == "__main__":
 
 			#if no new command, at LOI, and autonomous done
 			if LOI is not None and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
+				#print(gsLOI)
 				if LOI == gsLOI: #the rover reached LOI and now back at gsLOI
 					logging.info("rover at LOI")
 					if ~missionDone:

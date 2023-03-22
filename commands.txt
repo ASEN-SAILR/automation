@@ -1,1 +1,2 @@
-2, autonomous, LOI, 0, 0, 15:33:55
+2, autonomous, LOI, 30, 30, 15:48:30
+3, autonomous, LOI, 0, 0, 15:49:12

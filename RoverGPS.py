@@ -65,7 +65,7 @@ class RoverGPS:
         #input: currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
         #output: bearing in deg from north, ie. 89 (float)
         
-        lat1, lon1 = self.__getGPS()
+        lat1, lon1 = self.getGPS()
         lat2, lon2 = tarCoor
         #print(lat1,lon1)
         deg2rad = math.pi/180
@@ -84,7 +84,7 @@ class RoverGPS:
         input: currCoor, tarCoor = [lat,lon], ie. [23.0231,-34.204] (object of floats)
         output: distance to target in meter (float)
         """
-        lat1, lon1 = self.__getGPS()
+        lat1, lon1 = self.getGPS()
         lat2, lon2 = tarCoor
 
         deg2rad = math.pi/180
@@ -111,7 +111,7 @@ class RoverGPS:
         """
         return self.__bearingToTarget(tarCoor)-currHeading
 
-    def __getGPS(self): # -> list of float
+    def getGPS(self): # -> list of float
         with open(self.comms.obcTelemPath) as f:
             file = f.read().splitlines()
         coor = file[-1].split(', ')
