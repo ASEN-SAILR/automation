@@ -295,7 +295,9 @@ class RoverMove:
                                 ValueY = Iteraion[1]
                         Iteration_prev = Iteration[0]
                 BufferDistance = 0
-                DistanceToMove = np.sqrt(ValueX**2+ValueY**2) + BufferDistance
+                DistanceToObj = np.sqrt(ValueX**2+ValueY**2)
+                Angle = np.arctan2(ValueY,ValueX)
+		DistanceToMove = DistanceToObj/np.cos(Angle)
                 return DistanceToMove
 
         #Possibly not needed
