@@ -9,6 +9,7 @@ class RoverUART:
         #member var
         logging.info(f"attaching to {teensy_port}")
         self.ser = serial.Serial(teensy_port, 115200, timeout=1)
+        self.lastmag = -999
 
     def sendStopCmd(self):
         """
@@ -41,18 +42,21 @@ class RoverUART:
         gets the azimuth to magnetic north
         """
         logging.info(f"asking for magnetic azm")
+        _ = self.readAll()
         mode = "m"
         cmdString = mode.encode("utf-8") + struct.pack("<f",float(0.0))
         self.sendUartCmd(cmdString)
-        time.sleep(0.25)
+        #time.sleep(0.25)
         mystring = self.readLine()
-        if mystring[0] != 'm':
-            return -999
+        #_ = self.readAll()
         try:
-            return float(mystring[1:-1])
+            #print(float(mystring[1:-1]))
+            magval = float(mystring[1:-1])
+            self.lastmag = magval
+            return magval
         except:
             logging.warning("mag string was not in expected form. string: {mystring}")
-            return 0
+            return self.lastmag
         
 
 
