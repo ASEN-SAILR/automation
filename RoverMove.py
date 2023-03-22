@@ -289,10 +289,11 @@ class RoverMove:
                 Flag = 0
                 Iteration_prev = 0
                 ValueX = 0
+                ValueY = 0
                 for Iteration in Obstacles:
                         if Iteration[0] > Iteration_prev:
                                 ValueX = Iteration[0]
-                                ValueY = Iteraion[1]
+                                ValueY = Iteration[1]
                         Iteration_prev = Iteration[0]
                 BufferDistance = .5
                 ValueX = ValueX + BufferDistance
