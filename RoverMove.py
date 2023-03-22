@@ -118,9 +118,10 @@ class RoverMove:
                         #Finding change in heading desired to point to LOI
                         #MagHeading = magnet.get_heading()
                         MagHeading = self.uart.getMagneticAzm()
+                        print(MagHeading)
                         DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
                         #DeltaHeading = 0
-                        print('Delta heading required:',DeltaHeading,'radians.')
+                        print('Delta heading required:',DeltaHeading,'degrees.')
                         self.uart.sendRotateCmd(DeltaHeading)
                         #Sending command to teensy
                         #self.sendRotation(DeltaHeading)
@@ -149,6 +150,8 @@ class RoverMove:
                                         print("Nothing in the way, move 1 meter")
                                         self.uart.sendTranslateCmd(1)
                                         #pdb.set_trace()
+                                        MagHeading = self.uart.getMagneticAzm()
+                                        print(MagHeading)
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
                                         DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
                                         atloi = self.gps.atloi(LOI)
@@ -177,7 +180,7 @@ class RoverMove:
                                         #self.sendRotation(Angle)
                                         #Waits for motion to complete
                                         #self.motionInProgress()
-                                        print("Rotate",Angle,"radians")
+                                        print("Rotate",Angle,"degrees")
                                         self.uart.sendRotateCmd(Angle)
                                         #pdb.set_trace()
                                         [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
@@ -302,7 +305,7 @@ class RoverMove:
                 ValueX = ValueX + BufferDistance
                 DistanceToObj = np.sqrt(ValueX**2+ValueY**2)
                 Angle = np.arctan2(ValueY,ValueX)
-		DistanceToMove = DistanceToObj/np.cos(Angle)
+                DistanceToMove = DistanceToObj/np.cos(Angle)
                 return DistanceToMove
 
         #Possibly not needed
