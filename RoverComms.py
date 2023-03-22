@@ -98,7 +98,7 @@ class RoverComms:
     
         return command_dict
 
-    def writeAndSendTelemetry(self,gpsCoor:str): # -> bool:
+    def writeAndSendTelemetry(self,gpsStr:str): # -> bool:
         """
         write telemetry to telemetry file
 
@@ -110,12 +110,12 @@ class RoverComms:
         #     f.write(gpsCoor+'\n')
         with open(self.obcTelemPath) as f:
                 lines = f.read().splitlines()
-                if len(lines)>=120: #keep location history for 2 minutes
+                if len(lines)>=99999: #1 sec per 1 point
                     lines=lines[1:]
         with open(self.obcTelemPath, 'w') as f:
             for line in lines:
                 f.write(line+'\n')
-            f.write(gpsCoor+'\n')
+            f.write(gpsStr+'\n')
 
         self.syncTelem()
         
