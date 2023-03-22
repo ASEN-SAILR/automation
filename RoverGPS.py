@@ -36,7 +36,7 @@ class RoverGPS:
             #self.comms.writeAndSendTelemetry('1,2') 
             logging.info(f"writing {coor} to telem file")
             print("Sending telem")
-            self.comms.writeAndSendTelemetry('[lon,lat]: ['+str(coor[0])+','+str(coor[1])+'], '+str(datetime.now(pytz.timezone('US/Mountain')[:-13])) #write and send
+            self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
 
     def __readGPS(self,ser): #only for testing, on actual rover implementation, never call this
         gps = UbloxGps(ser)
@@ -114,8 +114,10 @@ class RoverGPS:
     def __getGPS(self): # -> list of float
         with open(self.comms.obcTelemPath) as f:
             file = f.read().splitlines()
-        coor = file[0].split(',')
-        coor = [float(coor[0]),float(coor[1])]
+        coor = file[-1].split(', ')
+        # coor = coor.split(',') 
+        coor = coor[0].split(',')
+        coor = [float(coor[0]),float(coor[1])] # [123,123]
         #print(coor)
         return coor
 

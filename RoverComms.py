@@ -93,7 +93,7 @@ class RoverComms:
 
         except:
             None
-            print("command file empty")
+            # print("command file empty")
         
     
         return command_dict
