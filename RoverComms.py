@@ -106,7 +106,15 @@ class RoverComms:
             toWrite: telemetry to write to file (FORMAT TBD)
         """
 
-        with open(self.obcTelemPath, 'a') as f:
+        # with open(self.obcTelemPath, 'a') as f:
+        #     f.write(gpsCoor+'\n')
+        with open(self.obcTelemPath) as f:
+                lines = f.read().splitlines()
+                if len(lines)>=120: #keep location history for 2 minutes
+                    lines=lines[1:]
+        with open(self.obcTelemPath, 'w') as f:
+            for line in lines:
+                f.write(line+'\n')
             f.write(gpsCoor+'\n')
 
         self.syncTelem()
