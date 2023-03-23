@@ -85,8 +85,9 @@ if __name__ == "__main__":
 	# start gps 
 	gps_port = r"/dev/ttyACM0"
 	gps = RoverGPS(gps_port,comms) # more params?
+
 	LOI = [-105.243501,40.012155]
-	gs_coords = [0,0]#gps.readGPS()
+	gs_coords = gps.readGPS()
 
 	# start move
 	translation_res = 1
