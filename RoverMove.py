@@ -20,7 +20,6 @@ class RoverMove:
 		self.translation_res = translation_res
 		logging.info("Rovermove initialized")
 
-	#Possibly not needed
 	def motionInProgress(self) :
 		"""
 		Loops until motion is complete
