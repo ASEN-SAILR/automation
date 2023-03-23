@@ -37,12 +37,6 @@ class RoverGPS:
             logging.info(f"writing {coor} to telem file")
             print("Sending telem")
             self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
-
-    def __readGPS(self,ser): #only for testing, on actual rover implementation, never call this
-        gps = UbloxGps(ser)
-        geo = gps.geo_coords()
-        #print(geo.lon,geo.lat)
-        return [geo.lon,geo.lat]
     
     def startTele(self):
         self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port,))
@@ -55,7 +49,7 @@ class RoverGPS:
     def atloi(self,LOI):
         return self.distanceToTarget(LOI)<self.precision
 
-    def __bearingToTarget(self,tarCoor:list): # -> float:
+    def bearingToTarget(self,tarCoor:list): # -> float:
         """
         input: 
             currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
@@ -65,7 +59,7 @@ class RoverGPS:
         #input: currCoor, tarCoor = set of coordinates [lat,lon], ie. [23.0231,-34.204] (object of floats)
         #output: bearing in deg from north, ie. 89 (float)
         
-        lat1, lon1 = self.__getGPS()
+        lat1, lon1 = self.getGPS()
         lat2, lon2 = tarCoor
         #print(lat1,lon1)
         deg2rad = math.pi/180
@@ -109,9 +103,9 @@ class RoverGPS:
         output: 
             angle to target with respect to current heading in deg, positive mean to the right (float)
         """
-        return self.__bearingToTarget(tarCoor)-currHeading
+        return self.bearingToTarget(tarCoor)-currHeading
 
-    def __getGPS(self): # -> list of float
+    def getGPS(self): # -> list of float
         with open(self.comms.obcTelemPath) as f:
             file = f.read().splitlines()
         coor = file[-1].split(', ')
