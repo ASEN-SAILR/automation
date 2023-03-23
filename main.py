@@ -60,7 +60,7 @@ if __name__ == "__main__":
 	# video.startRecording()
 
 	# start uart comms with Teensy
-	teensy_port = r"/dev/ttyACM1"
+	teensy_port = r"/dev/ttyACM0"
 	uart = RoverUART(teensy_port) 
 	uart.readLine() #clear the serial buffer 
 
@@ -83,18 +83,20 @@ if __name__ == "__main__":
 	buffer_dist = resolution/2
 
 	# start gps 
-	gps_port = r"/dev/ttyACM0"
-	gps = RoverGPS(gps_port,comms) # more params?
+	gps_port = r"/dev/ttyACM1"
+	gps = RoverGPS(gps_port) # more params?
 
-	LOI = [-105.243501,40.012155]
-	gs_coords = gps.readGPS()
+	LOI = [40.0093664,-105.2439658]
+	gs_coords = gps.getGPS()
+
+	gps.startTele()
 
 	# start move
 	translation_res = 1
 	move = RoverMove(lidar,gps,uart,buffer_dist,red_width,translation_res)
 
 	#start record process that will be run on background - keep recording and sending videos
-	gps.startTele()
+	#gps.startTele()
 
 	# Variable that contains the active process: manual or autonomous
 	# need to instantiate a process then terminate for logic in while loop to work
@@ -119,7 +121,6 @@ if __name__ == "__main__":
 				logging.info(f"command ({command}) read in from RoverComms ")
 			
 				missionDone = False
-				command = None #TODO REMOVE WHEN DONE WITH NO COMMS testing
 				break
 
 
@@ -168,7 +169,7 @@ if __name__ == "__main__":
 			active_command = "autonomous"
 			logging.info("autonomous command recieved")
 			LOI = command["LOI"]
-			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2))
+			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2,translation_res))
 			current_process.start()
 		elif command["commandType"]=="manual":
 			active_command = "manual"
@@ -191,6 +192,7 @@ if __name__ == "__main__":
 			# video.startRecording()
 
 
+		command = {} #TODO REMOVE WHEN DONE WITH NO COMMS testing
 	
 		#return to top of loop
 			

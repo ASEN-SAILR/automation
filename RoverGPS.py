@@ -37,18 +37,17 @@ class RoverGPS:
             logging.info(f"writing {coor} to telem file")
             print("Sending telem")
             lineToWrite = str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]
-            self.writeLocalTXT(lineToWrite)
+            #self.writeLocalTXT(lineToWrite)
             #self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
-
-    def writeLocalTXT(self,gpsStr:str): #temporary use for testing
-        with open('telemetry.txt') as f:
-            lines = f.read().splitlines()
-            if len(lines)>=99999: #1 sec per 1 point
-                lines=lines[1:]
-        with open('telemetry.txt', 'w') as f:
-            for line in lines:
-                f.write(line+'\n')
-            f.write(gpsStr+'\n')
+            #temporary use for testing
+            with open('telemetry.txt') as f:
+                lines = f.read().splitlines()
+                if len(lines)>=99999: #1 sec per 1 point
+                    lines=lines[1:]
+            with open('telemetry.txt', 'w') as f:
+                for line in lines:
+                    f.write(line+'\n')
+                f.write(lineToWrite+'\n')
     
     def startTele(self):
         self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port,))

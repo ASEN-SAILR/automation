@@ -46,7 +46,7 @@ class RoverUART:
         mode = "m"
         cmdString = mode.encode("utf-8") + struct.pack("<f",float(0.0))
         self.sendUartCmd(cmdString)
-        #time.sleep(0.25)
+        time.sleep(0.1)
         mystring = self.readLine()
         #_ = self.readAll()
         try:

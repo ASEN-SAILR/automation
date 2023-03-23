@@ -62,7 +62,7 @@ class RoverMove:
 
 			#Checks if at LOI
 			atloi = self.gps.atloi(LOI)
-                        logging.info('[lat,lon]='+str(gps.getGPS())+', dist='+str(gps.distanceToTarget(LOI))+' m, angle from N='+str(gps.bearingToTarget(LOI))+' deg, MagHeading='+str(mag_heading)+' deg, atloi='+str(atloi))
+			logging.info('[lat,lon]='+str(self.gps.getGPS())+', dist='+str(self.gps.distanceToTarget(LOI))+' m, angle from N='+str(self.gps.bearingToTarget(LOI))+' deg, MagHeading='+str(mag_heading)+' deg, atloi='+str(atloi))
 			
 			#If no object is in the way and not yet at LOI, enters loop
 			while status is None and atloi == 0:
@@ -131,7 +131,7 @@ class RoverMove:
 
 					#Checks if at LOI
 					atloi = self.gps.atloi(LOI)
-                logging.info('[lat,lon]='+str(gps.getGPS())+', dist='+str(gps.distanceToTarget(LOI))+' m, angle from N='+str(gps.bearingToTarget(LOI))+' deg, MagHeading='+str(mag_heading)+' deg, atloi='+str(atloi))
+		logging.info('[lat,lon]='+str(self.gps.getGPS())+', dist='+str(self.gps.distanceToTarget(LOI))+' m, angle from N='+str(self.gps.bearingToTarget(LOI))+' deg, MagHeading='+str(mag_heading)+' deg, atloi='+str(atloi))
 
 	def checkDesiredHeading(self,delta_heading):
 		'''
