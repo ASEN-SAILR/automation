@@ -25,25 +25,25 @@ if __name__ == "__main__":
 	logging.getLogger("numpy").setLevel(logging.WARNING)
 	logging.getLogger("multiprocessing").setLevel(logging.WARNING)
 
-	# start reading commands from commands log
-	# leaving these in for testing on automation end but should be taken out
-	commands_path = r"commands.txt"
-	telemetry_path = r"telemetry.txt"
-	# onboard computer comms vars
-	obcCommandPath = commands_path
-	obcTelemPath = telemetry_path
-	obcVideoPath = "video"
-	obcImagePath = "images"
-	#currCmdNum = 0 #not needed, automatically defined in RoverComms
-	# ground station comms vars
-	gs_ssh_password = "asen-sailr"
-	gs_ip = "192.168.1.3"
-	gs_home_path = "/home/ground-station/comms-gs/"
-	gs_telem_path = gs_home_path+"telemetry.txt"
-	gs_video_path = gs_home_path+"videos"
-	gs_image_path = gs_home_path+"images"
-	#start comms
-	comms = RoverComms(obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path)
+	# # start reading commands from commands log
+	# # leaving these in for testing on automation end but should be taken out
+	# commands_path = r"commands.txt"
+	# telemetry_path = r"telemetry.txt"
+	# # onboard computer comms vars
+	# obcCommandPath = commands_path
+	# obcTelemPath = telemetry_path
+	# obcVideoPath = "video"
+	# obcImagePath = "images"
+	# #currCmdNum = 0 #not needed, automatically defined in RoverComms
+	# # ground station comms vars
+	# gs_ssh_password = "asen-sailr"
+	# gs_ip = "192.168.1.3"
+	# gs_home_path = "/home/ground-station/comms-gs/"
+	# gs_telem_path = gs_home_path+"telemetry.txt"
+	# gs_video_path = gs_home_path+"videos"
+	# gs_image_path = gs_home_path+"images"
+	# #start comms
+	# comms = RoverComms(obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path)
 	
 
 	# start video recording (class)
@@ -85,11 +85,13 @@ if __name__ == "__main__":
 	# start gps 
 	gps_port = r"/dev/ttyACM0"
 	gps = RoverGPS(gps_port,comms) # more params?
-	#LOI = [-105.243501,40.012155]
-	gsLOI = gps.getGPS()
+
+	LOI = [-105.243501,40.012155]
+	gs_coords = gps.readGPS()
 
 	# start move
-	move = RoverMove(lidar,gps,uart,buffer_dist,red_width)
+	translation_res = 1
+	move = RoverMove(lidar,gps,uart,buffer_dist,red_width,translation_res)
 
 	#start record process that will be run on background - keep recording and sending videos
 	gps.startTele()
@@ -104,23 +106,26 @@ if __name__ == "__main__":
 	# tracks current command
 	active_command = "stop"
 	
-	command = None
+	command = {"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
 	while True:
 		logging.info("waiting for command")
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
-			command = comms.readCommand()
+			
+			# command = comms.readCommand()
+			
 			
 			if command:
 				logging.info(f"command ({command}) read in from RoverComms ")
 			
 				missionDone = False
+				command = None #TODO REMOVE WHEN DONE WITH NO COMMS testing
 				break
 
+
 			#if no new command, at LOI, and autonomous done
-			if LOI is not None and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
-				#print(gsLOI)
-				if LOI == gsLOI: #the rover reached LOI and now back at gsLOI
+			if active_command == "autonomous" and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
+				if LOI == gs_coords: #the rover reached LOI and now back at gsLOI
 					logging.info("rover at LOI")
 					if ~missionDone:
 						missionDone = True
@@ -136,6 +141,7 @@ if __name__ == "__main__":
 				# check for emergecy stop conidition first
 
 		if command["commandType"] == "stop":
+			active_command = "stop"
 			logging.info("stop command recieved")
 			# termiate child processes immediately and stop motion ASAP
 			LOI = None
@@ -159,11 +165,13 @@ if __name__ == "__main__":
 		#if command["mode"] == "autonomous" or command["mode"] == "manual":
 			#current_process = Process(target=move.startMove, args=(command,))
 		if command["commandType"]=="autonomous":
+			active_command = "autonomous"
 			logging.info("autonomous command recieved")
 			LOI = command["LOI"]
 			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2))
 			current_process.start()
 		elif command["commandType"]=="manual":
+			active_command = "manual"
 			logging.info(f"manual command recieved: {command}")
 			LOI = None
 			# current_process = Process(target=move.manual, args=(command["type"],command["dist"],command["angle"]))
@@ -172,6 +180,7 @@ if __name__ == "__main__":
 
 		#TODO take photo when at LOI
 		elif command["commandType"] == "photo":
+			active_command = "photo"
 			# STOP recording 
 			# take pano photo
 			# begin recording 
