@@ -39,7 +39,7 @@ class RoverGPS:
             self.writeLocalTXT(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13])
             #self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
 
-    def writeLocalTXT(self,line:str): #temporary use for testing
+    def writeLocalTXT(self,gpsStr:str): #temporary use for testing
         with open('telemetry.txt') as f:
             lines = f.read().splitlines()
             if len(lines)>=99999: #1 sec per 1 point
