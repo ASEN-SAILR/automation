@@ -14,11 +14,11 @@ import pytz
 ## all coordinates must be in deg-decimal form, not hour-min-sec
 
 class RoverGPS:
-    def __init__(self,gpsport:str,comms:RoverComms): # -> None:
+    def __init__(self,gpsport:str): #,comms:RoverComms): # -> None:
         #member vars
 
         #initialize stuff
-        self.comms = comms
+        #self.comms = comms
         self.precision = 1.15
         self.gps_port = gpsport
         # self.ser = serial.Serial(port, baudrate=38400, timeout=1)
@@ -36,7 +36,18 @@ class RoverGPS:
             #self.comms.writeAndSendTelemetry('1,2') 
             logging.info(f"writing {coor} to telem file")
             print("Sending telem")
-            self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
+            self.writeLocalTXT(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13])
+            #self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
+
+    def writeLocalTXT(self,line:str): #temporary use for testing
+        with open('telemetry.txt') as f:
+            lines = f.read().splitlines()
+            if len(lines)>=99999: #1 sec per 1 point
+                lines=lines[1:]
+        with open('telemetry.txt', 'w') as f:
+            for line in lines:
+                f.write(line+'\n')
+            f.write(gpsStr+'\n')
     
     def startTele(self):
         self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port,))
@@ -106,7 +117,8 @@ class RoverGPS:
         return self.bearingToTarget(tarCoor)-currHeading
 
     def getGPS(self): # -> list of float
-        with open(self.comms.obcTelemPath) as f:
+        #with open(self.comms.obcTelemPath) as f:
+        with open('telemetry.txt') as f: #temporary for testinng
             file = f.read().splitlines()
         coor = file[-1].split(', ')
         # coor = coor.split(',') 
