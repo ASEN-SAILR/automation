@@ -89,7 +89,8 @@ if __name__ == "__main__":
 	gs_coords = [0,0]#gps.readGPS()
 
 	# start move
-	move = RoverMove(lidar,gps,uart,buffer_dist,red_width)
+	translation_res = 1
+	move = RoverMove(lidar,gps,uart,buffer_dist,red_width,translation_res)
 
 	#start record process that will be run on background - keep recording and sending videos
 	gps.startTele()
