@@ -36,7 +36,8 @@ class RoverGPS:
             #self.comms.writeAndSendTelemetry('1,2') 
             logging.info(f"writing {coor} to telem file")
             print("Sending telem")
-            self.writeLocalTXT(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13])
+            lineToWrite = str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]
+            self.writeLocalTXT(lineToWrite)
             #self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
 
     def writeLocalTXT(self,gpsStr:str): #temporary use for testing
