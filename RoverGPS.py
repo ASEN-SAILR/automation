@@ -27,8 +27,8 @@ class RoverGPS:
         def readGPS(ser): #only for testing, on actual rover implementation, never call this
             gps = UbloxGps(ser)
             geo = gps.geo_coords()
-            #print(geo.lon,geo.lat)
-            return [geo.lon,geo.lat]
+            #print(geo.lat,geo.lon)
+            return [geo.lat,geo.lon]
         
         ser = serial.Serial(gps_port, baudrate=38400, timeout=1)
         while True:
