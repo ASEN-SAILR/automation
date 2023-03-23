@@ -78,7 +78,7 @@ class RoverGPS:
         input: currCoor, tarCoor = [lat,lon], ie. [23.0231,-34.204] (object of floats)
         output: distance to target in meter (float)
         """
-        lat1, lon1 = self.__getGPS()
+        lat1, lon1 = self.getGPS()
         lat2, lon2 = tarCoor
 
         deg2rad = math.pi/180
