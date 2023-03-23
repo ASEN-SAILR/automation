@@ -27,7 +27,8 @@ class RoverMove:
 		success = 0
 		while not success:
 			#TODO: Call the correct function
-			success = self.uart.check_motion_status()
+			#success = self.uart.check_motion_status()
+			success = 1
 			time.sleep(.5)
 		return
 
@@ -43,7 +44,7 @@ class RoverMove:
 		
 		#Initializing LiDAR
 		time_to_scan = 2 # seconds
-		[status, obstacles, _] = self.lidar.getobstacles(time_to_scan)
+		[status, obstacles, _] = self.lidar.getObstacles(time_to_scan)
 
 		#Loops until LOI is reached
 		while not atloi:
@@ -67,7 +68,7 @@ class RoverMove:
 				#Checks if Rover is pointing at LOI before movement
 				if self.checkDesiredHeading(delta_heading):
 					print("Nothing in the way")
-					print("Moving",translation_res,"meters"
+					print("Moving",translation_res,"meters")
 
 					#Sends translation command
 					self.uart.sendTranslateCmd(translation_res)
@@ -81,7 +82,7 @@ class RoverMove:
 					atloi = self.gps.atloi(LOI)
 
 					#Checks if any obstacle is in view
-					[status,obstacles,_] = self.lidar.getobstacles(time_to_scan)
+					[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
 					delta_heading = self.gps.angleToTarget(LOI,mag_heading)
 				#If Rover is not pointing at LOI, breaks and re-evaluates state
 				else:
@@ -98,7 +99,7 @@ class RoverMove:
 				self.motionInProgress()
 				
 				#Checks if any obstacle is in view
-				[status,obstacles,_] = self.lidar.getobstacles(time_to_scan)
+				[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
 				
 				#Checks if at LOI
 				atloi = self.gps.atloi(LOI)
@@ -125,7 +126,7 @@ class RoverMove:
 					self.motionInProgress()
 
 					#Checks if any obstacle is in view
-					[status,obstacles,_] = self.lidar.getobstacles(time_to_scan)
+					[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
 
 					#Checks if at LOI
 					atloi = self.gps.atloi(LOI)
@@ -168,8 +169,8 @@ class RoverMove:
 		Leftvalue_y = Leftvalue_y - buffer_dist
 		#Adding .5 for rover length so rotation is at center of Rover
 		rover_length = 1/2
-		Rightvalue_x = RightValueX + rover_length - buffer_dist
-		Leftvalue_x = LeftValueX + rover_length - buffer_dist 
+		Rightvalue_x = Rightvalue_x + rover_length - buffer_dist
+		Leftvalue_x = Leftvalue_x + rover_length - buffer_dist 
 		
 		#Finds the angles to turn right and left using trig
 		DistRight = np.sqrt(Rightvalue_x**2+Rightvalue_y**2)
@@ -223,7 +224,7 @@ class RoverMove:
 
 		#Adds buffer to move clearly past clearance zone
 		buffer_distance = .5
-		value_x = ValueX + buffer_distance
+		value_x = value_x + buffer_distance
 
 		#Trig to find distance to the object
 		distance_to_obj = np.sqrt(value_x**2+value_y**2)
@@ -237,8 +238,8 @@ class RoverMove:
 		"""
 		Passes on a single command to teensy to be executed
 		"""
-		if type == "rotate"
+		if type == "rotate":
 			self.uart.sendRotateCmd(angle)
-		elif type == "translate"
+		elif type == "translate":
 			self.uart.sendTranslateCmd(dist)
 		return
