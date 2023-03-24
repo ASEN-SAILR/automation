@@ -138,7 +138,7 @@ class RoverMove:
                         #time.sleep(2)
                         #pdb.set_trace()
                         atloi = self.gps.atloi(LOI)
-                        logging.info('[lon,lat] = '+str(gps.getGPS())+', dist='+str(gps.distanceToTarget(LOI))+' m, deg from N='+str(gps.bearingToTarget())+' deg')
+                        logging.info('[lon,lat]='+str(gps.getGPS())+', dist='+str(gps.distanceToTarget(LOI))+' m, degree from N='+str(gps.bearingToTarget())+' deg, MagHeading='+str(MagHeading)+'deg, angle to turn='+str(DeltaHeading)+'deg, atloi='+str(atloi))
                         
                         while Status is None and atloi == 0:
                                 if self.check_desired_heading(DeltaHeading):
