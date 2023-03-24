@@ -111,7 +111,7 @@ class RoverGPS:
         """
         return self.__bearingToTarget(tarCoor)-currHeading
 
-    def __getGPS(self): # -> list of float
+    def getGPS(self): # -> list of float
         with open(self.comms.obcTelemPath) as f:
             file = f.read().splitlines()
         coor = file[-1].split(', ')
