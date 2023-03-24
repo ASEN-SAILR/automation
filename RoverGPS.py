@@ -14,11 +14,11 @@ import pytz
 ## all coordinates must be in deg-decimal form, not hour-min-sec
 
 class RoverGPS:
-    def __init__(self,gpsport:str): #,comms:RoverComms): # -> None:
+    def __init__(self,gpsport:str,comms:RoverComms): # -> None:
         #member vars
 
         #initialize stuff
-        #self.comms = comms
+        self.comms = comms
         self.precision = 1.15
         self.gps_port = gpsport
         # self.ser = serial.Serial(port, baudrate=38400, timeout=1)
@@ -37,10 +37,10 @@ class RoverGPS:
             logging.info(f"writing {coor} to telem file")
             print("Sending telem")
             lineToWrite = str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]
-            self.writeLocalTXT(lineToWrite)
-            #self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
+            #self.writeLocalTXT(lineToWrite)
+            self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
 
-    def writeLocalTXT(self,gpsStr:str): #temporary use for testing
+    def writeLocalTXT(self,gpsStr:str): #temporary use for testing without comms
         with open('telemetry.txt') as f:
             lines = f.read().splitlines()
             if len(lines)>=99999: #1 sec per 1 point
