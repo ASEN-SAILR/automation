@@ -2,24 +2,22 @@
 #https://github.com/sparkfun/Qwiic_Ublox_Gps_Py
 from ublox_gps import UbloxGps
 import serial
-import logging
+
 import math
 import time
 import RoverComms
 from multiprocessing import Process
-from datetime import datetime
-import pytz
 
 
 ## all coordinates must be in deg-decimal form, not hour-min-sec
 
 class RoverGPS:
-    def __init__(self,gpsport:str): #,comms:RoverComms): # -> None:
+    def __init__(self,gpsport:str,comms:RoverComms): # -> None:
         #member vars
 
         #initialize stuff
-        #self.comms = comms
-        self.precision = 10
+        self.comms = comms
+        self.precision = 1.15
         self.gps_port = gpsport
         # self.ser = serial.Serial(port, baudrate=38400, timeout=1)
 
@@ -38,16 +36,17 @@ class RoverGPS:
             print("Sending telem")
             lineToWrite = str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]
             #self.writeLocalTXT(lineToWrite)
-            #self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
-            #temporary use for testing
-            with open('telemetry.txt') as f:
-                lines = f.read().splitlines()
-                if len(lines)>=99999: #1 sec per 1 point
-                    lines=lines[1:]
-            with open('telemetry.txt', 'w') as f:
-                for line in lines:
-                    f.write(line+'\n')
-                f.write(lineToWrite+'\n')
+            self.comms.writeAndSendTelemetry(str(coor[0])+','+str(coor[1])+', '+str(datetime.now(pytz.timezone('US/Mountain')))[:-13]) #write and send
+
+    def writeLocalTXT(self,gpsStr:str): #temporary use for testing without comms
+        with open('telemetry.txt') as f:
+            lines = f.read().splitlines()
+            if len(lines)>=99999: #1 sec per 1 point
+                lines=lines[1:]
+        with open('telemetry.txt', 'w') as f:
+            for line in lines:
+                f.write(line+'\n')
+            f.write(gpsStr+'\n')
     
     def startTele(self):
         self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port,))
