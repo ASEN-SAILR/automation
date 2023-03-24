@@ -25,25 +25,25 @@ if __name__ == "__main__":
 	logging.getLogger("numpy").setLevel(logging.WARNING)
 	logging.getLogger("multiprocessing").setLevel(logging.WARNING)
 
-	# # start reading commands from commands log
-	# # leaving these in for testing on automation end but should be taken out
-	# commands_path = r"commands.txt"
-	# telemetry_path = r"telemetry.txt"
-	# # onboard computer comms vars
-	# obcCommandPath = commands_path
-	# obcTelemPath = telemetry_path
-	# obcVideoPath = "video"
-	# obcImagePath = "images"
-	# #currCmdNum = 0 #not needed, automatically defined in RoverComms
-	# # ground station comms vars
-	# gs_ssh_password = "asen-sailr"
-	# gs_ip = "192.168.1.3"
-	# gs_home_path = "/home/ground-station/comms-gs/"
-	# gs_telem_path = gs_home_path+"telemetry.txt"
-	# gs_video_path = gs_home_path+"videos"
-	# gs_image_path = gs_home_path+"images"
-	# #start comms
-	# comms = RoverComms(obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path)
+	# start reading commands from commands log
+	# leaving these in for testing on automation end but should be taken out
+	commands_path = r"commands.txt"
+	telemetry_path = r"telemetry.txt"
+	# onboard computer comms vars
+	obcCommandPath = commands_path
+	obcTelemPath = telemetry_path
+	obcVideoPath = "video"
+	obcImagePath = "images"
+	#currCmdNum = 0 #not needed, automatically defined in RoverComms
+	# ground station comms vars
+	gs_ssh_password = "asen-sailr"
+	gs_ip = "192.168.1.3"
+	gs_home_path = "/home/ground-station/comms-gs/"
+	gs_telem_path = gs_home_path+"telemetry.txt"
+	gs_video_path = gs_home_path+"videos"
+	gs_image_path = gs_home_path+"images"
+	#start comms
+	comms = RoverComms(obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path)
 	
 
 	# start video recording (class)
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 	# video.startRecording()
 
 	# start uart comms with Teensy
-	teensy_port = r"/dev/ttyACM0"
+	teensy_port = r"/dev/ttyACM1"
 	uart = RoverUART(teensy_port) 
 	uart.readLine() #clear the serial buffer 
 
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 	buffer_dist = resolution/2
 
 	# start gps 
-	gps_port = r"/dev/ttyACM1"
+	gps_port = r"/dev/ttyACM0"
 	gps = RoverGPS(gps_port) # more params?
 
 	LOI = [40.0093664,-105.2439658]
