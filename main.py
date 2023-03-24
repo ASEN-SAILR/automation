@@ -86,7 +86,7 @@ if __name__ == "__main__":
 	gps_port = r"/dev/ttyACM0"
 	gps = RoverGPS(gps_port) # more params?
 
-	LOI = [40.0093664,-105.2439658]
+	#LOI = [40.0093664,-105.2439658]
 	gs_coords = gps.getGPS()
 
 	gps.startTele()
@@ -108,13 +108,13 @@ if __name__ == "__main__":
 	# tracks current command
 	active_command = "stop"
 	
-	command = {"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
+	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
 	while True:
 		logging.info("waiting for command")
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
 			
-			# command = comms.readCommand()
+			command = comms.readCommand()
 			
 			
 			if command:
@@ -125,7 +125,7 @@ if __name__ == "__main__":
 
 
 			#if no new command, at LOI, and autonomous done
-			if active_command == "autonomous" and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
+			if LOI is not None and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
 				if LOI == gs_coords: #the rover reached LOI and now back at gsLOI
 					logging.info("rover at LOI")
 					if ~missionDone:
