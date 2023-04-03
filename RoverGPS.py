@@ -2,13 +2,11 @@
 #https://github.com/sparkfun/Qwiic_Ublox_Gps_Py
 from ublox_gps import UbloxGps
 import serial
-import logging
+
 import math
 import time
 import RoverComms
 from multiprocessing import Process
-from datetime import datetime
-import pytz
 
 
 ## all coordinates must be in deg-decimal form, not hour-min-sec
