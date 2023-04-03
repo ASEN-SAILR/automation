@@ -56,8 +56,8 @@ class RoverMove:
 			
 			#Checks if a switch to manual control is sent
 			command = self.comms.readCommand()
-			if command["commandType"] == "manual":
-				print('Switching to manual mode..."')
+			if command["commandType"] == "stop":
+				print('Stopping autonomy..."')
 				break;
 
 			#Finding change in heading desired to point to LOI
