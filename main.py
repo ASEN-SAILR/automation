@@ -109,7 +109,7 @@ if __name__ == "__main__":
 	active_command = "stop"
 	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
-	logging.info("main loop begining")
+	logging.info("main loop beginning")
 	while True:
 		logging.info("waiting for command")
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()

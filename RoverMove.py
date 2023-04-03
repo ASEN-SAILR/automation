@@ -3,11 +3,12 @@ import sys, time, numpy as np, pdb, logging
 from RoverGPS import RoverGPS
 from RoverLidar import RoverLidar 
 from RoverUART import RoverUART
+from RoverComms import RoverComms
 from multiprocessing import Process
 
 ### Class that will handle the motion of the rover
 class RoverMove:
-	def __init__(self,lidar:RoverLidar,gps:RoverGPS,uart:RoverUART,buffer_dist,red_width,translation_res) -> None:
+	def __init__(self,lidar:RoverLidar,gps:RoverGPS,uart:RoverUART,comms:RoverComms,buffer_dist,red_width,translation_res) -> None:
 		"""
 		Initializes member variables
 		"""
@@ -18,6 +19,7 @@ class RoverMove:
 		self.buffer_dist = buffer_dist
 		self.red_width = red_width
 		self.translation_res = translation_res
+		self.comms = comms
 		logging.info("Rovermove initialized")
 
 	def motionInProgress(self) :
@@ -45,9 +47,18 @@ class RoverMove:
 		#Initializing LiDAR
 		time_to_scan = 2 # seconds
 		[status, obstacles, _] = self.lidar.getObstacles(time_to_scan)
+		
+		#Initializing commands
+		command = None
 
 		#Loops until LOI is reached
 		while not atloi:
+			
+			#Checks if a switch to manual control is sent
+			command = self.comms.readCommand()
+			if command["commandType"] == "manual":
+				print('Switching to manual mode..."')
+				break;
 
 			#Finding change in heading desired to point to LOI
 			mag_heading = self.uart.getMagneticAzm()
