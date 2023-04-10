@@ -43,7 +43,7 @@ class RoverComms:
         self.gs_video_path = gs_str_stem + gs_video_path
         self.gs_image_path = gs_str_stem + gs_image_path
 
-        self.isStreaming = Value('i' False)
+        self.isStreaming = Value('i', False)
         self.current_cmd_num = -1
         # initialize stuff as needed
 
@@ -150,10 +150,10 @@ class RoverComms:
         self.process = Process(target=self.liveVideoServer,args=(self.isStreaming,self.currFrame))
         self.process.start()
 
-    def stopLive(self):
+    def stopTele(self):
+        self.isStreaming = False
         # if self.process.is_alive():
         #     self.process.terminate()
-        isStreaming.value = False
 
     def liveVideoServer(self,isStreaming,currFrame):
 
