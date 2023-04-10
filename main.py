@@ -56,8 +56,6 @@ if __name__ == "__main__":
 	fps = 30 
 	videoResolution = (640,360) #format: tuple (480,480)
 	cam = RoverCamera(comms,camPort,videoLength,photoPath,photoResolution,videoPath,fps,videoResolution) #need comms so that we can send video after recording
-	# comms,port,vid_length,photoPath,photoResolution,videoPath,fps,videoResolution
-	# video.startRecording()
 
 	# start uart comms with Teensy
 	teensy_port = r"/dev/ttyACM0"
@@ -112,7 +110,6 @@ if __name__ == "__main__":
 	logging.info("main loop begining")
 	live_video_process = Process(comms.liveVideoServer)
 	live_video_process.start()
-
 	while True:
 		logging.info("waiting for command")
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()

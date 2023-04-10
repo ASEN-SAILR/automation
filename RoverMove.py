@@ -1,347 +1,275 @@
-# Trevor
-import sys
-sys.path.append("../")
-import time
+# Written by Trevor Reed
+import sys, time, numpy as np, pdb, logging
 from RoverGPS import RoverGPS
 from RoverLidar import RoverLidar 
 from RoverUART import RoverUART
-#from RoverMagnet import RoverMagnet
-#from RoverUART import RoverUART
-import numpy as np
-import pdb
+from RoverComms import RoverComms
 from multiprocessing import Process
+
 ### Class that will handle the motion of the rover
 class RoverMove:
-        def __init__(self,lidar:RoverLidar,gps:RoverGPS,uart:RoverUART,buffer_dist,red_width) -> None:
-                """
-                inputs:
-                        gps: instance of class RoverGPS
-                        lidar: instance of class RoverLidar
-                """
-                #member variables here
-
-				#self.uart = uart
-                self.gps = gps
-                #self.magnet = magnet
-                self.lidar = lidar
+	def __init__(self,lidar:RoverLidar,gps:RoverGPS,uart:RoverUART,comms:RoverComms,buffer_dist,red_width,translation_res) -> None:
+		"""
+		Initializes member variables
+		"""
+		self.gps = gps
+		self.lidar = lidar
 		self.uart = uart
-                self.process = None
-                self.buffer_dist = buffer_dist
-                self.red_width = red_width
+		self.process = None
+		self.buffer_dist = buffer_dist
+		self.red_width = red_width
+		self.translation_res = translation_res
+		self.comms = comms
+		logging.info("Rovermove initialized")
 
-        #Testing: Not complete
-        def motionInProgress(self) :
-                """
-                checks if the rover is executing a manual or autnonomous command
+	def motionInProgress(self) :
+		"""
+		Loops until motion is complete
+		"""
+		success = 0
+		while not success:
+			#TODO: Call the correct function
+			#success = self.uart.check_motion_status()
+			success = 1
+			time.sleep(.5)
+		return
 
-                TODO: we need a variable that tracks if a motion is in progress, may not be possible with multiprocessing...
-                
-                inputs:
-                        none
-                returns:
-                        True if executing motion
-                        False if not executin motion
-                """
-                success = 0
-                while not success:
-                        success = check_motion_status
-                return
+	### Autonomous Mode ###
+	def autonomous(self,LOI,red_width,buffer_dist,translation_res):
+		"""
+		Autonomously move the rover to a LOI
+		"""
+		logging.info("Beginning autonomous movement.")
+		
+		#Initializes starting/desired LOI and connection flag to verify connection is still established
+		start_LOI = LOI
+		desired_LOI = LOI
+		connection_flag = 1
 
-        def startMove(self,command:dict):
-                """
-                Begins multiprocessing process for manual or autonomous process for rover. 
+		#Checking if Rover is at LOI
+		atloi = self.gps.atloi(LOI)
+		
+		#Initializing LiDAR
+		time_to_scan = 2 # seconds
+		[status, obstacles, _] = self.lidar.getObstacles(time_to_scan)
+		
+		#Initializing commands
+		command = None
 
-                input:
-                        command dictionary
-                returns:
-                        bool
-                """
-                if self.process.is_alive():
-                        #TODO Throw error
-                        return
+		#Loops until LOI is reached
+		while not atloi:
 
-                # start self.process for these
+			#If ground station connection is lost, sets LOI to start point for rover to return to
+			if not self.comms.checkConnection():
+				#Sets the desired LOI to revert to when connection is regained
+				if connection_flag == 1:
+					desired_LOI = LOI
+				LOI = start_LOI
+				connection_flag = 0
+			#If ground station connection is regained, sets LOI back to what it was before
+			elif connection_flag == 0:
+				LOI = desired_LOI
+				connection_flag = 1
 
-                if command["type"]=="autonomous":
-                        self.process = Process(target=self.autonomous, args=(command['LOI']))
-                        self.process.start()
+			#Checks if a switch to manual control is sent
+			command = self.comms.readCommand()
+			if command["commandType"] == "stop":
+				print('Stopping autonomy..."')
+				break;
 
-                elif command["type"]=="manual":
-                        self.process = Process(target=self.manual, args=(command["type"],command["dist"],command["angle"]))
-                        self.process.start()
+			#Finding change in heading desired to point to LOI
+			mag_heading = self.uart.getMagneticAzm()
+			print(mag_heading)
+			delta_heading = self.gps.angleToTarget(LOI,mag_heading)
+			print('Delta heading required:',delta_heading,'degrees.')
 
-                else:
-                        # throw error?
-                        return
+			#Sending command to teensy and waiting for completion
+			self.uart.sendRotateCmd(delta_heading)
+			#Function waits for completion before moving on
+			self.motionInProgress()
 
-        #Possibly not needed
-        def stopMove(self) -> bool:
-                """
-                stop the rover after next action is complete
-                Maybe unneeded depending on how we want to stop the rover 
-                
-                input:
-                        none
-                return:
-                        bool
-                """
-                if self.process.is_alive():
-                        self.process.terminate()
+			#Checks if at LOI
+			atloi = self.gps.atloi(LOI)
+			logging.info('[lat,lon]='+str(self.gps.getGPS())+', dist='+str(self.gps.distanceToTarget(LOI))+' m, angle from N='+str(self.gps.bearingToTarget(LOI))+' deg, MagHeading='+str(mag_heading)+' deg, atloi='+str(atloi))
+			
+			#If no object is in the way and not yet at LOI, enters loop
+			while status is None and atloi == 0:
+				#Checks if Rover is pointing at LOI before movement
+				if self.checkDesiredHeading(delta_heading):
+					print("Nothing in the way")
+					print("Moving",translation_res,"meters")
 
-        
-        def emergencyStopRover(self) -> bool:
-                """
-                stop rover immediately. Terminate self.process ASAP. 
+					#Sends translation command
+					self.uart.sendTranslateCmd(translation_res)
+					#Function waits for completion before moving on
+					self.motionInProgress()
 
-                return:
-                        bool
-                """
-                self.stopMove()
-                return
+					#Checks if Rover is pointing at LOI
+					mag_heading = self.uart.getMagneticAzm()
+					print(mag_heading)
+					delta_heading = self.gps.angleToTarget(LOI,mag_heading)
+					atloi = self.gps.atloi(LOI)
 
-        ### Autonomous Mode ###
-        def autonomous(self,LOI,RedWidth,buffer_dist):
-                """
-                autonomously move the rover to a LOI
+					#Checks if any obstacle is in view
+					[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
+					delta_heading = self.gps.angleToTarget(LOI,mag_heading)
+				#If Rover is not pointing at LOI, breaks and re-evaluates state
+				else:
+					break
+					
+			#If object is in clearance zone (yellow), enters loop
+			while status == "yellow" and atloi == 0:
+				#Finds the distance required to pass the object
+				distance = self.getDeltaDistance(obstacles)
+				#Sends translation command
+				print("Moving",distance,"meters")
+				self.uart.sendTranslateCmd(distance)
+				#Function waits for completion before moving on
+				self.motionInProgress()
+				
+				#Checks if any obstacle is in view
+				[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
+				
+				#Checks if at LOI
+				atloi = self.gps.atloi(LOI)
 
-                TODO: update function calls to match current classes
-                """
-                MagHeading = self.uart.getMagneticAzm()
-                atloi = 0 # self.gps.distanceToTarget(LOI) < 1.15 #precision radius(+/-1.15)
-                #make the rover move autonomously to LOI
-                time_to_scan = 2 # seconds
-                [Status, Obstacles, _] = self.lidar.getObstacles(time_to_scan)
-                while not atloi:
-                        #Finding change in heading desired to point to LOI
-                        #MagHeading = magnet.get_heading()
-                        MagHeading = self.uart.getMagneticAzm()
-                        DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
-                        #DeltaHeading = 0
-                        print('Delta heading required:',DeltaHeading,'radians.')
-                        self.sendRotateCmd(DeltaHeading)
-                        #Sending command to teensy
-                        #self.sendRotation(DeltaHeading)
+			#If object is in avoidance zone (red), enters loop
+			while status == "red" and atloi == 0:
 
-                        #Will wait until motion is complete
-                        #motionInProgress()
+				#If obstacle is too close, Rover backs off (should not ever occur)
+				if self.getDeltaDistance(obstacles)<red_width/2:
+					#Sends command to backoff from Obstacle
+					self.uart.sendTranslateCmd(-translation_res)
+					#Function to wait for completion before moving on
+					self.motionInProgress()
 
-                        #Getting lidar map and finding what zone they are in
-                        #Priming for loop
-                        
-                        #time_to_scan = 2 #seconds
-                        #Gets current lidar obstacles and status
-                        #[Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                        #time.sleep(2)
-                        #pdb.set_trace()
-                        atloi = self.gps.atloi(LOI)
-                        
-                        while Status is None and atloi == 0:
-                                if self.check_desired_heading(DeltaHeading):
-                                        #Commenting out movement to test lidar
-                                        #self.sendTranslation(1) #Moves 1 meter
+				#Continues
+				else:
+					#Finds the required angle to rotate to move obstacle into clearance zone
+					des_angle = self.getDeltaRotation(obstacles,red_width,buffer_dist)
+					
+					#Sends rotation command
+					print("Rotating",des_angle,"degrees")
+					self.uart.sendRotateCmd(des_angle)
+					#Function to wait for completion before moving on
+					self.motionInProgress()
 
-                                        #Waits until motion is complete
-                                        #self.motionInProgress()
+					#Checks if any obstacle is in view
+					[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
 
-                                        print("Nothing in the way, move 1 meter")
-                                        self.sendTranslateCmd(1)
-                                        #pdb.set_trace()
-                                        [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                        DeltaHeading = self.gps.angleToTarget(LOI,MagHeading)
-                                        atloi = self.gps.atloi(LOI)
-                                else:
-                                        break
-                                        
-                        while Status is "yellow" and atloi == 0:
-                                #Needs testing
-                                Distance = self.get_delta_distance(Obstacles) #Gets the distance to clear clearance zone
-                                #Might need to check for distance more than a meter to make sure rover does not go further than it can see
-                                #self.sendTranslation(Distance)
-                                #Waits for motion to complete
-                                #self.motionInProgress()
-                                print("Move",Distance,"meters")
-                                self.sendTranslateCmd(Distance)
-                                #pdb.set_trace()
-                                [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                #time.sleep(2)
-                                atloi = self.gps.atloi(LOI)
-                        while Status is "red" and atloi == 0:
-                                #Needs testing
-                                if self.get_delta_distance(Obstacles)<RedWidth/2:
-                                        break#back off
-                                else:
-                                        Angle = self.get_delta_rotation(Obstacles,RedWidth,buffer_dist) #Gets angle to rotate to set object in clearance zone
-                                        #self.sendRotation(Angle)
-                                        #Waits for motion to complete
-                                        #self.motionInProgress()
-                                        print("Rotate",Angle,"radians")
-                                        self.sendRotateCmd(Angle)
-                                        #pdb.set_trace()
-                                        [Status,Obstacles,_] = self.lidar.getObstacles(time_to_scan)
-                                        atloi = self.gps.atloi(LOI)
-                                #time.sleep(2)
+					#Checks if at LOI
+					atloi = self.gps.atloi(LOI)
+		logging.info('[lat,lon]='+str(self.gps.getGPS())+', dist='+str(self.gps.distanceToTarget(LOI))+' m, angle from N='+str(self.gps.bearingToTarget(LOI))+' deg, MagHeading='+str(mag_heading)+' deg, atloi='+str(atloi))
 
-        def check_desired_heading(self,DeltaHeading):
-                if abs(DeltaHeading) < 2:# checks if rover is pointing at LOI
-                        return 1
-                else:
-                        return 0
-        
-        #Tested: Yes, working as intended       
-        #Input: Array of values of X,Y
-        def get_delta_rotation(self,Obstacles,RedWidth,buffer_dist):
-                if len(Obstacles) == 0:
-                        return 0
-                # priming variables
-                Flag = 0
-                RightValueY = Obstacles[0][1]
-                RightValueX = Obstacles[0][0]
-                LeftValueY = Obstacles[0][1]
-                LeftValueX = Obstacles[0][0]
-                # determines angle to rotate to avoid obstacles
-                # finds the furthest right and the furthest left obstacles
-                for Iteration in Obstacles:
-                        #pdb.set_trace()
-                        if Iteration[1] < LeftValueY:
-                                LeftValueY = Iteration[1]
-                                LeftValueX = Iteration[0]
-                        if Iteration[1] > RightValueY:
-                                RightValueY = Iteration[1]
-                                RightValueX = Iteration[0]
-                '''if abs(LeftValueY) > abs(RightValueY):
-                        ValueY = RightValueY
-                        ValueX = RightValueX
-                else:
-                        ValueY = LeftValueY
-                        ValueX = LeftValueX
-                        RedWidth = -RedWidth
-                '''
-                #print(RightValueY,LeftValueY)
-                RightValueY = RightValueY + buffer_dist
-                LeftValueY = LeftValueY - buffer_dist
-                # Adding .5 for rover length so rotation is at center
-                rover_length = 1/2
-                RightValueX = RightValueX + rover_length - buffer_dist
-                LeftValueX = LeftValueX + rover_length - buffer_dist 
-                #print(RightValueY,RightValueX)
-				#RightValueX += 0.5 #if we dont add this, we assume the rover turn in place of LiDar, which in fact we turn in place of the middle of the rover(0.5m behind LiDar)
-				#LeftValueX += 0.5
-                DistRight = np.sqrt(RightValueX**2+RightValueY**2)
-                AngleToTurnRight = np.rad2deg(np.arcsin((3*RedWidth/4)/DistRight)) #add buffer to y?
-                #pdb.set_trace()
-                #print(AngleToTurn)
-                DistLeft = np.sqrt(LeftValueX**2+LeftValueY**2)
-                AngleToTurnLeft = np.rad2deg(np.arcsin((-3*RedWidth/4)/DistLeft)) #add buffer to y?
-                #pdb.set_trace()
-                if not np.isnan(AngleToTurnRight):
-                        if RightValueY > 0:
-                                AngleToTurnRight += np.rad2deg(np.arctan(RightValueY/RightValueX))
-                else:
-                    	AngleToTurnRight = 90
-                # if LeftValueY < 0:
-                #          BufferAngle = np.rad2deg(np.arctan(LeftValueX/LeftValueY))
-                #          if not np.isnan(AngleToTurnLeft):
-                #                   AngleToTurnLeft = AngleToTurnLeft + BufferAngle
-                #          else:
-                #                   AngleToTurnLeft = -90
-                # else:
-                #          if np.isnan(AngleToTurnLeft):
-                #                   AngleToTurnLeft = -90
-                if not np.isnan(AngleToTurnLeft):
-                        if LeftValueY < 0:
-                                AngleToTurnLeft += np.rad2deg(np.arctan(LeftValueY/LeftValueX))
-                else:
-                        AngleToTurnLeft = -90
+	def checkDesiredHeading(self,delta_heading):
+		'''
+		Checks if the rover is pointing at the desired heading within 2 degrees
+		'''
+		if abs(delta_heading) < 2:
+			return 1
+		else:
+			return 0
+	
+	def getDeltaRotation(self,obstacles,red_width,buffer_dist):
+		'''
+		Finds the rotation required to move obstacle out of avoidance zone
+		'''
+		#If there are no obstacles in view, return 0 degrees
+		if len(obstacles) == 0:
+			return 0
 
-                #pdb.set_trace()
-                if abs(AngleToTurnLeft) > abs(AngleToTurnRight):
-                         AngleToTurn = AngleToTurnRight
-                elif abs(AngleToTurnLeft) < abs(AngleToTurnRight):
-                         AngleToTurn = AngleToTurnLeft
-                elif abs(RightValueY) > abs(LeftValueY): #abs(angleLeft) == abs(angleRight) and abs(rightY) > abs(leftY)
-                        print(RightValueY,LeftValueY)
-                        AngleToTurn = AngleToTurnLeft
-                else: #abs(angleLeft) == abs(angleRight) and abs(rightY) <= abs(leftY)
-                        AngleToTurn = AngleToTurnRight
-                #pdb.set_trace()
-                return AngleToTurn
-                # trig to find angle to turn
-                #AngleToTurnRight = np.rad2deg(np.arctan2(RightValueY+self.buffer_dist,RightValueX-self.buffer_dist))
-                #AngleToTurnLeft = np.rad2deg(np.arctan2(LeftValueY-self.buffer_dist,LeftValueX-self.buffer_dist))
-                #if LeftValueY == 0:
-                 #       AngleToTurnLeft = 0
-                #if RightValueY == 0:
-                 #       AngleToTurnRight = 0
-                # chooses the shorter angle
-                # adds buffer to account for rover size
-                #pdb.set_trace()
-                ''' print(AngleToTurnRight,AngleToTurnLeft)
-                if abs(AngleToTurnRight) > abs(AngleToTurnLeft):
-                        AngleToTurn = AngleToTurnLeft
-                else:
-                        AngleToTurn = AngleToTurnRight
-                return AngleToTurn
-                '''
-        #Tested: Yes, working as intended
-        #Input: Array of values of X,Y
-        def get_delta_distance(self,Obstacles):
-                # determines distance to move rover to avoid obstacles
-                Flag = 0
-                Iteration_prev = 0
-                ValueX = 0
-                ValueY = 0
-                for Iteration in Obstacles:
-                        if Iteration[0] > Iteration_prev:
-                                ValueX = Iteration[0]
-                                ValueY = Iteration[1]
-                        Iteration_prev = Iteration[0]
-                BufferDistance = .5
-                ValueX = ValueX + BufferDistance
-                DistanceToObj = np.sqrt(ValueX**2+ValueY**2)
-                Angle = np.arctan2(ValueY,ValueX)
-		DistanceToMove = DistanceToObj/np.cos(Angle)
-                return DistanceToMove
+		#Priming variables
+		flag = 0
+		Rightvalue_y = obstacles[0][1]
+		Rightvalue_x = obstacles[0][0]
+		Leftvalue_y = obstacles[0][1]
+		Leftvalue_x = obstacles[0][0]
 
-        #Possibly not needed
-        def manual(self,type:str,dist:float,angle:float) -> bool:
-                """
-                passes on  a single command to teensy to be executed
+		#Finds the furthest right X and Y and the furthest left X and Y values for obstacles
+		for iteration in obstacles:
+			if iteration[1] < Leftvalue_y:
+				Leftvalue_y = iteration[1]
+				Leftvalue_x = iteration[0]
+			if iteration[1] > Rightvalue_y:
+				Rightvalue_y = iteration[1]
+				Rightvalue_x = iteration[0]
+		
+		#Adds the buffer distance produced by LiDAR grid to corresponding values
+		Rightvalue_y = Rightvalue_y + buffer_dist
+		Leftvalue_y = Leftvalue_y - buffer_dist
+		#Adding .5 for rover length so rotation is at center of Rover
+		rover_length = 1/2
+		Rightvalue_x = Rightvalue_x + rover_length - buffer_dist
+		Leftvalue_x = Leftvalue_x + rover_length - buffer_dist 
+		
+		#Finds the angles to turn right and left using trig
+		DistRight = np.sqrt(Rightvalue_x**2+Rightvalue_y**2)
+		AngleToTurnRight = np.rad2deg(np.arcsin((3*red_width/4)/DistRight))
+		DistLeft = np.sqrt(Leftvalue_x**2+Leftvalue_y**2)
+		AngleToTurnLeft = np.rad2deg(np.arcsin((-3*red_width/4)/DistLeft))
+		
+		#Adds opposite angle to correct calculation
+		if not np.isnan(AngleToTurnRight):
+			if Rightvalue_y > 0:
+				AngleToTurnRight += np.rad2deg(np.arctan(Rightvalue_y/Rightvalue_x))
+		#If arcsin returns nan, set angles to 90 degrees (turn square right/left). Arcsin returns nan if obstacle is too close (shouldnt happen)
+		else:
+			AngleToTurnRight = 90
+		if not np.isnan(AngleToTurnLeft):
+			if Leftvalue_y < 0:
+				AngleToTurnLeft += np.rad2deg(np.arctan(Leftvalue_y/Leftvalue_x))
+		else:
+			AngleToTurnLeft = -90
 
-                input:
-                        type: "rotation" or "translation"
-                        dist: distance to translate
-                        angle: angle to rotate
-                                *only one of dist and angle will be used with each call to manual()
-                returns:
-                        True if executed
-                        False if error
+		#Chooses the smaller angle to return
+		if abs(AngleToTurnLeft) > abs(AngleToTurnRight):
+			 AngleToTurn = AngleToTurnRight
+		elif abs(AngleToTurnLeft) < abs(AngleToTurnRight):
+			 AngleToTurn = AngleToTurnLeft
 
-                """
+		#Last two checks are for if arcsin produced nan so it returns -90 or 90
+		elif abs(Rightvalue_y) > abs(Leftvalue_y):
+			AngleToTurn = AngleToTurnLeft
+		else: 
+			AngleToTurn = AngleToTurnRight
 
-                return
+		return AngleToTurn
+		
+	def getDeltaDistance(self,obstacles):
+		'''
+		Determines the distance required to move past an obstacle in the clearance zone
+		'''
+		#Priming variables
+		flag = 0
+		iteration_prev = 0
+		value_x = 0
+		value_y = 0
 
-        #Possibly not needed
-        def sendRotation(self,angle:float) -> bool:
-                """
-                sends a rotation to the teesny/controls to be executed
+		#Finds the point closest to the center (center is X == 0)
+		for iteration in obstacles:
+			if iteration[0] > iteration_prev:
+				value_x = iteration[0]
+				value_y = iteration[1]
+			iteration_prev = iteration[0]
 
-                input:
-                        angle: angle (deg) to rotate in NED frame about vertical axis (CW is positive)
-                output:
-                        True if sent to teensy
-                        False if something went wrong
-                """
-                return
+		#Adds buffer to move clearly past clearance zone
+		buffer_distance = .5
+		value_x = value_x + buffer_distance
 
-        #Possibly not needed
-        def sendTranslation(self,distance:float) -> bool:
-                """
-                sends a translation to the teesny/controls to be executed
+		#Trig to find distance to the object
+		distance_to_obj = np.sqrt(value_x**2+value_y**2)
+		angle = np.arctan2(value_y,value_x)
 
-                input:
-                        distance: distance [meters] to translate in body frame. Can only be along rover's foward and backward axis.
-                output:
-                        True if sent to teensy
-                        False if something went wrong
-                """
-                return
+		#Trig to find distance to move
+		distance_to_move = distance_to_obj/np.cos(angle)
+		return distance_to_move
+
+	def manual(self,type:str,dist:float,angle:float) -> bool:
+		"""
+		Passes on a single command to teensy to be executed
+		"""
+		if type == "rotate":
+			self.uart.sendRotateCmd(angle)
+		elif type == "translate":
+			self.uart.sendTranslateCmd(dist)
+		return

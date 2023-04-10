@@ -58,8 +58,8 @@ def main():
     #move = RoverMove(gps,lidar)
 
     if True:
-        cam.record()
-        print("Record and sync video done.")
+       # cam.record()
+       # print("Record and sync video done.")
         cam.take360()
         print("Take 360 and sync done.")
     if False: #True to test GPS reading background process
