@@ -66,51 +66,51 @@ class RoverCamera:
         self.videoResolution = videoResolution
         self.videoCounter = 0 #this will be on name of new video
 
-    def record(self):
+   # def record(self):
         """
         The process that will actually be recording video. 
         Record in self.vidLength length chunks.
         """
         
-        cap=cv2.VideoCapture(self.port[0]) #port
-        cap.set(cv2.CAP_PROP_FPS,self.fps)
+    #    cap=cv2.VideoCapture(self.port[0]) #port
+     #   cap.set(cv2.CAP_PROP_FPS,self.fps)
         #"desktop/:C/test" + "0" + ".avi"
-        out = cv2.VideoWriter("/home/sailr/SeniorProjects/automation/videos/video.avi",cv2.VideoWriter_fourcc(*'MJPG'),self.fps,self.videoResolution)
-        self.videoCounter+=self.videoCounter
+      #  out = cv2.VideoWriter("/home/sailr/SeniorProjects/automation/videos/video.avi",cv2.VideoWriter_fourcc(*'MJPG'),self.fps,self.videoResolution)
+       # self.videoCounter+=self.videoCounter
 
-        start = time.time()
-        while(time.time()-start<self.vid_length):#break to stop recording after videoLength second
-            ret,frame = cap.read()
-            frame = cv2.resize(frame,self.videoResolution)
-            if ret:
-                out.write(frame)
-                print('video capturing')
-            else:
-                print('video capture not working')
+        #start = time.time()
+        #while(time.time()-start<self.vid_length):#break to stop recording after videoLength second
+         #   ret,frame = cap.read()
+          #  frame = cv2.resize(frame,self.videoResolution)
+           # if ret:
+            #    out.write(frame)
+             #   print('video capturing')
+           # else:
+            #    print('video capture not working')
             #cv2.imshow('frame',frame)
             #if cv2.waitKey(1) & 0xFF == ord('q'):  
 
-        print(str(time.time()-start))
+       # print(str(time.time()-start))
         #cap.release() #stop recording and write video file into path
         #out.release() #turn off camera
-        self.comms.syncVideo()
+       # self.comms.syncVideo()
 
         # stroy all the windows
         #cv2.destroyAllWindows()
 
-    def startRecording(self):
+    #def startRecording(self):
         """
         begin a process for recording video
         """
-        self.recordingProcess = Process(target=self.record,args=None)     #   self.recordingProcess.start()
+     #   self.recordingProcess = Process(target=self.record,args=None)     #   self.recordingProcess.start()
         #tbc
 
     
-    def stopRecording(self):
+    #def stopRecording(self):
         """
         stop the recordingProcess
         """
-        self.recordingProcess.terminate()
+      #  self.recordingProcess.terminate()
         #tbc
 
     # uneeded? Should we send at certain cadence?

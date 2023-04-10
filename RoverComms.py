@@ -39,9 +39,8 @@ class RoverComms:
         self.gs_video_path = gs_str_stem + gs_video_path
         self.gs_image_path = gs_str_stem + gs_image_path
 
-        self.current_cmd_num = 0
-
         self.isStreaming = Value('i' False)
+        self.current_cmd_num = -1
         # initialize stuff as needed
 
     #probably not needed now?
@@ -76,7 +75,9 @@ class RoverComms:
 
         try:
             lastest_command = file[-1].split(', ')
-
+            #print(lastest_command)
+            if self.current_cmd_num == lastest_command[0]:
+                return command_dict
             if int(lastest_command[0]) != self.current_cmd_num:
                 if len(lastest_command) == 3 and (lastest_command[1] == 'start' or lastest_command[1] == 'stop'):
                     command_dict.update({'commandType':'startStop', 'command':lastest_command[1]})
@@ -94,12 +95,13 @@ class RoverComms:
                     None
 
         except:
-            print("command file empty")
+            None
+            # print("command file empty")
         
     
         return command_dict
 
-    def writeAndSendTelemetry(self,gpsCoor:str): # -> bool:
+    def writeAndSendTelemetry(self,gpsStr:str): # -> bool:
         """
         write telemetry to telemetry file
 
@@ -107,22 +109,30 @@ class RoverComms:
             toWrite: telemetry to write to file (FORMAT TBD)
         """
 
-        with open(self.obcTelemPath, 'a') as f:
-            f.write(gpsCoor+'\n')
+        # with open(self.obcTelemPath, 'a') as f:
+        #     f.write(gpsCoor+'\n')
+        with open(self.obcTelemPath) as f:
+                lines = f.read().splitlines()
+                if len(lines)>=99999: #1 sec per 1 point
+                    lines=lines[1:]
+        with open(self.obcTelemPath, 'w') as f:
+            for line in lines:
+                f.write(line+'\n')
+            f.write(gpsStr+'\n')
 
         self.syncTelem()
         
 
     def syncTelem(self,):
-        print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
+        #print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
         os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
 
     def syncVideo(self,):
-        print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
+        #print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
         os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
 
     def syncImage(self,):
-        print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
+        #print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
         os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
 
 
@@ -132,6 +142,14 @@ class RoverComms:
         else:
             return 0
 
+    def startLive(self):
+        self.process = Process(target=self.liveVideoServer)
+        self.process.start()
+
+    def stopTele(self):
+        if self.process.is_alive():
+            self.process.terminate()
+
     def liveVideoServer(self,):
 
         # Create a socket object
@@ -140,7 +158,7 @@ class RoverComms:
         host_name = socket.gethostname()
         # host_ip = socket.gethostbyname(host_name)
         host_ip = self.obc_ip
-        print('Host IP:', host_ip)
+        #print('Host IP:', host_ip)
         port = 9999
         socket_address = (host_ip, port)
 
