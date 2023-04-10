@@ -2,7 +2,9 @@
 #https://github.com/sparkfun/Qwiic_Ublox_Gps_Py
 from ublox_gps import UbloxGps
 import serial
-
+import logging
+from datetime import datetime
+import pytz
 import math
 import time
 import RoverComms
@@ -17,7 +19,7 @@ class RoverGPS:
 
         #initialize stuff
         self.comms = comms
-        self.precision = 1.15
+        self.precision = 10
         self.gps_port = gpsport
         # self.ser = serial.Serial(port, baudrate=38400, timeout=1)
 

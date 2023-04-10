@@ -6,9 +6,11 @@ from RoverUART import RoverUART
 import time
 
 if __name__ == "__main__":
-    teensy_port = '/dev/ttyACM0' # <- check this
+    teensy_port = '/dev/ttyACM1' # <- check this
     uart = RoverUART(teensy_port=teensy_port)
-
+    time.sleep(0.5)
+    _ = uart.readAll()
+    
     # rotation
     deg = input("enter value to rotate: ")
     print(f"testing uart.sendRotateCmd({deg})")
@@ -28,9 +30,9 @@ if __name__ == "__main__":
     # magnetometer
     _ = input("hit enter to send magnetometer request ")
     print(f"testing uart.getMagneticAzm()")
-    uart.getMagneticAzm()
-    returned = uart.readAll()
-    print(f"read \"{returned}\" from the teensy")
+    num = uart.getMagneticAzm()
+    # returned = uart.readAll()
+    print(f"read \"{num}\" from the teensy. Extra characters in serial buffer: ")
 
     # stop
     _ = input("hit enter to send stop request ")
