@@ -20,6 +20,10 @@ import struct
 
 class RoverComms:
     def __init__(self,obcCommandPath:str,obcTelemPath:str,obcVideoPath:str,obcImagePath:str,gs_ssh_password:str,gs_ip:str,gs_telem_path:str,gs_video_path:str,gs_image_path:str):
+
+        self.isStreaming = Value('i',True)
+        self.currFrame = Array('i',np.zeros_like(640,360))
+
         # onboard computer vars
         self.obcCommandPath = obcCommandPath
         self.obcTelemPath = obcTelemPath
@@ -140,14 +144,15 @@ class RoverComms:
             return 0
 
     def startLive(self):
-        self.process = Process(target=self.liveVideoServer)
+        self.process = Process(target=self.liveVideoServer,args=(self.isStreaming,self.currFrame))
         self.process.start()
 
-    def stopTele(self):
-        if self.process.is_alive():
-            self.process.terminate()
+    def stopLive(self):
+        # if self.process.is_alive():
+        #     self.process.terminate()
+        isStreaming.value = False
 
-    def liveVideoServer(self,):
+    def liveVideoServer(self,isStreaming,currFrame):
 
         # Create a socket object
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -165,7 +170,7 @@ class RoverComms:
         server_socket.listen(5)
 
         #print('Waiting for client...')
-        while True:
+        while isStreaming.value:
             # Accept a client connection
             client_socket, client_address = server_socket.accept()
             #print('Client connected:', client_address)
@@ -187,6 +192,7 @@ class RoverComms:
                 ret, frame = cap.read()
 
                 # Convert the frame to a byte string
+                currFrame[:] = frame
                 data = pickle.dumps(frame)
 
                 # Send the frame size to the client
