@@ -141,11 +141,15 @@ class RoverCamera:
         capture1.release()
         
 
-        capture2 = cv2.VideoCapture(self.port[2])
-        capture2.set(cv2.CAP_PROP_AUTOFOCUS,1)
-        result,frame2=capture2.read()
-        #cv2.imwrite('frame'+str(self.port[2])+'.jpg',frame2)
-        capture2.release()
+        # middle fromt
+        if comms.frame is not None:
+            frame2 = comms.frame()
+        else:
+            capture2 = cv2.VideoCapture(self.port[2])
+            capture2.set(cv2.CAP_PROP_AUTOFOCUS,1)
+            result,frame2=capture2.read()
+            #cv2.imwrite('frame'+str(self.port[2])+'.jpg',frame2)
+            capture2.release()
         
         #frame0=cv2.imread('frame'+str(self.port[0])+'.jpg')
         #frame1=cv2.imread('frame'+str(self.port[1])+'.jpg')

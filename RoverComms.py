@@ -17,6 +17,7 @@ import cv2
 import socket
 import pickle
 import struct
+from multiprocessing import Process, Value
 
 class RoverComms:
     def __init__(self,obcCommandPath:str,obcTelemPath:str,obcVideoPath:str,obcImagePath:str,gs_ssh_password:str,gs_ip:str,gs_telem_path:str,gs_video_path:str,gs_image_path:str):
@@ -25,8 +26,9 @@ class RoverComms:
         self.obcTelemPath = obcTelemPath
         self.obcVideoPath = obcVideoPath
         self.obcImagePath = obcImagePath
-
-        self.obc_ip = '10.203.178.120'
+        self.frame = None
+        # self.obc_ip = '10.203.178.120'
+        self.obc_ip = '127.0.2.1'
 
         # ground station vars
         self.gs_ssh_password = gs_ssh_password #'asen4018'
@@ -38,6 +40,8 @@ class RoverComms:
         self.gs_image_path = gs_str_stem + gs_image_path
 
         self.current_cmd_num = 0
+
+        self.isStreaming = Value('i' False)
         # initialize stuff as needed
 
     #probably not needed now?
@@ -72,7 +76,6 @@ class RoverComms:
 
         try:
             lastest_command = file[-1].split(', ')
-            print(lastest_command)
 
             if int(lastest_command[0]) != self.current_cmd_num:
                 if len(lastest_command) == 3 and (lastest_command[1] == 'start' or lastest_command[1] == 'stop'):
@@ -124,7 +127,7 @@ class RoverComms:
 
 
     def checkConnection(self,):
-        if 0 == os.system('ping '+self.gs_ip+' -c 3 -W 1'):
+        if 0 == os.system('ping '+self.gs_ip+' -c 1 -W 1'):
             return 1
         else:
             return 0
@@ -133,6 +136,7 @@ class RoverComms:
 
         # Create a socket object
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         host_name = socket.gethostname()
         # host_ip = socket.gethostbyname(host_name)
         host_ip = self.obc_ip
@@ -145,37 +149,40 @@ class RoverComms:
 
         # Listen for incoming connections
         server_socket.listen(5)
-
+        self.isStreaming = True
         print('Waiting for client...')
-        while True:
-            # Accept a client connection
-            client_socket, client_address = server_socket.accept()
-            print('Client connected:', client_address)
+    
+        # Accept a client connection
+        client_socket, client_address = server_socket.accept()
+        print('Client connected:', client_address)
 
-            # Open the webcam
-            cap = cv2.VideoCapture(0)
-            cap.set(cv2.CAP_PROP_FPS,30)
-            # Set the video dimensions
-            frame_width = int(cap.get(3))
-            frame_height = int(cap.get(4))
+        # Open the webcam
+        cap = cv2.VideoCapture(0)
+        # cap = cv2.VideoCapture(8)
+        cap.set(cv2.CAP_PROP_FPS,30)
+        # Set the video dimensions
+        frame_width = int(cap.get(3))
+        frame_height = int(cap.get(4))
 
-            # Send the video dimensions to the client
-            client_socket.send(struct.pack("I", frame_width))
-            client_socket.send(struct.pack("I", frame_height))
+        # Send the video dimensions to the client
+        # client_socket.send(struct.pack("I", frame_width))
+        # client_socket.send(struct.pack("I", frame_height))
 
-            # Start streaming the video
-            while True:
-                # Read a frame from the webcam
-                ret, frame = cap.read()
+        # Start streaming the video
+        while self.isStreaming:
+            # Read a frame from the webcam
+            ret, frame = cap.read()
+            self.frame = frame
+            # Convert the frame to a byte string
+            data = pickle.dumps(frame)
 
-                # Convert the frame to a byte string
-                data = pickle.dumps(frame)
+            # Send the frame size to the client
+            client_socket.send(struct.pack("I", len(data)))
 
-                # Send the frame size to the client
-                client_socket.send(struct.pack("I", len(data)))
+            # Send the frame to the client
+            client_socket.send(data)
 
-                # Send the frame to the client
-                client_socket.send(data)
-
-
-
+            # # 'L' is a marker for the start of frame
+            # message_size = struct.pack("L", len(data))
+            # client_socket.sendall(message_size + data)
+        
