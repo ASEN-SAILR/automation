@@ -60,7 +60,7 @@ if __name__ == "__main__":
 	# video.startRecording()
 
 	# start uart comms with Teensy
-	teensy_port = r"/dev/ttyACM1"
+	teensy_port = r"/dev/ttyACM0"
 	uart = RoverUART(teensy_port) 
 	uart.readLine() #clear the serial buffer 
 
@@ -83,8 +83,8 @@ if __name__ == "__main__":
 	buffer_dist = resolution/2
 
 	# start gps 
-	gps_port = r"/dev/ttyACM0"
-	gps = RoverGPS(gps_port) # more params?
+	gps_port = r"/dev/ttyACM1"
+	gps = RoverGPS(gps_port,comms) # more params?
 
 	#LOI = [40.0093664,-105.2439658]
 	gs_coords = gps.getGPS()
@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
 	# tracks current command
 	active_command = "stop"
-	
+	LOI = None	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
 	while True:
