@@ -3,11 +3,12 @@ import sys, time, numpy as np, pdb, logging
 from RoverGPS import RoverGPS
 from RoverLidar import RoverLidar 
 from RoverUART import RoverUART
+from RoverComms import RoverComms
 from multiprocessing import Process
 
 ### Class that will handle the motion of the rover
 class RoverMove:
-	def __init__(self,lidar:RoverLidar,gps:RoverGPS,uart:RoverUART,buffer_dist,red_width,translation_res) -> None:
+	def __init__(self,lidar:RoverLidar,gps:RoverGPS,uart:RoverUART,comms:RoverComms,buffer_dist,red_width,translation_res) -> None:
 		"""
 		Initializes member variables
 		"""
@@ -18,6 +19,7 @@ class RoverMove:
 		self.buffer_dist = buffer_dist
 		self.red_width = red_width
 		self.translation_res = translation_res
+		self.comms = comms
 		logging.info("Rovermove initialized")
 
 	def motionInProgress(self) :
@@ -39,15 +41,41 @@ class RoverMove:
 		"""
 		logging.info("Beginning autonomous movement.")
 		
+		#Initializes starting/desired LOI and connection flag to verify connection is still established
+		start_LOI = LOI
+		desired_LOI = LOI
+		connection_flag = 1
+
 		#Checking if Rover is at LOI
 		atloi = self.gps.atloi(LOI)
 		
 		#Initializing LiDAR
 		time_to_scan = 2 # seconds
 		[status, obstacles, _] = self.lidar.getObstacles(time_to_scan)
+		
+		#Initializing commands
+		command = None
 
 		#Loops until LOI is reached
 		while not atloi:
+
+			#If ground station connection is lost, sets LOI to start point for rover to return to
+			if not self.comms.checkConnection():
+				#Sets the desired LOI to revert to when connection is regained
+				if connection_flag == 1:
+					desired_LOI = LOI
+				LOI = start_LOI
+				connection_flag = 0
+			#If ground station connection is regained, sets LOI back to what it was before
+			elif connection_flag == 0:
+				LOI = desired_LOI
+				connection_flag = 1
+
+			#Checks if a switch to manual control is sent
+			command = self.comms.readCommand()
+			if command["commandType"] == "stop":
+				print('Stopping autonomy..."')
+				break;
 
 			#Finding change in heading desired to point to LOI
 			mag_heading = self.uart.getMagneticAzm()
