@@ -121,15 +121,15 @@ class RoverComms:
         
 
     def syncTelem(self,):
-        print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
+        #print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
         os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
 
     def syncVideo(self,):
-        print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
+        #print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
         os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
 
     def syncImage(self,):
-        print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
+        #print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
         os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcImagePath+" "+self.gs_image_path)
 
 
@@ -154,7 +154,7 @@ class RoverComms:
         host_name = socket.gethostname()
         # host_ip = socket.gethostbyname(host_name)
         host_ip = self.obc_ip
-        print('Host IP:', host_ip)
+        #print('Host IP:', host_ip)
         port = 9999
         socket_address = (host_ip, port)
 
@@ -164,11 +164,11 @@ class RoverComms:
         # Listen for incoming connections
         server_socket.listen(5)
 
-        print('Waiting for client...')
+        #print('Waiting for client...')
         while True:
             # Accept a client connection
             client_socket, client_address = server_socket.accept()
-            print('Client connected:', client_address)
+            #print('Client connected:', client_address)
 
             # Open the webcam
             cap = cv2.VideoCapture(0)
