@@ -22,8 +22,7 @@ from multiprocessing import Process, Value
 class RoverComms:
     def __init__(self,obcCommandPath:str,obcTelemPath:str,obcVideoPath:str,obcImagePath:str,gs_ssh_password:str,gs_ip:str,gs_telem_path:str,gs_video_path:str,gs_image_path:str):
 
-        self.isStreaming = Value('i',True)
-        self.currFrame = Array('i',np.zeros_like(640,360))
+        
 
         # onboard computer vars
         self.obcCommandPath = obcCommandPath
@@ -43,7 +42,9 @@ class RoverComms:
         self.gs_video_path = gs_str_stem + gs_video_path
         self.gs_image_path = gs_str_stem + gs_image_path
 
-        self.isStreaming = Value('i', False)
+        self.isStreaming = Value('b', False)
+        self.currFrame = Array('f',np.zeros_like(640,360))
+
         self.current_cmd_num = -1
         # initialize stuff as needed
 
@@ -147,11 +148,12 @@ class RoverComms:
             return 0
 
     def startLive(self):
+        self.isStreaming.value = True
         self.process = Process(target=self.liveVideoServer,args=(self.isStreaming,self.currFrame))
         self.process.start()
 
-    def stopTele(self):
-        self.isStreaming = False
+    def stopLive(self):
+        self.isStreaming.value = False #better practice than terminate, allow child to end process properly
         # if self.process.is_alive():
         #     self.process.terminate()
 
@@ -172,7 +174,6 @@ class RoverComms:
 
         # Listen for incoming connections
         server_socket.listen(5)
-        self.isStreaming = True
         print('Waiting for client...')
     
         # Accept a client connection
@@ -192,10 +193,10 @@ class RoverComms:
         # client_socket.send(struct.pack("I", frame_height))
 
         # Start streaming the video
-        while self.isStreaming:
+        while isStreaming.value:
             # Read a frame from the webcam
             ret, frame = cap.read()
-            self.frame = frame
+            currFrame[:] = frame
             # Convert the frame to a byte string
             data = pickle.dumps(frame)
 

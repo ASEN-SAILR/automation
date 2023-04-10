@@ -142,8 +142,8 @@ class RoverCamera:
         
 
         # middle fromt
-        if comms.frame is not None:
-            frame2 = comms.frame()
+        if comms.currFrame is not None:
+            frame2 = list(comms.currFrame)
         else:
             capture2 = cv2.VideoCapture(self.port[2])
             capture2.set(cv2.CAP_PROP_AUTOFOCUS,1)

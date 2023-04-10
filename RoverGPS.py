@@ -8,7 +8,7 @@ import pytz
 import math
 import time
 import RoverComms
-from multiprocessing import Process
+from multiprocessing import Process,Value
 
 
 ## all coordinates must be in deg-decimal form, not hour-min-sec
@@ -19,16 +19,12 @@ class RoverGPS:
 
         #initialize stuff
         self.comms = comms
-<<<<<<< HEAD
-        self.precision = 7 #was 1.15
-        self.port = serial.Serial(port, baudrate=38400, timeout=1)
-=======
         self.precision = 10
         self.gps_port = gpsport
+        self.tele_flag = Value('b',True)
         # self.ser = serial.Serial(port, baudrate=38400, timeout=1)
->>>>>>> 53cb21fd35a98ed29f8f98aff4b5a3549f9e4d90
 
-    def readAndWriteAndSendTele(self,gps_port):
+    def readAndWriteAndSendTele(self,gps_port,tele_flag):
         def readGPS(ser): #only for testing, on actual rover implementation, never call this
             gps = UbloxGps(ser)
             geo = gps.geo_coords()
@@ -36,7 +32,7 @@ class RoverGPS:
             return [geo.lat,geo.lon]
         
         ser = serial.Serial(gps_port, baudrate=38400, timeout=1)
-        while True:
+        while tele_flag.value:
             coor = readGPS(ser)
             #self.comms.writeAndSendTelemetry('1,2') 
             logging.info(f"writing {coor} to telem file")
@@ -56,12 +52,13 @@ class RoverGPS:
             f.write(gpsStr+'\n')
     
     def startTele(self):
-        self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port,))
+        self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port,self.tele_flag))
         self.process.start()
 
     def stopTele(self):
-        if self.process.is_alive():
-            self.process.terminate()
+        self.tele_flag.value = False #this ensure we end it properly without causing any error
+        # if self.process.is_alive():
+        #     self.process.terminate()
 
     def atloi(self,LOI):
         return self.distanceToTarget(LOI)<self.precision
