@@ -19,9 +19,14 @@ class RoverGPS:
 
         #initialize stuff
         self.comms = comms
+<<<<<<< HEAD
+        self.precision = 7 #was 1.15
+        self.port = serial.Serial(port, baudrate=38400, timeout=1)
+=======
         self.precision = 10
         self.gps_port = gpsport
         # self.ser = serial.Serial(port, baudrate=38400, timeout=1)
+>>>>>>> 53cb21fd35a98ed29f8f98aff4b5a3549f9e4d90
 
     def readAndWriteAndSendTele(self,gps_port):
         def readGPS(ser): #only for testing, on actual rover implementation, never call this
