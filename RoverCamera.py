@@ -142,8 +142,8 @@ class RoverCamera:
         
 
         # middle fromt
-        if comms.currFrame is not None:
-            frame2 = list(comms.currFrame)
+        if comms.frame is not np.zeros(640*360*3):
+            frame2 = np.array(comms.frame).reshape(360,640.3)
         else:
             capture2 = cv2.VideoCapture(self.port[2])
             capture2.set(cv2.CAP_PROP_AUTOFOCUS,1)

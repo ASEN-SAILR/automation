@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
 	# start move
 	translation_res = 1
-	move = RoverMove(lidar,gps,uart,buffer_dist,red_width,translation_res)
+	move = RoverMove(lidar,gps,uart,comms,buffer_dist,red_width,translation_res)
 
 	#start record process that will be run on background - keep recording and sending videos
 	#gps.startTele()
@@ -108,12 +108,14 @@ if __name__ == "__main__":
 	LOI = None	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
-	live_video_process = Process(comms.liveVideoServer)
-	live_video_process.start()
+	# comms.startLive()
+
 	while True:
+
 		logging.info("waiting for command")
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
 			
+			#print("================ Waiting for Command ======================")
 			command = comms.readCommand()
 			
 			
@@ -129,21 +131,21 @@ if __name__ == "__main__":
 				if LOI == gs_coords: #the rover reached LOI and now back at gsLOI
 					logging.info("rover at LOI")
 					if ~missionDone:
+						comms.isStreaming = False
 						missionDone = True
 						print("Mission done. Rover is now back at ground station. Waiting for a new command...")
-			else:#TODO:the rover is at the LOI
-				#pass
-				# video.stopRecording()
-				live_video_process.terminate()
-				cam.take360()
-				time.sleep(30)
-				# video.take360()
-				# video.startRecording()
-				live_video_process.start()
-				# #TODO what does the command looks like
-				# command = {"type"="autonomous","LOI"=gsLOI}
-				#once a command is recieved, we need a way to monitor motion		
-				# check for emergecy stop conidition first
+				else:#TODO:the rover is at the LOI
+					#pass
+					# video.stopRecording()
+					cam.take360()
+					print("Panaramic image taken, pausing for 30 seconds")
+					time.sleep(30)
+					# video.take360()
+					# video.startRecording()
+					# #TODO what does the command looks like
+					# command = {"type"="autonomous","LOI"=gsLOI}
+					#once a command is recieved, we need a way to monitor motion		
+					# check for emergecy stop conidition first
 
 		if command["commandType"] == "stop":
 			active_command = "stop"
@@ -176,11 +178,13 @@ if __name__ == "__main__":
 			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2,translation_res))
 			current_process.start()
 		elif command["commandType"]=="manual":
+			print("====================+++++++++++== Sending manual command ============+++")
 			active_command = "manual"
 			logging.info(f"manual command recieved: {command}")
 			LOI = None
-			# current_process = Process(target=move.manual, args=(command["type"],command["dist"],command["angle"]))
-			current_process = Process(target=move.manual, args=("rotation",0,0))
+			print(command)
+			current_process = Process(target=move.manual, args=(command["manualType"],command["command"],command["command"]))
+			#current_process = Process(target=move.manual, args=("translation",0,0))
 			current_process.start()		
 
 		#TODO take photo when at LOI

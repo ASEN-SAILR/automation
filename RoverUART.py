@@ -32,6 +32,7 @@ class RoverUART:
         """
         sends teensy a command to translate over UART connection
         """
+        print("TESTING")
         logging.info(f"sending translation command: meter: {meter}")
         mode = "t"
         cmdString = mode.encode("utf-8") + struct.pack("<f",float(meter))

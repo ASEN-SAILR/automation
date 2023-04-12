@@ -17,7 +17,8 @@ import cv2
 import socket
 import pickle
 import struct
-from multiprocessing import Process, Value
+import numpy as np
+from multiprocessing import Process, Value, Array
 
 class RoverComms:
     def __init__(self,obcCommandPath:str,obcTelemPath:str,obcVideoPath:str,obcImagePath:str,gs_ssh_password:str,gs_ip:str,gs_telem_path:str,gs_video_path:str,gs_image_path:str):
@@ -31,8 +32,8 @@ class RoverComms:
         self.obcImagePath = obcImagePath
         self.frame = None
         # self.obc_ip = '10.203.178.120'
-        self.obc_ip = '127.0.2.1'
-
+        # self.obc_ip = '127.0.2.1'
+        self.obc_ip = '169.254.179.9'
         # ground station vars
         self.gs_ssh_password = gs_ssh_password #'asen4018'
         self.gs_ip = gs_ip #'192.168.56.102'
@@ -43,8 +44,9 @@ class RoverComms:
         self.gs_image_path = gs_str_stem + gs_image_path
 
         self.isStreaming = Value('b', False)
-        self.currFrame = Array('f',np.zeros_like(640,360))
-
+        self.frame = Array('f',np.zeros(640*360*3))
+        # self.frame = np.frombuffer(self.arr.get_obj(),atype=np.float32).reshape(640,360)
+        #self.frame = None
         self.current_cmd_num = -1
         # initialize stuff as needed
 
@@ -149,7 +151,7 @@ class RoverComms:
 
     def startLive(self):
         self.isStreaming.value = True
-        self.process = Process(target=self.liveVideoServer,args=(self.isStreaming,self.currFrame))
+        self.process = Process(target=self.liveVideoServer,args=(self.isStreaming,self.frame))
         self.process.start()
 
     def stopLive(self):
@@ -157,7 +159,7 @@ class RoverComms:
         # if self.process.is_alive():
         #     self.process.terminate()
 
-    def liveVideoServer(self,isStreaming,currFrame):
+    def liveVideoServer(self,isStreaming,current_frame):
 
         # Create a socket object
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -196,7 +198,8 @@ class RoverComms:
         while isStreaming.value:
             # Read a frame from the webcam
             ret, frame = cap.read()
-            currFrame[:] = frame
+            
+            current_frame[:] = frame.flatten()
             # Convert the frame to a byte string
             data = pickle.dumps(frame)
 

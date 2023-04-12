@@ -72,10 +72,10 @@ class RoverMove:
 				connection_flag = 1
 
 			#Checks if a switch to manual control is sent
-			command = self.comms.readCommand()
-			if command["commandType"] == "stop":
-				print('Stopping autonomy..."')
-				break;
+			#command = self.comms.readCommand()
+			#if command["commandType"] == "stop":
+			#	print('Stopping autonomy..."')
+			#	break;
 
 			#Finding change in heading desired to point to LOI
 			mag_heading = self.uart.getMagneticAzm()
