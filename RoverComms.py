@@ -43,7 +43,7 @@ class RoverComms:
         self.gs_image_path = gs_str_stem + gs_image_path
 
         self.isStreaming = Value('b', False)
-        self.currFrame = Array('f',np.zeros_like(640,360))
+        self.currFrame = Array('f',np.zeros(360*640*3))
 
         self.current_cmd_num = -1
         # initialize stuff as needed
@@ -196,7 +196,7 @@ class RoverComms:
         while isStreaming.value:
             # Read a frame from the webcam
             ret, frame = cap.read()
-            currFrame[:] = frame
+            currFrame[:] = frame.flatten() # = frame.reshape(-1)
             # Convert the frame to a byte string
             data = pickle.dumps(frame)
 

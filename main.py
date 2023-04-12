@@ -108,8 +108,8 @@ if __name__ == "__main__":
 	LOI = None	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
-	live_video_process = Process(comms.liveVideoServer)
-	live_video_process.start()
+	comms.startLive() # live_video_process = Process(comms.liveVideoServer)
+					  # live_video_process.start()
 	while True:
 		logging.info("waiting for command")
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
@@ -131,19 +131,22 @@ if __name__ == "__main__":
 					if ~missionDone:
 						missionDone = True
 						print("Mission done. Rover is now back at ground station. Waiting for a new command...")
-			else:#TODO:the rover is at the LOI
-				#pass
-				# video.stopRecording()
-				live_video_process.terminate()
-				cam.take360()
-				time.sleep(30)
-				# video.take360()
-				# video.startRecording()
-				live_video_process.start()
-				# #TODO what does the command looks like
-				# command = {"type"="autonomous","LOI"=gsLOI}
-				#once a command is recieved, we need a way to monitor motion		
-				# check for emergecy stop conidition first
+				else:#TODO:the rover is at the LOI
+					#pass
+					# video.stopRecording()
+					# live_video_process.terminate()
+					print('At LOI, now taking pano.')
+					cam.take360()
+					print('Pano took. Now wait 30s before going back to ground station.')
+					time.sleep(30)
+					print('Waiting done. Setting command to auto and LOI to ground station.')
+					# video.take360()
+					# video.startRecording()
+					# live_video_process.start()
+					# #TODO what does the command looks like
+					command = {"commandType"="autonomous","LOI"=gsLOI}
+					#once a command is recieved, we need a way to monitor motion		
+					# check for emergecy stop conidition first
 
 		if command["commandType"] == "stop":
 			active_command = "stop"
@@ -180,9 +183,8 @@ if __name__ == "__main__":
 			logging.info(f"manual command recieved: {command}")
 			LOI = None
 			# current_process = Process(target=move.manual, args=(command["type"],command["dist"],command["angle"]))
-			current_process = Process(target=move.manual, args=("rotation",0,0))
+			current_process = Process(target=move.manual, args=(command["manualType"],command["command"]))
 			current_process.start()		
-
 		#TODO take photo when at LOI
 		elif command["commandType"] == "photo":
 			active_command = "photo"
@@ -191,6 +193,7 @@ if __name__ == "__main__":
 			# begin recording 
 			#todo
 			LOI = None
+			cam.take360()
 			# video.stopRecording()
 			# video.take360()
 			# video.startRecording()

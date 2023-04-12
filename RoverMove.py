@@ -264,12 +264,12 @@ class RoverMove:
 		distance_to_move = distance_to_obj/np.cos(angle)
 		return distance_to_move
 
-	def manual(self,type:str,dist:float,angle:float) -> bool:
+	def manual(self,type:str,distOrAngle:float) -> bool:
 		"""
 		Passes on a single command to teensy to be executed
 		"""
 		if type == "rotate":
-			self.uart.sendRotateCmd(angle)
+			self.uart.sendRotateCmd(distOrAngle)
 		elif type == "translate":
-			self.uart.sendTranslateCmd(dist)
+			self.uart.sendTranslateCmd(distOrAngle)
 		return
