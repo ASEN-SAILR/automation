@@ -128,34 +128,47 @@ class RoverCamera:
 
     def take360(self):
 
-        capture0=cv2.VideoCapture(self.port[0])
+        # if self.comms.frame is not np.zeros(640*480*3):
+        #     frame0 = np.array(self.comms.frame).reshape(480,640,3)
+        # else:
+        #     capture0=cv2.VideoCapture(self.port[0])
+        #     capture0.set(cv2.CAP_PROP_AUTOFOCUS,1)
+        #     result,frame0=capture0.read()
+        #     capture0.release()
+        # cv2.imwrite('frame'+str(self.port[0])+'.jpg',frame0)
+
+
+        self.stopLiveVideo()
+        
+        capture0 = cv2.VideoCapture(self.port[0])
         capture0.set(cv2.CAP_PROP_AUTOFOCUS,1)
+        # capture0.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+        # capture0.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
         result,frame0=capture0.read()
-        #cv2.imwrite('frame'+str(self.port[0])+'.jpg',frame0)
+        cv2.imwrite('frame'+str(self.port[0])+'.jpg',frame0)
         capture0.release()
 
         capture1 = cv2.VideoCapture(self.port[1])
         capture1.set(cv2.CAP_PROP_AUTOFOCUS,1)
+        # capture1.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+        # capture1.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
         result,frame1=capture1.read()
-        #cv2.imwrite('frame'+str(self.port[1])+'.jpg',frame1)
+        cv2.imwrite('frame'+str(self.port[1])+'.jpg',frame1)
         capture1.release()
-        
 
         # middle fromt
-        if comms.frame is not np.zeros(640*360*3):
-            frame2 = np.array(comms.frame).reshape(360,640.3)
-        else:
-            capture2 = cv2.VideoCapture(self.port[2])
-            capture2.set(cv2.CAP_PROP_AUTOFOCUS,1)
-            result,frame2=capture2.read()
-            #cv2.imwrite('frame'+str(self.port[2])+'.jpg',frame2)
-            capture2.release()
+        capture2 = cv2.VideoCapture(self.port[2])
+        capture2.set(cv2.CAP_PROP_AUTOFOCUS,1)
+        # capture2.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+        # capture2.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+        result,frame2=capture2.read()
+        cv2.imwrite('frame'+str(self.port[2])+'.jpg',frame2)
+        capture2.release()
         
-        #frame0=cv2.imread('frame'+str(self.port[0])+'.jpg')
-        #frame1=cv2.imread('frame'+str(self.port[1])+'.jpg')
-        #frame2=cv2.imread('frame'+str(self.port[2])+'.jpg')
+        frame0=cv2.imread('frame'+str(self.port[0])+'.jpg')
+        frame1=cv2.imread('frame'+str(self.port[1])+'.jpg')
+        frame2=cv2.imread('frame'+str(self.port[2])+'.jpg')
 
-        # initialized a list of images
         imgs = [frame2,frame1,frame0]
         
         #for i in range(len(image_paths)):
@@ -188,6 +201,16 @@ class RoverCamera:
         self.photoCounter += 1
         # save output as .jpg
         self.comms.syncImage()
+
+        self.startLiveVideo()
+
+
+    def startLiveVideo(self,):
+        self.comms.startLive()
+    
+    def stopLiveVideo(self,):
+        self.comms.stopLive()
+
 
 #######
 

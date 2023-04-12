@@ -1,7 +1,8 @@
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
- 
+import time
+
 # setting path
 sys.path.append('../.')
 sys.path.append('.')
@@ -36,31 +37,33 @@ if __name__ == "__main__":
                     )
     # path = r"C:\Users\luker\OneDrive - UCB-O365\Classes\2023_spring\ASEN 4028\Teams Shortcuts\General\JPL Senior Projects\Testing\LiDAR Testing Material\data\TRR_scan_15_spray_paint.npy"
     # scan = np.load(path)
-    color,objects,points = lidar.getObstacles(2)
+    while True:
+        color,objects,points = lidar.getObstacles(2)
 
 
-    fig,ax = plt.subplots()
-    ax.scatter(points[:,0],points[:,1])
-    ax.set_title(DATA_NAME+"hits")
-    ax.set_xlabel("x [m]")
-    ax.set_ylabel("y [m]")
-    ax.set_xlim(x_lim*1.1)
-    ax.set_ylim(y_lim*1.1)
-    ax.set_aspect("equal")
-    ax.grid()
+        fig,ax = plt.subplots()
+        ax.scatter(points[:,0],points[:,1])
+        ax.set_title(DATA_NAME+"hits")
+        ax.set_xlabel("x [m]")
+        ax.set_ylabel("y [m]")
+        ax.set_xlim(x_lim*1.1)
+        ax.set_ylim(y_lim*1.1)
+        ax.set_aspect("equal")
+        ax.grid()
 
-    fig,ax = plt.subplots()
-    ax.scatter(objects[:,0],objects[:,1])
-    ax.set_title(DATA_NAME+"Obstacles")
-    ax.set_xlabel("x [m]")
-    ax.set_ylabel("y [m]")
-    ax.set_xlim(x_lim*1.1)
-    ax.set_ylim(y_lim*1.1)
-    ax.set_aspect("equal")
-    ax.grid()
+        fig,ax = plt.subplots()
+        ax.scatter(objects[:,0],objects[:,1])
+        ax.set_title(DATA_NAME+"Obstacles")
+        ax.set_xlabel("x [m]")
+        ax.set_ylabel("y [m]")
+        ax.set_xlim(x_lim*1.1)
+        ax.set_ylim(y_lim*1.1)
+        ax.set_aspect("equal")
+        ax.grid()
 
-    plt.show()
-
+        plt.show()
+        time.sleep(5)
+        plt.close('all')
     
 
 

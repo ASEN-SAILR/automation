@@ -10,11 +10,21 @@ from RoverUART import RoverUART
 import logging
 import numpy as np
 import time
+import os
 from multiprocessing import Process
+import serial.tools.list_ports
 
 DISTANCE = 1 #distance to move in a straight line
 
-if __name__ == "__main__":
+def find_device_port(device_name):
+	ports = serial.tools.list_ports.grep(device_name)
+	for port in ports:
+		if device_name in port.description:
+			return ports.device
+	return None
+
+
+def main():
 	#initialize logging
 	logging.basicConfig(
 		filename='rover_log.log',
@@ -24,6 +34,9 @@ if __name__ == "__main__":
 	
 	logging.getLogger("numpy").setLevel(logging.WARNING)
 	logging.getLogger("multiprocessing").setLevel(logging.WARNING)
+
+	# file housekeeping
+	# os.system("> commands.txt")
 
 	# start reading commands from commands log
 	# leaving these in for testing on automation end but should be taken out
@@ -59,6 +72,7 @@ if __name__ == "__main__":
 
 	# start uart comms with Teensy
 	teensy_port = r"/dev/ttyACM0"
+	#teensy_port = find_device_port("teensy")
 	uart = RoverUART(teensy_port) 
 	uart.readLine() #clear the serial buffer 
 
@@ -82,6 +96,7 @@ if __name__ == "__main__":
 
 	# start gps 
 	gps_port = r"/dev/ttyACM1"
+	#gps_port = find_device_port("gps")
 	gps = RoverGPS(gps_port,comms) # more params?
 
 	#LOI = [40.0093664,-105.2439658]
@@ -108,13 +123,22 @@ if __name__ == "__main__":
 	LOI = None	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
-	comms.startLive() # live_video_process = Process(comms.liveVideoServer)
+	cam.startLiveVideo() # live_video_process = Process(comms.liveVideoServer)
 					  # live_video_process.start()
-	while True:
 
+	time.sleep(1)
+	gps.stopTele()
+
+	cam.take360()
+
+	return
+
+	while True:
+		time.sleep(1)
 		logging.info("waiting for command")
+		print("Waiting for Command...")
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
-			
+			time.sleep(1)
 			#print("================ Waiting for Command ======================")
 			command = comms.readCommand()
 			
@@ -124,9 +148,9 @@ if __name__ == "__main__":
 				missionDone = False
 				break
 
-
+			#print(current_process.is_alive(),LOI)
 			#if no new command, at LOI, and autonomous done
-			if LOI is not None and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
+			if LOI is not None and not current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
 				if LOI == gs_coords: #the rover reached LOI and now back at gsLOI
 					logging.info("rover at LOI")
 					if ~missionDone:
@@ -147,18 +171,18 @@ if __name__ == "__main__":
 					# video.startRecording()
 					# live_video_process.start()
 					# #TODO what does the command looks like
-					command = {"commandType"="autonomous","LOI"=gsLOI}
+					command = {"commandType":"autonomous","LOI":gsLOI}
 
 					#once a command is recieved, we need a way to monitor motion		
 					# check for emergecy stop conidition first
 
-		if command["commandType"] == "stop":
+		if command["commandType"] == "startStop":
 			active_command = "stop"
 			logging.info("stop command recieved")
 			print('Stop command received.')
 			# termiate child processes immediately and stop motion ASAP
 			LOI = None
-			move.emergencyStop()
+			#move.emergencyStop()
 
 			if current_process.is_alive(): current_process.terminate()
 			# current_process.close() #may need this???
@@ -172,12 +196,12 @@ if __name__ == "__main__":
 
 		# if we are here, there has been a new command specified and 
 		# we need to stop manual or autonomous motion
-		if current_process.is_alive(): current_process.terminate() #we probably want a more elegent way of stopping, this may cause memory leaks
 		#move.stopMove()
 
 		#if command["mode"] == "autonomous" or command["mode"] == "manual":
 			#current_process = Process(target=move.startMove, args=(command,))
 		if command["commandType"]=="autonomous":
+			if current_process.is_alive(): current_process.terminate()
 			active_command = "autonomous"
 			logging.info("autonomous command recieved")
 			print('autonomous command received.')
@@ -185,7 +209,7 @@ if __name__ == "__main__":
 			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2,translation_res))
 			current_process.start()
 		elif command["commandType"]=="manual":
-			print("====================+++++++++++== Sending manual command ============+++")
+			if current_process.is_alive(): current_process.terminate() #print("====================+++++++++++== Sending manual command ============+++")
 			active_command = "manual"
 			logging.info(f"manual command recieved: {command}")
 			print('manual command received.')
@@ -213,3 +237,6 @@ if __name__ == "__main__":
 		#return to top of loop
 			
 
+
+if __name__ == "__main__":
+	main()

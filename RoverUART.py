@@ -32,7 +32,7 @@ class RoverUART:
         """
         sends teensy a command to translate over UART connection
         """
-        print("TESTING")
+        #print("TESTING")
         logging.info(f"sending translation command: meter: {meter}")
         mode = "t"
         cmdString = mode.encode("utf-8") + struct.pack("<f",float(meter))
@@ -54,6 +54,7 @@ class RoverUART:
             #print(float(mystring[1:-1]))
             magval = float(mystring[1:-1])
             self.lastmag = magval
+            print(magval)
             return magval
         except:
             logging.warning("mag string was not in expected form. string: {mystring}")
@@ -90,7 +91,7 @@ class RoverUART:
         """
         read from serial buffer until empty
         """
-        print("in readAll()")
+        #print("in readAll()")
         buffer = []
         while self.ser.in_waiting>0:
              print(".")

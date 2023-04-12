@@ -1,1 +1,6 @@
-1, manual, translate, 3, 19:46:50
+1, autonomous, LOI, 40.011061, -105.243612, 17:07:35
+2, autonomous, LOI, 40.011061, -105.243612, 17:09:14
+3, autonomous, LOI, 40.011061, -105.243612, 17:10:49
+4, stop, 17:13:07
+5, manual, translate, 1, 17:14:15
+6, autonomous, LOI, 40.011061, -105.243612, 17:18:00
