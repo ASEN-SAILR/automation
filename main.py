@@ -116,10 +116,9 @@ if __name__ == "__main__":
 			
 			command = comms.readCommand()
 			
-			
 			if command:
 				logging.info(f"command ({command}) read in from RoverComms ")
-			
+				print('received new command: command=',command)
 				missionDone = False
 				break
 
@@ -151,6 +150,7 @@ if __name__ == "__main__":
 		if command["commandType"] == "stop":
 			active_command = "stop"
 			logging.info("stop command recieved")
+			print('Stop command received.')
 			# termiate child processes immediately and stop motion ASAP
 			LOI = None
 			move.emergencyStop()
@@ -175,16 +175,18 @@ if __name__ == "__main__":
 		if command["commandType"]=="autonomous":
 			active_command = "autonomous"
 			logging.info("autonomous command recieved")
+			print('autonomous command received.')
 			LOI = command["LOI"]
 			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2,translation_res))
 			current_process.start()
 		elif command["commandType"]=="manual":
 			active_command = "manual"
 			logging.info(f"manual command recieved: {command}")
+			print('manual command received.')
 			LOI = None
 			# current_process = Process(target=move.manual, args=(command["type"],command["dist"],command["angle"]))
 			current_process = Process(target=move.manual, args=(command["manualType"],command["command"]))
-			current_process.start()		
+			current_process.start()
 		#TODO take photo when at LOI
 		elif command["commandType"] == "photo":
 			active_command = "photo"
@@ -192,6 +194,7 @@ if __name__ == "__main__":
 			# take pano photo
 			# begin recording 
 			#todo
+			print('stop command received.')
 			LOI = None
 			cam.take360()
 			# video.stopRecording()
