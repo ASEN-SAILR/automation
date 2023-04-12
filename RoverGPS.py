@@ -19,7 +19,7 @@ class RoverGPS:
 
         #initialize stuff
         self.comms = comms
-        self.precision = 10
+        self.precision = 1.15
         self.gps_port = gpsport
         self.tele_flag = Value('b',True)
         # self.ser = serial.Serial(port, baudrate=38400, timeout=1)

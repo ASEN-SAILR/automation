@@ -108,8 +108,8 @@ if __name__ == "__main__":
 	LOI = None	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
-	# comms.startLive()
-
+	comms.startLive() # live_video_process = Process(comms.liveVideoServer)
+					  # live_video_process.start()
 	while True:
 
 		logging.info("waiting for command")
@@ -118,10 +118,9 @@ if __name__ == "__main__":
 			#print("================ Waiting for Command ======================")
 			command = comms.readCommand()
 			
-			
 			if command:
 				logging.info(f"command ({command}) read in from RoverComms ")
-			
+				print('received new command: command=',command)
 				missionDone = False
 				break
 
@@ -137,19 +136,26 @@ if __name__ == "__main__":
 				else:#TODO:the rover is at the LOI
 					#pass
 					# video.stopRecording()
+
+					# live_video_process.terminate()
+					print('At LOI, now taking pano.')
 					cam.take360()
-					print("Panaramic image taken, pausing for 30 seconds")
+					print('Pano took. Now wait 30s before going back to ground station.')
 					time.sleep(30)
+					print('Waiting done. Setting command to auto and LOI to ground station.')
 					# video.take360()
 					# video.startRecording()
+					# live_video_process.start()
 					# #TODO what does the command looks like
-					# command = {"type"="autonomous","LOI"=gsLOI}
+					command = {"commandType"="autonomous","LOI"=gsLOI}
+
 					#once a command is recieved, we need a way to monitor motion		
 					# check for emergecy stop conidition first
 
 		if command["commandType"] == "stop":
 			active_command = "stop"
 			logging.info("stop command recieved")
+			print('Stop command received.')
 			# termiate child processes immediately and stop motion ASAP
 			LOI = None
 			move.emergencyStop()
@@ -174,6 +180,7 @@ if __name__ == "__main__":
 		if command["commandType"]=="autonomous":
 			active_command = "autonomous"
 			logging.info("autonomous command recieved")
+			print('autonomous command received.')
 			LOI = command["LOI"]
 			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2,translation_res))
 			current_process.start()
@@ -181,11 +188,10 @@ if __name__ == "__main__":
 			print("====================+++++++++++== Sending manual command ============+++")
 			active_command = "manual"
 			logging.info(f"manual command recieved: {command}")
+			print('manual command received.')
 			LOI = None
-			print(command)
-			current_process = Process(target=move.manual, args=(command["manualType"],command["command"],command["command"]))
-			#current_process = Process(target=move.manual, args=("translation",0,0))
-			current_process.start()		
+			current_process = Process(target=move.manual, args=(command["manualType"],command["command"]))
+			current_process.start()
 
 		#TODO take photo when at LOI
 		elif command["commandType"] == "photo":
@@ -194,7 +200,9 @@ if __name__ == "__main__":
 			# take pano photo
 			# begin recording 
 			#todo
+			print('stop command received.')
 			LOI = None
+			cam.take360()
 			# video.stopRecording()
 			# video.take360()
 			# video.startRecording()
