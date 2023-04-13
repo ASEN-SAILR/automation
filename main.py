@@ -10,7 +10,7 @@ from RoverUART import RoverUART
 import logging
 import numpy as np
 import time
-from multiprocessing import Process
+from multiprocessing import Process, Value
 
 DISTANCE = 1 #distance to move in a straight line
 
@@ -99,12 +99,14 @@ if __name__ == "__main__":
 	# Variable that contains the active process: manual or autonomous
 	# need to instantiate a process then terminate for logic in while loop to work
 	def foo(): pass
-	current_process = Process(target=foo, args=())
+	process_flag = Value('b',True)
+	current_process = Process(target=foo, args=(process_flag))
 	current_process.start()
+
 	if current_process.is_alive():current_process.terminate()
 
 	# tracks current command
-	active_command = "stop"
+	# active_command = "stop"
 	LOI = None	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
@@ -127,30 +129,33 @@ if __name__ == "__main__":
 
 			#if no new command, at LOI, and autonomous done
 			if LOI is not None and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
-				if LOI == gs_coords: #the rover reached LOI and now back at gsLOI
-					logging.info("rover at LOI")
-					if ~missionDone:
-						comms.isStreaming = False
-						missionDone = True
-						print("Mission done. Rover is now back at ground station. Waiting for a new command...")
-				else:#TODO:the rover is at the LOI
-					#pass
-					# video.stopRecording()
+				if gps.atloi(LOI): 
+					if LOI == gs_coords: #the rover reached LOI and now back at gsLOI
+						logging.info("rover at LOI")
+						if ~missionDone:
+							comms.isStreaming = False
+							missionDone = True
+							print("Mission done. Rover is now back at ground station. Waiting for a new command...")
+					else:#TODO:the rover is at the LOI
+						#pass
+						# video.stopRecording()
 
-					# live_video_process.terminate()
-					print('At LOI, now taking pano.')
-					cam.take360()
-					print('Pano took. Now wait 30s before going back to ground station.')
-					time.sleep(30)
-					print('Waiting done. Setting command to auto and LOI to ground station.')
-					# video.take360()
-					# video.startRecording()
-					# live_video_process.start()
-					# #TODO what does the command looks like
-					command = {"commandType"="autonomous","LOI"=gsLOI}
+						# live_video_process.terminate()
+						print('At LOI, now taking pano.')
+						cam.take360()
+						print('Pano took. Now wait 30s before going back to ground station.')
+						time.sleep(30)
+						print('Waiting done. Setting command to auto and LOI to ground station.')
+						# video.take360()
+						# video.startRecording()
+						# live_video_process.start()
+						# #TODO what does the command looks like
+						command = {"commandType"="autonomous","LOI"=gsLOI}
 
-					#once a command is recieved, we need a way to monitor motion		
-					# check for emergecy stop conidition first
+						#once a command is recieved, we need a way to monitor motion		
+						# check for emergecy stop conidition first
+				else: #if autonomous exits before we're at LOI(by error), reset command to autonomous toward LOI
+    					command = {"commandType"="autonomous","LOI"=LOI}
 
 		if command["commandType"] == "stop":
 			active_command = "stop"
@@ -158,8 +163,8 @@ if __name__ == "__main__":
 			print('Stop command received.')
 			# termiate child processes immediately and stop motion ASAP
 			LOI = None
-			move.emergencyStop()
-
+			# move.emergencyStop()
+			process_flag.value = False
 			if current_process.is_alive(): current_process.terminate()
 			# current_process.close() #may need this???
 
@@ -172,19 +177,27 @@ if __name__ == "__main__":
 
 		# if we are here, there has been a new command specified and 
 		# we need to stop manual or autonomous motion
-		if current_process.is_alive(): current_process.terminate() #we probably want a more elegent way of stopping, this may cause memory leaks
+		#if current_process.is_alive(): current_process.terminate() #we probably want a more elegent way of stopping, this may cause memory leaks
 		#move.stopMove()
 
 		#if command["mode"] == "autonomous" or command["mode"] == "manual":
 			#current_process = Process(target=move.startMove, args=(command,))
 		if command["commandType"]=="autonomous":
+    		process_flag.value = False
+			while current_process.is_alive():
+    				print('Exiting the current process')
+    				time.sleep(1)
 			active_command = "autonomous"
 			logging.info("autonomous command recieved")
 			print('autonomous command received.')
 			LOI = command["LOI"]
-			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2,translation_res))
+			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2,translation_res,process_flag))
 			current_process.start()
 		elif command["commandType"]=="manual":
+			process_flag = False
+			while current_process.is_alive():
+    				print('Exiting the current process')
+    				time.sleep(1)
 			print("====================+++++++++++== Sending manual command ============+++")
 			active_command = "manual"
 			logging.info(f"manual command recieved: {command}")

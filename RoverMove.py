@@ -35,10 +35,11 @@ class RoverMove:
 		return
 
 	### Autonomous Mode ###
-	def autonomous(self,LOI,red_width,buffer_dist,translation_res):
+	def autonomous(self,LOI,red_width,buffer_dist,translation_res,flag):
 		"""
 		Autonomously move the rover to a LOI
 		"""
+		flag.value = True
 		logging.info("Beginning autonomous movement.")
 		
 		#Initializes starting/desired LOI and connection flag to verify connection is still established
@@ -57,7 +58,7 @@ class RoverMove:
 		command = None
 
 		#Loops until LOI is reached
-		while not atloi:
+		while not atloi and flag.value:
 
 			#If ground station connection is lost, sets LOI to start point for rover to return to
 			if not self.comms.checkConnection():
@@ -93,7 +94,7 @@ class RoverMove:
 			logging.info('[lat,lon]='+str(self.gps.getGPS())+', dist='+str(self.gps.distanceToTarget(LOI))+' m, angle from N='+str(self.gps.bearingToTarget(LOI))+' deg, MagHeading='+str(mag_heading)+' deg, atloi='+str(atloi))
 			
 			#If no object is in the way and not yet at LOI, enters loop
-			while status is None and atloi == 0:
+			while status is None and not atloi and flag.value:
 				#Checks if Rover is pointing at LOI before movement
 				if self.checkDesiredHeading(delta_heading):
 					print("Nothing in the way")
@@ -118,7 +119,7 @@ class RoverMove:
 					break
 					
 			#If object is in clearance zone (yellow), enters loop
-			while status == "yellow" and atloi == 0:
+			while status == "yellow" and not atloi and flag.value:
 				#Finds the distance required to pass the object
 				distance = self.getDeltaDistance(obstacles)
 				#Sends translation command
@@ -134,7 +135,7 @@ class RoverMove:
 				atloi = self.gps.atloi(LOI)
 
 			#If object is in avoidance zone (red), enters loop
-			while status == "red" and atloi == 0:
+			while status == "red" and not atloi and flag.value:
 
 				#If obstacle is too close, Rover backs off (should not ever occur)
 				if self.getDeltaDistance(obstacles)<red_width/2:
