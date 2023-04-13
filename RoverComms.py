@@ -44,11 +44,12 @@ class RoverComms:
         self.gs_image_path = gs_str_stem + gs_image_path
 
         self.isStreaming = Value('b', False)
-        self.frame = Array('f',np.zeros(640*360*3))
+        self.frame = Array('f',np.zeros(640*480*3))
         # self.frame = np.frombuffer(self.arr.get_obj(),atype=np.float32).reshape(640,360)
         #self.frame = None
         self.current_cmd_num = -1
         # initialize stuff as needed
+        self.after_pano = False
 
     #probably not needed now?
     #def isNewCommand(self): 
@@ -132,7 +133,7 @@ class RoverComms:
 
     def syncTelem(self,):
         #print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
-        os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcTelemPath+" "+self.gs_telem_path)
+        os.system("sshpass -p '"+ self.gs_ssh_password+"' rsync -ae ssh "+self.obcTelemPath+" "+self.gs_telem_path)
 
     def syncVideo(self,):
         #print("sshpass -p '"+ self.gs_ssh_password+"' rsync -ave ssh "+self.obcVideoPath+" "+self.gs_video_path)
@@ -144,7 +145,7 @@ class RoverComms:
 
 
     def checkConnection(self,):
-        if 0 == os.system('ping '+self.gs_ip+' -c 1 -W 1'):
+        if 0 == os.system('ping '+self.gs_ip+' -c 1 -W 1 > /dev/null 2>&1'):
             return 1
         else:
             return 0
@@ -168,7 +169,10 @@ class RoverComms:
         # host_ip = socket.gethostbyname(host_name)
         host_ip = self.obc_ip
         #print('Host IP:', host_ip)
-        port = 9999
+        if not self.after_pano:
+            port = 9999
+        else:
+            port = 9998
         socket_address = (host_ip, port)
 
         # Bind the socket to a public host and a port
@@ -185,7 +189,9 @@ class RoverComms:
         # Open the webcam
         cap = cv2.VideoCapture(0)
         # cap = cv2.VideoCapture(8)
-        cap.set(cv2.CAP_PROP_FPS,30)
+        cap.set(cv2.CAP_PROP_FPS,20)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
         # Set the video dimensions
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
@@ -199,8 +205,9 @@ class RoverComms:
             # Read a frame from the webcam
             ret, frame = cap.read()
             
-            current_frame[:] = frame.flatten()
-            # Convert the frame to a byte string
+            # if frame != None:
+            # current_frame[:] = frame.flatten()
+        # Convert the frame to a byte string
             data = pickle.dumps(frame)
 
             # Send the frame size to the client

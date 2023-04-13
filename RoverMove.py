@@ -80,8 +80,8 @@ class RoverMove:
 
 			#Finding change in heading desired to point to LOI
 			mag_heading = self.uart.getMagneticAzm()
-			print(mag_heading)
 			delta_heading = self.gps.angleToTarget(LOI,mag_heading)
+			#delta_heading = delta_heading/2
 			print('Delta heading required:',delta_heading,'degrees.')
 
 			#Sending command to teensy and waiting for completion
@@ -107,12 +107,14 @@ class RoverMove:
 
 					#Checks if Rover is pointing at LOI
 					mag_heading = self.uart.getMagneticAzm()
-					print(mag_heading)
+					#print(mag_heading)
 					delta_heading = self.gps.angleToTarget(LOI,mag_heading)
 					atloi = self.gps.atloi(LOI)
 
 					#Checks if any obstacle is in view
+					print("Flag1")
 					[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
+					print("Flag2")
 					delta_heading = self.gps.angleToTarget(LOI,mag_heading)
 				#If Rover is not pointing at LOI, breaks and re-evaluates state
 				else:
@@ -121,6 +123,7 @@ class RoverMove:
 			#If object is in clearance zone (yellow), enters loop
 			while status == "yellow" and not atloi and flag.value:
 				#Finds the distance required to pass the object
+				print("Object in yellow zone")
 				distance = self.getDeltaDistance(obstacles)
 				#Sends translation command
 				print("Moving",distance,"meters")
@@ -136,7 +139,7 @@ class RoverMove:
 
 			#If object is in avoidance zone (red), enters loop
 			while status == "red" and not atloi and flag.value:
-
+				print("Object in red zone")
 				#If obstacle is too close, Rover backs off (should not ever occur)
 				if self.getDeltaDistance(obstacles)<red_width/2:
 					#Sends command to backoff from Obstacle
@@ -164,9 +167,9 @@ class RoverMove:
 
 	def checkDesiredHeading(self,delta_heading):
 		'''
-		Checks if the rover is pointing at the desired heading within 2 degrees
+		Checks if the rover is pointing at the desired heading within 15 degrees
 		'''
-		if abs(delta_heading) < 2:
+		if abs(delta_heading) < 15:
 			return 1
 		else:
 			return 0
@@ -234,7 +237,7 @@ class RoverMove:
 		else: 
 			AngleToTurn = AngleToTurnRight
 
-		return AngleToTurn
+		return -AngleToTurn
 		
 	def getDeltaDistance(self,obstacles):
 		'''

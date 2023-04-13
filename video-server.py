@@ -5,9 +5,11 @@ import struct
 
 # Create a socket object
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
 host_name = socket.gethostname()
 # host_ip = socket.gethostbyname(host_name)
-host_ip = '10.203.178.120'
+host_ip = '169.254.179.9'
 # host_ip = '127.0.1.1'
 
 print('Host IP:', host_ip)
@@ -27,7 +29,7 @@ while True:
     print('Client connected:', client_address)
 
     # Open the webcam
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
 
     # Set the video dimensions
     frame_width = int(cap.get(3))
