@@ -152,13 +152,16 @@ class RoverComms:
 
     def startLive(self):
         self.isStreaming.value = True
-        self.process = Process(target=self.liveVideoServer,args=(self.isStreaming,self.frame))
+        print('Starting LiveVideo')
+        self.process = Process(target=self.liveVideoServer,args=(self.isStreaming))
         self.process.start()
 
     def stopLive(self):
         self.isStreaming.value = False #better practice than terminate, allow child to end process properly
-        # if self.process.is_alive():
-        #     self.process.terminate()
+        while self.process.is_alive():
+            print('Waiting for LiveVideo to stop.')
+            time.sleep(1)
+        print('LiveVideo ended.')
 
     def liveVideoServer(self,isStreaming,current_frame):
 

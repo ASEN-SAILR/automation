@@ -129,11 +129,11 @@ def main():
 					  # live_video_process.start()
 
 	time.sleep(1)
-	gps.stopTele()
+	# gps.stopTele()
 
-	cam.take360()
+	# cam.take360()
 
-	return
+	# return
 
 	while True:
 		time.sleep(1)
@@ -147,7 +147,6 @@ def main():
 			if command:
 				logging.info(f"command ({command}) read in from RoverComms ")
 				print('received new command: command=',command)
-				missionDone = False
 				break
 
 			#print(current_process.is_alive(),LOI)
@@ -156,10 +155,9 @@ def main():
 				if gps.atloi(LOI): 
 					if LOI == gs_coords: #the rover reached LOI and now back at gsLOI
 						logging.info("rover at LOI")
-						if ~missionDone:
-							comms.isStreaming = False
-							missionDone = True
-							print("Mission done. Rover is now back at ground station. Waiting for a new command...")
+						LOI = None
+						comms.isStreaming = False
+						print("Mission done. Rover is now back at ground station. Waiting for a new command...")
 					else:#TODO:the rover is at the LOI
 						#pass
 						# video.stopRecording()
@@ -169,7 +167,7 @@ def main():
 						cam.take360()
 						print('Pano took. Now wait 30s before going back to ground station.')
 						time.sleep(30)
-						print('Waiting done. Setting command to auto and LOI to ground station.')
+						print('Waiting done. Setting command to autonomous and LOI to ground station.')
 						# video.take360()
 						# video.startRecording()
 						# live_video_process.start()
@@ -201,23 +199,16 @@ def main():
 
 		# if we are here, there has been a new command specified and 
 		# we need to stop manual or autonomous motion
-<<<<<<< HEAD
 		#if current_process.is_alive(): current_process.terminate() #we probably want a more elegent way of stopping, this may cause memory leaks
-=======
->>>>>>> ad16ce35bcfe8fe3ca7fd05c3a62ad907a797826
 		#move.stopMove()
 
 		#if command["mode"] == "autonomous" or command["mode"] == "manual":
 			#current_process = Process(target=move.startMove, args=(command,))
 		if command["commandType"]=="autonomous":
-<<<<<<< HEAD
     		process_flag.value = False
 			while current_process.is_alive():
     				print('Exiting the current process')
     				time.sleep(1)
-=======
-			if current_process.is_alive(): current_process.terminate()
->>>>>>> ad16ce35bcfe8fe3ca7fd05c3a62ad907a797826
 			active_command = "autonomous"
 			logging.info("autonomous command recieved")
 			print('autonomous command received.')
@@ -225,15 +216,11 @@ def main():
 			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2,translation_res,process_flag))
 			current_process.start()
 		elif command["commandType"]=="manual":
-<<<<<<< HEAD
 			process_flag = False
 			while current_process.is_alive():
     				print('Exiting the current process')
     				time.sleep(1)
 			print("====================+++++++++++== Sending manual command ============+++")
-=======
-			if current_process.is_alive(): current_process.terminate() #print("====================+++++++++++== Sending manual command ============+++")
->>>>>>> ad16ce35bcfe8fe3ca7fd05c3a62ad907a797826
 			active_command = "manual"
 			logging.info(f"manual command recieved: {command}")
 			print('manual command received.')
@@ -243,6 +230,10 @@ def main():
 
 		#TODO take photo when at LOI
 		elif command["commandType"] == "photo":
+			process_flag = False
+			while current_process.is_alive():
+    				print('Exiting the current process')
+    				time.sleep(1)
 			active_command = "photo"
 			# STOP recording 
 			# take pano photo
