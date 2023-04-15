@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # scan = np.load(path)
     while True:
         color,objects,points = lidar.getObstacles(2)
-
+        print(objects)
 
         fig,ax = plt.subplots()
         ax.scatter(points[:,0],points[:,1])
@@ -61,9 +61,9 @@ if __name__ == "__main__":
         ax.set_aspect("equal")
         ax.grid()
 
-        plt.show()
-        time.sleep(5)
-        plt.close('all')
+       # plt.show()
+        #time.sleep(5)
+        #plt.close('all')
     
 
 

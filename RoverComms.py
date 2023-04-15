@@ -121,7 +121,7 @@ class RoverComms:
         #     f.write(gpsCoor+'\n')
         with open(self.obcTelemPath) as f:
                 lines = f.read().splitlines()
-                if len(lines)>=99999: #1 sec per 1 point
+                if len(lines)>=20: #1 sec per 1 point
                     lines=lines[1:]
         with open(self.obcTelemPath, 'w') as f:
             for line in lines:
@@ -222,4 +222,5 @@ class RoverComms:
             # # 'L' is a marker for the start of frame
             # message_size = struct.pack("L", len(data))
             # client_socket.sendall(message_size + data)
+        client_socket.close()
         

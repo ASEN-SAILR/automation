@@ -80,8 +80,9 @@ class RoverMove:
 
 			#Finding change in heading desired to point to LOI
 			mag_heading = self.uart.getMagneticAzm()
+			print('Mag heading: ',mag_heading)
 			delta_heading = self.gps.angleToTarget(LOI,mag_heading)
-			#delta_heading = delta_heading/2
+			#delta_heading = 0
 			print('Delta heading required:',delta_heading,'degrees.')
 
 			#Sending command to teensy and waiting for completion
@@ -112,9 +113,7 @@ class RoverMove:
 					atloi = self.gps.atloi(LOI)
 
 					#Checks if any obstacle is in view
-					print("Flag1")
 					[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
-					print("Flag2")
 					delta_heading = self.gps.angleToTarget(LOI,mag_heading)
 				#If Rover is not pointing at LOI, breaks and re-evaluates state
 				else:

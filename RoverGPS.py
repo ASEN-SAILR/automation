@@ -117,7 +117,9 @@ class RoverGPS:
         output: 
             angle to target with respect to current heading in deg, positive mean to the right (float)
         """
-        return self.bearingToTarget(tarCoor)-currHeading
+        bearingToTar = self.bearingToTarget(tarCoor)
+        print(bearingToTar)
+        return bearingToTar-currHeading
 
     def getGPS(self): # -> list of float
         #with open(self.comms.obcTelemPath) as f:

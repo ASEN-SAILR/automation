@@ -101,7 +101,7 @@ def main():
 
 	#LOI = [40.0093664,-105.2439658]
 	gs_coords = gps.getGPS()
-
+	os.system('> telemetry.txt')       
 	gps.startTele()
 
 	# start move
@@ -115,7 +115,7 @@ def main():
 	# need to instantiate a process then terminate for logic in while loop to work
 	def foo(): pass
 	process_flag = Value('b',True)
-	current_process = Process(target=foo, args=(process_flag))
+	current_process = Process(target=foo, args=(process_flag,))
 	current_process.start()
 
 	if current_process.is_alive():current_process.terminate()
@@ -125,7 +125,7 @@ def main():
 	LOI = None	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
-	cam.startLiveVideo() # live_video_process = Process(comms.liveVideoServer)
+	#cam.startLiveVideo() # live_video_process = Process(comms.liveVideoServer)
 					  # live_video_process.start()
 
 	time.sleep(1)
@@ -172,12 +172,12 @@ def main():
 						# video.startRecording()
 						# live_video_process.start()
 						# #TODO what does the command looks like
-						command = {"commandType"="autonomous","LOI"=gsLOI}
+						command = {"commandType":"autonomous","LOI":gsLOI}
 
 						#once a command is recieved, we need a way to monitor motion		
 						# check for emergecy stop conidition first
 				else: #if autonomous exits before we're at LOI(by error), reset command to autonomous toward LOI
-    					command = {"commandType"="autonomous","LOI"=LOI}
+    					command = {"commandType":"autonomous","LOI":LOI}
 
 		if command["commandType"] == "startStop":
 			active_command = "stop"
@@ -205,7 +205,7 @@ def main():
 		#if command["mode"] == "autonomous" or command["mode"] == "manual":
 			#current_process = Process(target=move.startMove, args=(command,))
 		if command["commandType"]=="autonomous":
-    		process_flag.value = False
+			process_flag.value = False
 			while current_process.is_alive():
     				print('Exiting the current process')
     				time.sleep(1)
@@ -220,7 +220,6 @@ def main():
 			while current_process.is_alive():
     				print('Exiting the current process')
     				time.sleep(1)
-			print("====================+++++++++++== Sending manual command ============+++")
 			active_command = "manual"
 			logging.info(f"manual command recieved: {command}")
 			print('manual command received.')
