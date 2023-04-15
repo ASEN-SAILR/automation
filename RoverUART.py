@@ -98,3 +98,18 @@ class RoverUART:
              #buffer.append(self.ser.readline().decode("utf-8").rstrip())
              buffer.append(self.ser.readline().decode("utf-8").rstrip())
         return buffer
+    
+    def checkMotionStatus(self,timeout=10):
+        start_time = time.time()
+        line = self.readLine()
+        while((time.time()-start_time) < timeout):
+            time.sleep(0.2)
+            line = self.readLine()
+            if line == 'd':
+                logging.info(f"motion complete recieved after {time.time()-start_time} seconds")
+                print(f"confimraiton of motion complete recieved after {time.time()-start_time} seconds")
+                return True
+        logging.warning(f"no confimraiton of motion complete recieved after {timeout} seconds")
+        print(f"no confimraiton of motion complete recieved after {timeout} seconds")
+        return False
+            
