@@ -28,10 +28,7 @@ class RoverMove:
 		"""
 		success = 0
 		while not success:
-			#TODO: Call the correct function
-			#success = self.uart.check_motion_status()
-			success = 1
-			time.sleep(.5)
+			success = self.uart.checkMotionStatus()
 		return
 
 	### Autonomous Mode ###
@@ -108,7 +105,6 @@ class RoverMove:
 
 					#Checks if Rover is pointing at LOI
 					mag_heading = self.uart.getMagneticAzm()
-					#print(mag_heading)
 					delta_heading = self.gps.angleToTarget(LOI,mag_heading)
 					atloi = self.gps.atloi(LOI)
 
