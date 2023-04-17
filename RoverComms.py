@@ -18,7 +18,7 @@ import socket
 import pickle
 import struct
 import numpy as np
-from import Process, Value, Array
+from multiprocessing import Process, Value, Array
 import time
 
 class RoverComms:

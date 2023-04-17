@@ -54,7 +54,7 @@ class RoverMove:
 		#Initializing commands
 		command = None
 		yellow_flag = 1
-
+		mag_heading = self.uart.getMagneticAzm()
 		#Loops until LOI is reached
 		while not atloi and flag.value:
 			#If ground station connection is lost, sets LOI to start point for rover to return to

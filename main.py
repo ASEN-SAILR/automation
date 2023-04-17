@@ -58,6 +58,7 @@ def main():
 	# ground station comms vars
 	gs_ssh_password = "asen-sailr"
 	gs_ip = "192.168.1.3"
+	# gs_ip = '128.138.65.188'
 	gs_home_path = "/home/ground-station/comms-gs/"
 	gs_telem_path = gs_home_path+"telemetry.txt"
 	gs_video_path = gs_home_path
@@ -139,16 +140,16 @@ def main():
 	# active_command = "stop"
 	LOI = None	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
+	active_command = {"commandType":None}
 	logging.info("main loop begining")
-	#cam.startLiveVideo() # live_video_process = Process(comms.liveVideoServer)
+	cam.startLiveVideo() # live_video_process = Process(comms.liveVideoServer)
 					  # live_video_process.start()
 
-	time.sleep(1)
-	# gps.stopTele()
+	time.sleep(10)
+	# testing
+	cam.take360()
+	return
 
-	# cam.take360()
-
-	# return
 	lost_connection = False
 
 	while True:
@@ -160,18 +161,18 @@ def main():
 			#print("================ Waiting for Command ======================")
 			
 			if not comms.checkConnection():
-    			lost_connection = True
+				lost_connection = True
 				print('Lose connection, returning to ground station to regain connection')
 				logging.info(f"Lose connection, returning to ground station")
-    			process_flag.value = False
-    			command = {"commandType":"autonomous","LOI":gsLOI}
+				process_flag.value = False
+				command = {"commandType":"autonomous","LOI":gsLOI}
 				break
 			elif lost_connection and active_command["commandType"]=='autonomous': #this means we lost connection when we're on auto, 
 																				  #now we're back in connection so we need to continue auto
-    			lost_connection = False
+				lost_connection = False
 				print('Reconnected, continue autonomation')
 				process_flag.value = False
-    			command = active_command
+				command = active_command
 				break
 
 			command = comms.readCommand()
@@ -183,9 +184,9 @@ def main():
 
 			#print(current_process.is_alive(),LOI)
 			#if no new command, at LOI, and autonomous done
-			if active_command["commandType"]="autonomous" and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
+			if active_command["commandType"]=="autonomous" and not current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
 				if gps.atloi(active_command["LOI"]): 
-					if active_command["LOI"] == gs_coords: #the rover reached LOI and now back at gsLOI
+					if active_command["LOI"] == gsLOI: #the rover reached LOI and now back at gsLOI
 						logging.info("rover at LOI")
 						# LOI = None
 						# comms.isStreaming = False
@@ -209,7 +210,7 @@ def main():
 						#once a command is recieved, we need a way to monitor motion		
 						# check for emergecy stop conidition first
 				else: #if autonomous exits before we're at LOI(by error), reset command to autonomous toward LOI
-    					command = {"commandType":"autonomous","LOI":LOI}
+						command = {"commandType":"autonomous","LOI":LOI}
 
 		if command["commandType"] == "startStop":
 			# active_command = "stop"
@@ -239,8 +240,8 @@ def main():
 		if command["commandType"]=="autonomous":
 			process_flag.value = False
 			while current_process.is_alive():
-    				print('Exiting the current process')
-    				time.sleep(1)
+					print('Exiting the current process')
+					time.sleep(1)
 			# active_command = "autonomous"
 			logging.info("autonomous command recieved")
 			print('autonomous command received.')
@@ -250,8 +251,8 @@ def main():
 		elif command["commandType"]=="manual":
 			process_flag = False
 			while current_process.is_alive():
-    				print('Exiting the current process')
-    				time.sleep(1)
+					print('Exiting the current process')
+					time.sleep(1)
 			# active_command = "manual"
 			logging.info(f"manual command recieved: {command}")
 			print('manual command received.')
@@ -263,8 +264,8 @@ def main():
 		elif command["commandType"] == "photo":
 			process_flag = False
 			while current_process.is_alive():
-    				print('Exiting the current process')
-    				time.sleep(1)
+					print('Exiting the current process')
+					time.sleep(1)
 			# active_command = "photo"
 			# STOP recording 
 			# take pano photo
