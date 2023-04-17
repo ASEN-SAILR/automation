@@ -16,15 +16,22 @@ import serial.tools.list_ports
 
 DISTANCE = 1 #distance to move in a straight line
 
-def find_device_port(device_name):
-	ports = serial.tools.list_ports.grep(device_name)
+def find_device_port(deviceID):
+	ports = serial.tools.list_ports.comports()
 	for port in ports:
-		if device_name in port.description:
-			return ports.device
+		if deviceID in port.hwid:
+			return port.device
 	return None
+def search_all_hwid():
+	ports = serial.tools.list_ports.comports()
+	for port in ports:
+		print(port.hwid,port.device)
 
-
+#?? for teensy
+#'VID:PID=10C4:EA60' for lidar
+#'VID:PID=1546:01A8' for gps
 def main():
+	search_all_hwid()
 	#initialize logging
 	logging.basicConfig(
 		filename='rover_log.log',
@@ -36,7 +43,7 @@ def main():
 	logging.getLogger("multiprocessing").setLevel(logging.WARNING)
 
 	# file housekeeping
-	# os.system("> commands.txt")
+	os.system("> commands.txt")
 
 	# start reading commands from commands log
 	# leaving these in for testing on automation end but should be taken out
@@ -53,8 +60,8 @@ def main():
 	gs_ip = "192.168.1.3"
 	gs_home_path = "/home/ground-station/comms-gs/"
 	gs_telem_path = gs_home_path+"telemetry.txt"
-	gs_video_path = gs_home_path+"videos"
-	gs_image_path = gs_home_path+"images"
+	gs_video_path = gs_home_path
+	gs_image_path = gs_home_path
 	#start comms
 	comms = RoverComms(obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path)
 	
@@ -70,19 +77,23 @@ def main():
 	videoResolution = (640,360) #format: tuple (480,480)
 	cam = RoverCamera(comms,camPort,videoLength,photoPath,photoResolution,videoPath,fps,videoResolution) #need comms so that we can send video after recording
 
+	# print('ss')
 	# start uart comms with Teensy
-	teensy_port = r"/dev/ttyACM0"
+	teensy_port = find_device_port('VID:PID=16C0:0483')
+	#teensy_port = r"/dev/ttyACM0"
 	#teensy_port = find_device_port("teensy")
 	uart = RoverUART(teensy_port) 
+	print(teensy_port)
 	uart.readLine() #clear the serial buffer 
-
+	print('ss')
 	# start lidar
-	lidar_port = r"/dev/ttyUSB0"
+	lidar_port = find_device_port('VID:PID=10C4:EA60')
+	# lidar_port = r"/dev/ttyUSB0"
 	lidar = RoverLidar(port_name=lidar_port)
-	x_lim=np.array((0,1)) 
-	y_lim=np.array((-.5,.5))
-	threshold=0
-	red_lim=np.array((0.25,0.25))
+	x_lim=np.array((0,2)) 
+	y_lim=np.array((-1,1))
+	threshold=8
+	red_lim=np.array((-0.25,0.25))
 	red_width = .5
 	resolution=0.1
 	lidar.setMapParams(
@@ -93,17 +104,20 @@ def main():
 			resolution=resolution
 			)
 	buffer_dist = resolution/2
-
+	
 	# start gps 
-	gps_port = r"/dev/ttyACM1"
-	#gps_port = find_device_port("gps")
+	gps_port = find_device_port('VID:PID=1546:01A8')
+	#gps_port = r"/dev/ttyACM1"
+	#gps_port = find_device_port("gps"
+	
 	gps = RoverGPS(gps_port,comms) # more params?
-
+	os.system('> telemetry.txt')   
+	gps.startTele()
+	time.sleep(4)
 	#LOI = [40.0093664,-105.2439658]
 	gs_coords = gps.getGPS()
-	os.system('> telemetry.txt')       
-	gps.startTele()
-
+	
+	# time.sleep(5)
 	# start move
 	translation_res = 1
 	move = RoverMove(lidar,gps,uart,comms,buffer_dist,red_width,translation_res)
@@ -116,6 +130,7 @@ def main():
 	def foo(): pass
 	process_flag = Value('b',True)
 	current_process = Process(target=foo, args=(process_flag,))
+	current_process.daemon = True
 	current_process.start()
 
 	if current_process.is_alive():current_process.terminate()
@@ -125,10 +140,11 @@ def main():
 	LOI = None	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
-	#cam.startLiveVideo() # live_video_process = Process(comms.liveVideoServer)
+	cam.startLiveVideo() # live_video_process = Process(comms.liveVideoServer)
 					  # live_video_process.start()
 
 	time.sleep(1)
+
 	# gps.stopTele()
 
 	# cam.take360()
@@ -216,7 +232,7 @@ def main():
 			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2,translation_res,process_flag))
 			current_process.start()
 		elif command["commandType"]=="manual":
-			process_flag = False
+			process_flag.value = False
 			while current_process.is_alive():
     				print('Exiting the current process')
     				time.sleep(1)
@@ -229,7 +245,7 @@ def main():
 
 		#TODO take photo when at LOI
 		elif command["commandType"] == "photo":
-			process_flag = False
+			process_flag.value = False
 			while current_process.is_alive():
     				print('Exiting the current process')
     				time.sleep(1)

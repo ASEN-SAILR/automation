@@ -19,7 +19,7 @@ class RoverGPS:
 
         #initialize stuff
         self.comms = comms
-        self.precision = 1.15
+        self.precision = 5
         self.gps_port = gpsport
         self.tele_flag = Value('b',True)
         # self.ser = serial.Serial(port, baudrate=38400, timeout=1)
@@ -30,7 +30,7 @@ class RoverGPS:
             geo = gps.geo_coords()
             #print(geo.lat,geo.lon)
             return [geo.lat,geo.lon]
-        
+        # print('tele_flag: ',tele_flag)
         ser = serial.Serial(gps_port, baudrate=38400, timeout=1)
         while tele_flag.value:
             coor = readGPS(ser)
@@ -52,7 +52,8 @@ class RoverGPS:
             f.write(gpsStr+'\n')
     
     def startTele(self):
-        self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port,self.tele_flag))
+        self.process = Process(target=self.readAndWriteAndSendTele,args=(self.gps_port,self.tele_flag,))
+        self.process.daemon = True
         self.process.start()
 
     def stopTele(self):
@@ -117,9 +118,14 @@ class RoverGPS:
         output: 
             angle to target with respect to current heading in deg, positive mean to the right (float)
         """
-        bearingToTar = self.bearingToTarget(tarCoor)
-        print(bearingToTar)
-        return bearingToTar-currHeading
+        bearingToTar = self.bearingToTarget(tarCoor)-currHeading
+        if abs(bearingToTar)>180:
+            if bearingToTar < 0:
+                bearingToTar = 360-abs(bearingToTar)
+            else:
+                bearingToTar = bearingToTar-360
+        #print(bearingToTar)
+        return bearingToTar
 
     def getGPS(self): # -> list of float
         #with open(self.comms.obcTelemPath) as f:

@@ -169,7 +169,7 @@ class RoverCamera:
         frame1=cv2.imread('frame'+str(self.port[1])+'.jpg')
         frame2=cv2.imread('frame'+str(self.port[2])+'.jpg')
 
-        imgs = [frame2,frame1,frame0]
+        imgs = [frame2,frame0,frame1]
         
         #for i in range(len(image_paths)):
          #   imgs.append(image_paths[i])

@@ -53,10 +53,10 @@ class RoverMove:
 		
 		#Initializing commands
 		command = None
+		yellow_flag = 1
 
 		#Loops until LOI is reached
 		while not atloi and flag.value:
-
 			#If ground station connection is lost, sets LOI to start point for rover to return to
 			if not self.comms.checkConnection():
 				#Sets the desired LOI to revert to when connection is regained
@@ -69,23 +69,20 @@ class RoverMove:
 				LOI = desired_LOI
 				connection_flag = 1
 
-			#Checks if a switch to manual control is sent
-			#command = self.comms.readCommand()
-			#if command["commandType"] == "stop":
-			#	print('Stopping autonomy..."')
-			#	break;
-
 			#Finding change in heading desired to point to LOI
 			mag_heading = self.uart.getMagneticAzm()
 			print('Mag heading: ',mag_heading)
-			delta_heading = self.gps.angleToTarget(LOI,mag_heading)
-			#delta_heading = 0
-			print('Delta heading required:',delta_heading,'degrees.')
+			#If a rotation did not just happen from red/yellow zone, point right direction
+			if yellow_flag == 1:
+				delta_heading = self.gps.angleToTarget(LOI,mag_heading)
+				if not self.checkDesiredHeading(delta_heading):
+					print('Delta heading required:',delta_heading,'degrees.')
 
-			#Sending command to teensy and waiting for completion
-			self.uart.sendRotateCmd(delta_heading)
-			#Function waits for completion before moving on
-			self.motionInProgress()
+					#Sending command to teensy and waiting for completion
+					self.uart.sendRotateCmd(delta_heading)
+					#Function waits for completion before moving on
+					self.motionInProgress()
+					[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
 
 			#Checks if at LOI
 			atloi = self.gps.atloi(LOI)
@@ -94,6 +91,7 @@ class RoverMove:
 			#If no object is in the way and not yet at LOI, enters loop
 			while status is None and not atloi and flag.value:
 				#Checks if Rover is pointing at LOI before movement
+				yellow_flag = 1
 				if self.checkDesiredHeading(delta_heading):
 					print("Nothing in the way")
 					print("Moving",translation_res,"meters")
@@ -110,7 +108,6 @@ class RoverMove:
 
 					#Checks if any obstacle is in view
 					[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
-					delta_heading = self.gps.angleToTarget(LOI,mag_heading)
 				#If Rover is not pointing at LOI, breaks and re-evaluates state
 				else:
 					break
@@ -132,9 +129,16 @@ class RoverMove:
 				#Checks if at LOI
 				atloi = self.gps.atloi(LOI)
 
+				#Reinitializes flag to point back at LOI
+				yellow_flag = 1
+
 			#If object is in avoidance zone (red), enters loop
 			while status == "red" and not atloi and flag.value:
 				print("Object in red zone")
+
+				#Flag that yellow zone will be next so it will not point back at LOI
+				yellow_flag = 0
+
 				#If obstacle is too close, Rover backs off (should not ever occur)
 				if self.getDeltaDistance(obstacles)<red_width/2:
 					#Sends command to backoff from Obstacle
@@ -153,6 +157,11 @@ class RoverMove:
 					#Function to wait for completion before moving on
 					self.motionInProgress()
 
+					#If rover turned 90 deg, obstacle will no longer be in view, so move translation_res to avoid
+					if abs(des_angle == 90):
+						self.uart.sendTranslateCmd(translation_res)
+						self.motionInProgress()
+
 					#Checks if any obstacle is in view
 					[status,obstacles,_] = self.lidar.getObstacles(time_to_scan)
 
@@ -164,7 +173,7 @@ class RoverMove:
 		'''
 		Checks if the rover is pointing at the desired heading within 15 degrees
 		'''
-		if abs(delta_heading) < 15:
+		if abs(delta_heading) < 10:
 			return 1
 		else:
 			return 0
@@ -196,8 +205,8 @@ class RoverMove:
 		#Adds the buffer distance produced by LiDAR grid to corresponding values
 		Rightvalue_y = Rightvalue_y + buffer_dist
 		Leftvalue_y = Leftvalue_y - buffer_dist
-		#Adding .5 for rover length so rotation is at center of Rover
-		rover_length = 1/2
+		#Adding .15 (half a foot in meters) for rover length so rotation is at center of Rover
+		rover_length = 0#.15
 		Rightvalue_x = Rightvalue_x + rover_length - buffer_dist
 		Leftvalue_x = Leftvalue_x + rover_length - buffer_dist 
 		

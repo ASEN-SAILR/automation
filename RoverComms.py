@@ -19,6 +19,7 @@ import pickle
 import struct
 import numpy as np
 from multiprocessing import Process, Value, Array
+import time
 
 class RoverComms:
     def __init__(self,obcCommandPath:str,obcTelemPath:str,obcVideoPath:str,obcImagePath:str,gs_ssh_password:str,gs_ip:str,gs_telem_path:str,gs_video_path:str,gs_image_path:str):
@@ -44,7 +45,7 @@ class RoverComms:
         self.gs_image_path = gs_str_stem + gs_image_path
 
         self.isStreaming = Value('b', False)
-        self.frame = Array('f',np.zeros(640*480*3))
+        # self.frame = Array('f',np.zeros(640*480*3))
         # self.frame = np.frombuffer(self.arr.get_obj(),atype=np.float32).reshape(640,360)
         #self.frame = None
         self.current_cmd_num = -1
@@ -121,7 +122,7 @@ class RoverComms:
         #     f.write(gpsCoor+'\n')
         with open(self.obcTelemPath) as f:
                 lines = f.read().splitlines()
-                if len(lines)>=20: #1 sec per 1 point
+                if len(lines)>=1000: #1 sec per 1 point
                     lines=lines[1:]
         with open(self.obcTelemPath, 'w') as f:
             for line in lines:
@@ -153,7 +154,7 @@ class RoverComms:
     def startLive(self):
         self.isStreaming.value = True
         print('Starting LiveVideo')
-        self.process = Process(target=self.liveVideoServer,args=(self.isStreaming))
+        self.process = Process(target=self.liveVideoServer,args=(self.isStreaming,))
         self.process.start()
 
     def stopLive(self):
@@ -163,7 +164,7 @@ class RoverComms:
             time.sleep(1)
         print('LiveVideo ended.')
 
-    def liveVideoServer(self,isStreaming,current_frame):
+    def liveVideoServer(self,isStreaming):
 
         # Create a socket object
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -171,14 +172,11 @@ class RoverComms:
         host_name = socket.gethostname()
         # host_ip = socket.gethostbyname(host_name)
         host_ip = self.obc_ip
-        #print('Host IP:', host_ip)
-        if not self.after_pano:
-            port = 9999
-        else:
-            port = 9998
-        socket_address = (host_ip, port)
+        print('Host IP:', host_ip)
 
         # Bind the socket to a public host and a port
+        port = 9999
+        socket_address = (host_ip, port)
         server_socket.bind(socket_address)
 
         # Listen for incoming connections

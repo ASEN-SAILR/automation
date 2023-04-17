@@ -101,9 +101,7 @@ class RoverLidar:
         """
         start_time = time.time()
         scan = []
-        print("entered getTimedScan")
         for temp_scan in self._lidar.iter_scans():
-            print("In for loop in getTimedScan")
             if(start_time+scan_time<time.time()):
                 break
             # print(temp_scan)
@@ -115,7 +113,8 @@ class RoverLidar:
         return np.array(scan)
 
     def splitScan(self, scan):
-        qualitites = scan[:,0]
+        #qualitites = scan[:,0]
+        qualitites = 0
         angles = scan[:,1]
         distances = scan[:,2]
         logging.debug(f"splitScan ran. `distances` has length {len(distances)}")
@@ -209,7 +208,6 @@ class RoverLidar:
             color: color of zone where there are obstacles
             obstacles: coordiantes of obstacles located in map[(x1,y1),(x2,y2),...,(xn,yn)]  
         """
-        print("entered getObstales")
         #if a scan is not specifid, take a scan for time specified by `scan_time`
         if scan_time is None and scan is None:
             raise Exception("One of scan_time and scan must be defined")
@@ -221,7 +219,6 @@ class RoverLidar:
         
         if scan is None:
             scan = self.getTimedScan(scan_time)
-            print("got timed scan")
 
         _, angles, distances = self.splitScan(scan)
         distances /= 1000 # mm to m

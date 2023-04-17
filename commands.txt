@@ -1,6 +1,266 @@
-1, autonomous, LOI, 40.011061, -105.243612, 17:07:35
-2, autonomous, LOI, 40.011061, -105.243612, 17:09:14
-3, autonomous, LOI, 40.011061, -105.243612, 17:10:49
-4, stop, 17:13:07
-5, manual, translate, 1, 17:14:15
-6, autonomous, LOI, 40.011061, -105.243612, 17:18:00
+1, manual, translate, 2, 12:19:13
+2, manual, rotate, -90, 12:19:41
+3, stop, 12:19:58
+4, manual, translate, 2, 12:24:05
+5, manual, translate, 2, 12:25:08
+1, manual, translate, 2, 12:28:03
+2, stop, 12:28:17
+3, manual, translate, 2, 12:28:47
+4, stop, 12:28:50
+5, manual, translate, 10, 12:29:03
+6, stop, 12:29:11
+1, manual, translate, 1, 15:14:07
+2, manual, translate, 1, 15:15:16
+3, manual, translate, 1, 15:16:10
+1, manual, translate, 1, 15:18:54
+1, manual, translate, 2, 15:45:13
+2, stop, 15:45:45
+3, manual, translate, 2, 15:46:05
+4, manual, translate, 1, 15:46:48
+5, stop, 15:47:05
+1, manual, translate, 2, 16:07:39
+2, manual, rotate, -90, 16:08:00
+3, manual, translate, 3, 16:09:47
+4, manual, translate, 3, 16:13:27
+5, manual, translate, 3, 16:14:14
+6, manual, translate, 3, 16:16:22
+1, manual, translate, 3, 16:18:16
+2, manual, translate, -3, 16:19:33
+3, manual, rotate, -360, 16:20:10
+4, stop, 16:20:31
+5, manual, rotate, 360, 16:23:34
+1, autonomous, LOI, 40.00805556, -105.2427777, 16:47:23
+1, autonomous, LOI, 40.00805556, -105.2427777, 17:01:01
+1, autonomous, LOI, 40.00805556, -105.2427777, 17:03:15
+2, manual, translate, 20, 17:13:57
+3, stop, 17:14:22
+4, stop, 17:14:53
+1, autonomous, LOI, 1, 1, 17:38:08
+2, autonomous, LOI, 1, 1, 17:40:05
+3, autonomous, LOI, 1, 1, 17:44:13
+4, autonomous, LOI, 1, 1, 17:46:29
+5, autonomous, LOI, 1, 1, 17:48:45
+6, autonomous, LOI, 1, 1, 17:52:05
+7, autonomous, LOI, 1, 1, 17:59:24
+8, autonomous, LOI, 1, 1, 18:00:30
+9, autonomous, LOI, 1, 1, 18:02:18
+10, autonomous, LOI, 1, 1, 18:05:02
+11, autonomous, LOI, 1, 1, 18:06:14
+1, manual, translate, 1, 18:18:19
+2, manual, translate, 1, 18:19:38
+3, autonomous, LOI, 40.00805556, -105.2427777, 18:20:28
+4, autonomous, LOI, 40.00805556, -105.2427777, 18:22:02
+5, autonomous, LOI, 40.00805556, -105.2427777, 18:23:23
+6, autonomous, LOI, 40.00805556, -105.2427777, 18:25:16
+7, autonomous, LOI, 40.00805556, -105.2427777, 18:27:54
+8, stop, 18:28:36
+9, autonomous, LOI, 40.00805556, -105.2427777, 18:29:52
+10, stop, 18:34:57
+11, autonomous, LOI, 40.00805556, -105.2427777, 18:37:11
+12, autonomous, LOI, 40.00805556, -105.2427777, 18:41:32
+13, autonomous, LOI, 40.00805556, -105.2427777, 18:43:15
+14, manual, rotate, 90, 18:49:37
+15, manual, rotate, 10, 18:49:42
+16, autonomous, LOI, 40.00805556, -105.2427777, 18:50:01
+17, autonomous, LOI, 40.00805556, -105.2427777, 18:51:02
+18, manual, rotate, -10, 18:52:31
+19, manual, rotate, -8, 18:52:37
+20, manual, rotate, 10, 18:52:43
+21, autonomous, LOI, 40.00805556, -105.2427777, 18:53:12
+22, autonomous, LOI, 40.00805556, -105.2427777, 18:55:22
+23, autonomous, LOI, 40.00805556, -105.2427777, 18:57:14
+24, autonomous, LOI, 40.00805556, -105.2427777, 18:59:51
+25, stop, 19:00:17
+26, autonomous, LOI, 40.00805556, -105.2427777, 19:01:05
+27, autonomous, LOI, 40.00805556, -105.2427777, 19:02:06
+28, autonomous, LOI, 40.00805556, -105.2427777, 19:08:17
+29, autonomous, LOI, 40.00805556, -105.2427777, 19:09:45
+30, autonomous, LOI, 40.00805556, -105.2427777, 19:12:44
+31, autonomous, LOI, 40.00805556, -105.2427777, 19:14:09
+32, stop, 19:14:43
+33, autonomous, LOI, 40.00805556, -105.2427777, 19:15:58
+34, autonomous, LOI, 40.00805556, -105.2427777, 19:20:09
+35, autonomous, LOI, 40.00805556, -105.2427777, 19:20:26
+36, autonomous, LOI, 40.00805556, -105.2427777, 19:27:38
+1, autonomous, LOI, 1, 1, 10:35:23
+2, autonomous, LOI, 1, 1, 10:36:54
+3, stop, 10:39:04
+1, autonomous, LOI, 40.00805556, -105.2427777, 10:47:22
+2, stop, 10:48:35
+3, manual, translate, 1, 10:48:51
+4, manual, translate, 1, 10:54:08
+5, autonomous, LOI, 40.00805556, -105.2427777, 10:54:31
+6, stop, 10:54:56
+7, autonomous, LOI, 40.00805556, -105.2427777, 10:56:01
+8, stop, 10:58:16
+9, autonomous, LOI, 40.00805556, -105.2427777, 11:01:24
+10, autonomous, LOI, 40.00805556, -105.2427777, 11:02:25
+11, autonomous, LOI, 40.009061, -105.243165, 11:27:02
+12, autonomous, LOI, 40.009061, -105.243165, 11:28:57
+13, stop, 11:29:12
+14, autonomous, LOI, 40.009061, -105.243165, 11:29:46
+15, stop, 11:29:55
+16, autonomous, LOI, 40.009061, -105.243165, 11:30:10
+17, autonomous, LOI, 40.009061, -105.243165, 11:30:27
+18, manual, translate, 1, 11:38:45
+19, manual, translate, 1, 11:39:03
+20, manual, translate, -1, 11:39:14
+21, manual, rotate, -360, 11:39:30
+22, manual, rotate, -90, 11:39:42
+23, manual, rotate, 90, 11:39:49
+24, manual, rotate, 10, 11:39:55
+25, manual, rotate, -10, 11:39:59
+26, manual, rotate, -30, 11:40:06
+27, manual, rotate, 30, 11:40:11
+28, manual, rotate, -45, 11:40:19
+29, manual, rotate, 45, 11:40:24
+30, manual, rotate, -90, 11:40:29
+31, autonomous, LOI, 40.009061, -105.243165, 11:41:01
+32, autonomous, LOI, 40.009061, -105.243165, 11:41:39
+33, stop, 11:41:44
+34, autonomous, LOI, 40.009061, -105.243165, 11:41:53
+35, stop, 11:44:55
+36, manual, rotate, 90, 11:45:58
+37, autonomous, LOI, 40.009061, -105.243165, 11:46:29
+38, manual, rotate, 100, 11:47:46
+39, manual, translate, 5, 11:47:52
+40, manual, translate, -2.5, 11:48:21
+41, autonomous, LOI, 40.009061, -105.243165, 11:49:05
+42, autonomous, LOI, 40.009061, -105.243165, 11:49:53
+43, autonomous, LOI, 40.009061, -105.243165, 11:50:06
+1, autonomous, LOI, 40.009061, -105.243165, 12:18:40
+2, autonomous, LOI, 40.009061, -105.243165, 12:20:54
+3, autonomous, LOI, 40.009061, -105.243165, 12:23:28
+4, autonomous, LOI, 40.009061, -105.243165, 12:23:49
+5, autonomous, LOI, 40.009061, -105.243165, 12:25:24
+6, autonomous, LOI, 40.009061, -105.243165, 12:27:16
+7, autonomous, LOI, 40.009061, -105.243165, 12:30:43
+8, stop, 12:30:48
+9, autonomous, LOI, 40.009061, -105.243165, 12:31:00
+10, autonomous, LOI, 40.009061, -105.243165, 12:31:24
+11, autonomous, LOI, 40.009061, -105.243165, 12:31:38
+1, autonomous, LOI, 40.009061, -105.243165, 13:00:49
+2, autonomous, LOI, 40.009061, -105.243165, 13:03:49
+3, autonomous, LOI, 40.009061, -105.243165, 13:06:13
+4, autonomous, LOI, 40.009061, -105.243165, 13:06:28
+5, autonomous, LOI, 40.009061, -105.243165, 13:07:59
+6, autonomous, LOI, 40.009061, -105.243165, 13:08:10
+7, autonomous, LOI, 40.009061, -105.243165, 13:12:47
+8, autonomous, LOI, 40.009061, -105.243165, 13:13:48
+9, autonomous, LOI, 40.009061, -105.243165, 13:15:59
+10, autonomous, LOI, 40.009061, -105.243165, 13:16:13
+11, manual, rotate, 75, 13:17:00
+12, manual, rotate, 75, 13:17:13
+13, autonomous, LOI, 40.009061, -105.243165, 13:19:25
+14, autonomous, LOI, 40.009061, -105.243165, 13:19:45
+15, autonomous, LOI, 40.009061, -105.243165, 13:20:30
+16, autonomous, LOI, 40.009061, -105.243165, 13:25:26
+17, autonomous, LOI, 40.009061, -105.243165, 13:25:41
+18, manual, translate, 1, 13:26:33
+19, manual, translate, 1, 13:26:49
+20, manual, translate, 1, 13:28:20
+21, manual, translate, -1, 13:28:30
+22, autonomous, LOI, 40.009061, -105.243165, 13:28:52
+23, autonomous, LOI, 1, 1, 13:29:01
+24, autonomous, LOI, 1, 1, 13:30:34
+25, autonomous, LOI, 1, 1, 13:30:40
+26, autonomous, LOI, 1, 1, 13:32:32
+27, autonomous, LOI, 1, 1, 13:32:39
+28, autonomous, LOI, 1, 1, 13:34:57
+29, autonomous, LOI, 1, 1, 13:35:17
+30, stop, 13:35:58
+31, manual, rotate, -30, 13:36:00
+32, autonomous, LOI, 1, 1, 13:38:33
+33, autonomous, LOI, 1, 1, 13:41:12
+34, autonomous, LOI, 1, 1, 13:41:37
+35, autonomous, LOI, 1, 1, 13:41:48
+36, autonomous, LOI, 1, 1, 13:43:19
+37, manual, rotate, -40, 13:43:58
+38, autonomous, LOI, 1, 1, 13:46:29
+39, autonomous, LOI, 1, 1, 13:49:07
+40, autonomous, LOI, 1, 1, 13:49:14
+41, autonomous, LOI, 1, 1, 13:50:38
+42, autonomous, LOI, 1, 1, 13:50:46
+43, autonomous, LOI, 1, 1, 13:56:29
+44, autonomous, LOI, 1, 1, 13:56:39
+45, manual, translate, 1, 13:57:28
+46, manual, rotate, 1, 13:57:59
+47, manual, rotate, 45, 13:58:03
+48, stop, 13:58:12
+1, manual, translate, 1, 13:59:46
+2, manual, translate, -1, 13:59:54
+3, autonomous, LOI, 1, 1, 14:00:06
+4, autonomous, LOI, 1, 1, 14:00:17
+5, autonomous, LOI, 1, 1, 14:01:33
+6, autonomous, LOI, 1, 1, 14:01:41
+7, autonomous, LOI, 1, 1, 14:02:53
+8, stop, 14:03:39
+9, manual, translate, -1.6, 14:03:57
+10, manual, rotate, 29, 14:04:08
+11, manual, translate, -2, 14:04:12
+12, autonomous, LOI, 1, 1, 14:04:30
+13, stop, 14:04:34
+14, autonomous, LOI, 1, 1, 14:04:36
+1, autonomous, LOI, 1, 1, 14:08:33
+2, stop, 14:09:27
+3, manual, translate, -1.6, 14:09:45
+4, manual, rotate, 25, 14:10:06
+5, manual, translate, -2, 14:10:15
+6, manual, rotate, 5, 14:10:34
+7, autonomous, LOI, 1, 1, 14:10:43
+8, stop, 14:11:00
+9, autonomous, LOI, 1, 1, 14:11:04
+10, stop, 14:11:53
+1, manual, translate, 2, 19:47:33
+2, manual, translate, -2, 19:48:12
+3, manual, translate, 2, 19:48:35
+4, manual, translate, -2, 19:48:57
+5, manual, rotate, -360, 19:49:41
+6, manual, rotate, 360, 19:50:41
+7, autonomous, LOI, 40.005355, -105.262143, 19:59:36
+8, autonomous, LOI, 40.005355, -105.262143, 20:00:38
+9, autonomous, LOI, 40.005355, -105.262143, 20:00:54
+10, autonomous, LOI, 40.005355, -105.262143, 20:02:59
+1, autonomous, LOI, 40.003005, -105.259945, 20:20:08
+2, autonomous, LOI, 40.003005, -105.259945, 20:21:12
+3, autonomous, LOI, 40.002936, -105.259569, 20:24:26
+4, autonomous, LOI, 40.00294119, -105.2595637, 20:29:12
+5, autonomous, LOI, 40.00294119, -105.2595637, 20:29:33
+6, autonomous, LOI, 40.00294119, -105.2595637, 20:30:46
+7, autonomous, LOI, 40.00294119, -105.2595637, 20:31:57
+8, autonomous, LOI, 40.00294119, -105.2595637, 20:32:09
+9, autonomous, LOI, 40.002957, -105.2597198, 20:37:59
+10, autonomous, LOI, 40.002957, -105.2597198, 20:38:16
+11, autonomous, LOI, 40.002957, -105.2597198, 20:40:03
+12, autonomous, LOI, 40.002957, -105.2597198, 20:40:13
+13, autonomous, LOI, 40.0029569, -105.2597198, 20:57:27
+14, autonomous, LOI, 40.0029569, -105.2597198, 20:57:59
+15, autonomous, LOI, 40.0029569, -105.2597198, 20:58:08
+16, autonomous, LOI, 40.0029569, -105.2597198, 20:59:00
+17, autonomous, LOI, 40.0029569, -105.2597198, 20:59:11
+18, autonomous, LOI, 40.0029569, -105.2597198, 21:01:05
+19, autonomous, LOI, 40.0029569, -105.2597198, 21:01:15
+20, autonomous, LOI, 40.0029569, -105.2597198, 21:02:06
+21, autonomous, LOI, 40.0029569, -105.2597198, 21:02:16
+22, autonomous, LOI, 40.0029569, -105.2597198, 21:04:31
+23, autonomous, LOI, 40.0029569, -105.2597198, 21:12:17
+24, autonomous, LOI, 40.0029569, -105.2597198, 21:12:38
+1, autonomous, LOI, 40.0029569, -105.2597198, 21:18:02
+2, autonomous, LOI, 40.0029569, -105.2597198, 21:18:19
+3, autonomous, LOI, 40.0021984, -105.2598336, 21:21:13
+4, autonomous, LOI, 40.0021984, -105.2598336, 21:27:59
+5, stop, 21:29:39
+1, autonomous, LOI, 40.0021984, -105.2598336, 21:31:12
+1, autonomous, LOI, 40.0021984, -105.2598336, 21:42:29
+2, autonomous, LOI, 40.0021984, -105.2598336, 21:42:53
+3, stop, 21:43:37
+4, autonomous, LOI, 40.0021984, -105.2598336, 21:47:03
+5, autonomous, LOI, 40.0021984, -105.2598336, 21:48:39
+6, autonomous, LOI, 40.0021984, -105.2598336, 21:50:47
+7, autonomous, LOI, 40.0021984, -105.2598336, 21:52:08
+8, autonomous, LOI, 40.0021984, -105.2598336, 21:53:59
+9, autonomous, LOI, 40.0021984, -105.2598336, 21:55:24
+10, stop, 21:57:51
+11, manual, rotate, 180, 21:57:58
+12, manual, rotate, 180, 21:58:19
+13, manual, translate, 3, 21:58:26

@@ -38,7 +38,7 @@ class RoverUART:
         cmdString = mode.encode("utf-8") + struct.pack("<f",float(meter))
         self.sendUartCmd(cmdString)
 
-    def getMagneticAzm(self):
+    def getMagneticAzm(self,timeout=3):
         """
         gets the azimuth to magnetic north
         """
@@ -47,18 +47,26 @@ class RoverUART:
         mode = "m"
         cmdString = mode.encode("utf-8") + struct.pack("<f",float(0.0))
         self.sendUartCmd(cmdString)
-        time.sleep(0.1)
-        mystring = self.readLine()
-        #_ = self.readAll()
+
+        
+        
+        
+        start_time = time.time()
         try:
-            #print(float(mystring[1:-1]))
-            magval = float(mystring[1:-1])
-            self.lastmag = magval
-            print(magval)
-            return magval
-        except:
-            logging.warning("mag string was not in expected form. string: {mystring}")
-            return self.lastmag
+            while((time.time()-start_time) < timeout):
+                time.sleep(0.2)
+                mystring = self.readLine()
+                if mystring[0:1] == 'm':
+                    #print(float(mystring[1:-1]))
+                    magval = float(mystring[1:-1])
+                    self.lastmag = magval
+                    print("UART Mag: ",magval)
+                    return magval
+        except: 
+            pass
+        logging.warning("mag string was not in expected form. string: {mystring}")
+        print("Mag failed")
+        return self.lastmag
         
 
 
@@ -67,6 +75,7 @@ class RoverUART:
         """
         sends the command specified by cmd
         """
+        self.readAll()
         logging.info(f"sending {cmd} to teensy")
         self.ser.write(cmd)
  
@@ -83,6 +92,7 @@ class RoverUART:
         """
         #if self.ser.in_waiting>0:
         to_return = self.ser.readline().decode("utf-8").rstrip()
+        #print(f"uart readLine(): {to_return}")
         logging.info(f"read {to_return} from teensy")
         return to_return
         #return "nothing read"
@@ -94,17 +104,18 @@ class RoverUART:
         #print("in readAll()")
         buffer = []
         while self.ser.in_waiting>0:
-             print(".")
+             #print(".")
              #buffer.append(self.ser.readline().decode("utf-8").rstrip())
              buffer.append(self.ser.readline().decode("utf-8").rstrip())
         return buffer
     
     def checkMotionStatus(self,timeout=10):
         start_time = time.time()
-        line = self.readLine()
+        #line = self.readLine()
         while((time.time()-start_time) < timeout):
-            time.sleep(0.2)
+            time.sleep(0.1)
             line = self.readLine()
+            print("checking motion status")
             if line == 'd':
                 logging.info(f"motion complete recieved after {time.time()-start_time} seconds")
                 print(f"confimraiton of motion complete recieved after {time.time()-start_time} seconds")

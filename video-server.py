@@ -29,7 +29,7 @@ while True:
     print('Client connected:', client_address)
 
     # Open the webcam
-    cap = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture(0)
 
     # Set the video dimensions
     frame_width = int(cap.get(3))
