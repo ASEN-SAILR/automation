@@ -18,7 +18,7 @@ import socket
 import pickle
 import struct
 import numpy as np
-from multiprocessing import Process, Value, Array
+from import Process, Value, Array
 import time
 
 class RoverComms:
@@ -190,7 +190,7 @@ class RoverComms:
         # Open the webcam
         cap = cv2.VideoCapture(0)
         # cap = cv2.VideoCapture(8)
-        cap.set(cv2.CAP_PROP_FPS,20)
+        cap.set(cv2.CAP_PROP_FPS,30)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
         # Set the video dimensions
