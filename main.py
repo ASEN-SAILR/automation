@@ -115,7 +115,7 @@ def main():
 	gps.startTele()
 	time.sleep(4)
 	#LOI = [40.0093664,-105.2439658]
-	gs_coords = gps.getGPS()
+	gsLOI = gps.getGPS()
 	
 	# time.sleep(5)
 	# start move
@@ -140,16 +140,16 @@ def main():
 	LOI = None	
 	command = None#{"commandType":"autonomous", "LOI":[40.0091687,-105.243807]}
 	logging.info("main loop begining")
-	cam.startLiveVideo() # live_video_process = Process(comms.liveVideoServer)
+	#cam.startLiveVideo() # live_video_process = Process(comms.liveVideoServer)
 					  # live_video_process.start()
 
 	time.sleep(1)
-
 	# gps.stopTele()
 
 	# cam.take360()
 
 	# return
+	lost_connection = False
 
 	while True:
 		time.sleep(1)
@@ -158,6 +158,22 @@ def main():
 		while True: # and uart.read() == "nominal" <---- do we need to check Teensy comms for errors. Mayeb something like uart.heartbeat()
 			time.sleep(1)
 			#print("================ Waiting for Command ======================")
+			
+			if not comms.checkConnection():
+    			lost_connection = True
+				print('Lose connection, returning to ground station to regain connection')
+				logging.info(f"Lose connection, returning to ground station")
+    			process_flag.value = False
+    			command = {"commandType":"autonomous","LOI":gsLOI}
+				break
+			elif lost_connection and active_command["commandType"]=='autonomous': #this means we lost connection when we're on auto, 
+																				  #now we're back in connection so we need to continue auto
+    			lost_connection = False
+				print('Reconnected, continue autonomation')
+				process_flag.value = False
+    			command = active_command
+				break
+
 			command = comms.readCommand()
 			
 			if command:
@@ -167,12 +183,12 @@ def main():
 
 			#print(current_process.is_alive(),LOI)
 			#if no new command, at LOI, and autonomous done
-			if LOI is not None and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
-				if gps.atloi(LOI): 
-					if LOI == gs_coords: #the rover reached LOI and now back at gsLOI
+			if active_command["commandType"]="autonomous" and ~current_process.is_alive(): #we need to check if LOI not none because that means we were in autonomous mode so we should take a photo and return to gs. If LOI is none, that means we were in manual or other mode and should not take a photo and return to gs until user sets mode to autonomous. We also check if the process is done because that means we are at LOI.
+				if gps.atloi(active_command["LOI"]): 
+					if active_command["LOI"] == gs_coords: #the rover reached LOI and now back at gsLOI
 						logging.info("rover at LOI")
-						LOI = None
-						comms.isStreaming = False
+						# LOI = None
+						# comms.isStreaming = False
 						print("Mission done. Rover is now back at ground station. Waiting for a new command...")
 					else:#TODO:the rover is at the LOI
 						#pass
@@ -196,11 +212,11 @@ def main():
     					command = {"commandType":"autonomous","LOI":LOI}
 
 		if command["commandType"] == "startStop":
-			active_command = "stop"
+			# active_command = "stop"
 			logging.info("stop command recieved")
 			print('Stop command received.')
 			# termiate child processes immediately and stop motion ASAP
-			LOI = None
+			# LOI = None
 			# move.emergencyStop()
 			process_flag.value = False
 			if current_process.is_alive(): current_process.terminate()
@@ -225,43 +241,44 @@ def main():
 			while current_process.is_alive():
     				print('Exiting the current process')
     				time.sleep(1)
-			active_command = "autonomous"
+			# active_command = "autonomous"
 			logging.info("autonomous command recieved")
 			print('autonomous command received.')
-			LOI = command["LOI"]
-			current_process = Process(target=move.autonomous, args=(LOI,red_width,resolution/2,translation_res,process_flag))
+			# LOI = command["LOI"]
+			current_process = Process(target=move.autonomous, args=(command["LOI"],red_width,resolution/2,translation_res,process_flag))
 			current_process.start()
 		elif command["commandType"]=="manual":
-			process_flag.value = False
+			process_flag = False
 			while current_process.is_alive():
     				print('Exiting the current process')
     				time.sleep(1)
-			active_command = "manual"
+			# active_command = "manual"
 			logging.info(f"manual command recieved: {command}")
 			print('manual command received.')
-			LOI = None
+			# LOI = None
 			current_process = Process(target=move.manual, args=(command["manualType"],command["command"]))
 			current_process.start()
 
 		#TODO take photo when at LOI
 		elif command["commandType"] == "photo":
-			process_flag.value = False
+			process_flag = False
 			while current_process.is_alive():
     				print('Exiting the current process')
     				time.sleep(1)
-			active_command = "photo"
+			# active_command = "photo"
 			# STOP recording 
 			# take pano photo
 			# begin recording 
 			#todo
 			print('stop command received.')
-			LOI = None
+			# LOI = None
 			cam.take360()
 			# video.stopRecording()
 			# video.take360()
 			# video.startRecording()
 
 
+		active_command = command #keep track of the last command in case of connection lost
 		command = {} #TODO REMOVE WHEN DONE WITH NO COMMS testing
 	
 		#return to top of loop
