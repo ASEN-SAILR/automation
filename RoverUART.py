@@ -113,7 +113,7 @@ class RoverUART:
         start_time = time.time()
         #line = self.readLine()
         while((time.time()-start_time) < timeout):
-            time.sleep(0.1)
+            time.sleep(1)
             line = self.readLine()
             print("checking motion status")
             if line == 'd':
