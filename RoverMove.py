@@ -50,6 +50,7 @@ class RoverMove:
 		#Initializing LiDAR
 		time_to_scan = 2 # seconds
 		[status, obstacles, _] = self.lidar.getObstacles(time_to_scan)
+		mag_heading = self.uart.getMagneticAzm()
 		
 		#Initializing commands
 		command = None
@@ -280,4 +281,5 @@ class RoverMove:
 			self.uart.sendRotateCmd(distOrAngle)
 		elif type == "translate":
 			self.uart.sendTranslateCmd(distOrAngle)
+		self.motionInProgress()
 		return
